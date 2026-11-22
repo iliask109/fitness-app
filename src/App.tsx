@@ -54,7 +54,7 @@ function AdminShell() {
   return (
     <div className="app">
       <header className="topbar">
-        <span className="brand">💪 FitLogix</span>
+        <a className="brand" href="#/admin" aria-label="מסך הבית">FitLogix</a>
         {isDemo && <span className="badge">מצב הדגמה</span>}
         <span className="chip tag-admin">🛡️ מנהל</span>
       </header>
@@ -82,7 +82,7 @@ function UserShell() {
     return (
       <div className="app">
         <header className="topbar">
-          <span className="brand">💪 FitLogix</span>
+          <span className="brand">FitLogix</span>
           <button className="btn small" onClick={signOut}>התנתקות</button>
         </header>
         <main className="content onboarding-only">
@@ -107,7 +107,7 @@ function UserShell() {
   return (
     <div className="app">
       <header className="topbar">
-        <span className="brand">💪 FitLogix</span>
+        <a className="brand" href="#/" aria-label="מסך הבית">FitLogix</a>
         {isDemo && <span className="badge">מצב הדגמה</span>}
         <button className="icon-btn" onClick={() => navigate('/settings')} aria-label="הגדרות">⚙️</button>
       </header>
