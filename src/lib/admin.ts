@@ -37,11 +37,12 @@ export function recordDemoLogin(id: string, email: string) {
 }
 
 /* ---------- API ---------- */
-export async function checkIsAdmin(uid: string): Promise<boolean> {
-  if (!supabase) return !!demoUsers().find((u) => u.id === uid)?.is_admin;
+/** Whether the signed-in user is an admin; `error` explains a failed check (shown in Settings). */
+export async function checkIsAdmin(uid: string): Promise<{ admin: boolean; error?: string }> {
+  if (!supabase) return { admin: !!demoUsers().find((u) => u.id === uid)?.is_admin };
   const { data, error } = await supabase.rpc('is_admin');
-  if (error) return false; // admin.sql not installed yet
-  return !!data;
+  if (error) return { admin: false, error: error.message };
+  return { admin: !!data };
 }
 
 export async function listUsers(): Promise<AdminUser[]> {
