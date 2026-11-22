@@ -1,40 +1,47 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTable } from '../lib/useTable';
 import { useProfile } from '../lib/useProfile';
-import type { BodyWeight, Meal, WaterLog, Workout } from '../lib/types';
-import { formatDate, todayISO, weekStart, workoutVolume, round } from '../lib/utils';
-import Ring from '../components/Ring';
+import type { BodyWeight, Workout } from '../lib/types';
+import { formatDate, todayISO, weekStart, workoutVolume } from '../lib/utils';
+
+/** Current time, refreshed every few seconds so the clock and greeting stay up to date. */
+function useNow() {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 5000);
+    return () => clearInterval(t);
+  }, []);
+  return now;
+}
+
+function greeting(hour: number) {
+  if (hour >= 5 && hour < 12) return 'בוקר טוב';
+  if (hour >= 12 && hour < 18) return 'צהריים טובים';
+  return 'ערב טוב';
+}
 
 export default function Dashboard() {
+  const now = useNow();
   const today = todayISO();
   const { profile } = useProfile();
   const workouts = useTable<Workout>('workouts');
-  const meals = useTable<Meal>('meals');
-  const water = useTable<WaterLog>('water_logs');
   const weights = useTable<BodyWeight>('body_weights');
-
-  const todayMeals = meals.rows.filter((m) => m.date === today);
-  const kcal = todayMeals.reduce((a, m) => a + m.calories, 0);
-  const protein = todayMeals.reduce((a, m) => a + m.protein, 0);
-  const glasses = water.rows.find((w) => w.date === today)?.glasses ?? 0;
 
   const week = weekStart(today);
   const weekWorkouts = workouts.rows.filter((w) => w.date >= week);
   const sorted = useMemo(() => [...workouts.rows].sort((a, b) => b.date.localeCompare(a.date)), [workouts.rows]);
   const lastWeight = [...weights.rows].sort((a, b) => b.date.localeCompare(a.date))[0];
 
-  const hour = new Date().getHours();
-  const greet = hour < 12 ? 'בוקר טוב' : hour < 18 ? 'צהריים טובים' : 'ערב טוב';
+  const fullName = [profile.first_name || profile.display_name, profile.last_name].filter(Boolean).join(' ');
 
   return (
     <div className="stack">
-      <h2>{greet}{(profile.first_name || profile.display_name) ? `, ${profile.first_name || profile.display_name}` : ''} 👋</h2>
-      <p className="muted">{formatDate(today, { weekday: 'long', day: 'numeric', month: 'long' })}</p>
-
-      <div className="card rings">
-        <Ring value={kcal} goal={profile.calorie_goal} label="קלוריות" color="var(--green)" />
-        <Ring value={round(protein)} goal={profile.protein_goal} label="חלבון (ג׳)" color="var(--blue)" />
-        <Ring value={glasses} goal={profile.water_goal} label="כוסות מים" color="var(--cyan)" />
+      <div className="hello">
+        <h2>{greeting(now.getHours())}{fullName ? `, ${fullName}` : ''} 👋</h2>
+        <div className="clock">
+          <span className="clock-time" dir="ltr">{now.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}</span>
+          <span className="muted">{now.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
+        </div>
       </div>
 
       <div className="grid2">

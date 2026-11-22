@@ -89,8 +89,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 .group-title { margin: 8px 0 4px; }
 .picker { display: flex; flex-direction: column; gap: 6px; max-height: 360px; overflow-y: auto; }
 
-.rings { display: flex; justify-content: space-around; }
-.ring { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .stat { display: flex; flex-direction: column; align-items: center; }
 .stat-num { font-size: 28px; font-weight: 800; }
 .big-num { font-size: 24px; }
@@ -167,3 +165,8 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 }
 .day-picker button.on { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }
 .info-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: 14px; }
+
+/* home greeting + clock */
+.hello { display: flex; flex-direction: column; gap: 6px; }
+.clock { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.clock-time { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; }
