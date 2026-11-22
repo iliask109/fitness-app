@@ -61,6 +61,7 @@ export default function Settings() {
               setForm({ ...form, birth_date: v, age: v ? String(ageFromBirthDate(v)) : form.age });
             }} /></label>
         </div>
+        <a className="btn" href="#/profile-setup">🏋️ עריכת פרופיל אימון (גובה, מטרה, ציוד…)</a>
         <h3>🎯 יעדים</h3>
         <div className="grid2">
           {FIELDS.map(([k, label]) => (

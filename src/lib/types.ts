@@ -41,6 +41,14 @@ export interface Profile extends BaseRow {
   last_name?: string | null;
   age?: number | null;
   birth_date?: string | null;
+  height_cm?: number | null;
+  experience?: string | null;
+  fitness_goal?: string | null;
+  training_days?: number | null;
+  training_locations?: string[] | null;
+  equipment?: string[] | null;
+  /** Set when the training profile was completed; until then the app shows the onboarding page. */
+  onboarded_at?: string | null;
   calorie_goal: number;
   protein_goal: number;
   carbs_goal: number;

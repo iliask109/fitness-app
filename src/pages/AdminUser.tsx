@@ -6,6 +6,7 @@ import { navigate } from '../lib/router';
 import { BodyWeight, DEFAULT_PROFILE, Meal, Profile, Workout } from '../lib/types';
 import { addDays, currentAge, daysAgo, formatDate, todayISO, weekStart, workoutVolume } from '../lib/utils';
 import ProgressCharts from '../components/ProgressCharts';
+import { EXPERIENCE, GOALS, LOCATIONS, labelOf } from '../lib/fitnessProfile';
 
 interface Data { workouts: Workout[]; meals: Meal[]; weights: BodyWeight[]; profile: Profile }
 
@@ -89,6 +90,23 @@ export default function AdminUser({ id }: { id: string }) {
         <div className="card stat"><span className="stat-num">{data.workouts.filter((w) => w.date >= week).length}</span><span className="muted small">אימונים השבוע</span></div>
         <div className="card stat"><span className="stat-num">{avgKcal ?? '–'}</span><span className="muted small">ממוצע קלוריות (7 ימים)</span></div>
         <div className="card stat"><span className="stat-num">{u.last_weight ?? '–'}</span><span className="muted small">משקל אחרון</span></div>
+      </div>
+
+      <div className="card stack tight">
+        <h3>🏋️ פרופיל אימון</h3>
+        {!data.profile.onboarded_at ? <p className="muted small">המשתמש עוד לא מילא את פרופיל האימון.</p> : (
+          <div className="info-grid">
+            <span className="muted">גובה</span><span>{data.profile.height_cm} ס״מ</span>
+            {u.last_weight != null && data.profile.height_cm ? (
+              <><span className="muted">BMI</span><span>{(u.last_weight / (data.profile.height_cm / 100) ** 2).toFixed(1)}</span></>
+            ) : null}
+            <span className="muted">ניסיון</span><span>{labelOf(EXPERIENCE, data.profile.experience)}</span>
+            <span className="muted">מטרה</span><span>{labelOf(GOALS, data.profile.fitness_goal)}</span>
+            <span className="muted">ימי אימון</span><span>{data.profile.training_days} בשבוע</span>
+            <span className="muted">איפה</span><span>{(data.profile.training_locations ?? []).map((l) => labelOf(LOCATIONS, l)).join(', ')}</span>
+            <span className="muted">ציוד</span><span>{(data.profile.equipment ?? []).join(', ')}</span>
+          </div>
+        )}
       </div>
 
       <div className="card stack tight">

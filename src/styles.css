@@ -148,3 +148,22 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 .workout-details summary::-webkit-details-marker { display: none; }
 .workout-details[open] summary { margin-bottom: 6px; }
 .optional { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+/* onboarding */
+.onboarding-only { padding-bottom: 32px; }
+.options { display: grid; gap: 8px; }
+.options.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.option {
+  font: inherit; color: var(--text); background: var(--bg); border: 2px solid var(--border); border-radius: 12px;
+  padding: 10px 8px; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: start; min-width: 0;
+}
+.option.centered { align-items: center; text-align: center; }
+.option.on { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 12%, transparent); }
+.option-icon { font-size: 24px; }
+.day-picker { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day-picker button {
+  font: inherit; font-weight: 700; font-size: 17px; aspect-ratio: 1; border-radius: 12px; cursor: pointer;
+  border: 2px solid var(--border); background: var(--bg); color: var(--text);
+}
+.day-picker button.on { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }
+.info-grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: 14px; }

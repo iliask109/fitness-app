@@ -6,5 +6,5 @@ export function useProfile() {
   const { user } = useAuth();
   const t = useTable<Profile>('profiles');
   const profile: Profile = { ...DEFAULT_PROFILE, ...t.rows[0], id: t.rows[0]?.id ?? user!.id };
-  return { profile, loading: t.loading, save: (p: Partial<Profile>) => t.save({ ...profile, ...p }) };
+  return { profile, loading: t.loading, error: t.error, reload: t.reload, save: (p: Partial<Profile>) => t.save({ ...profile, ...p }) };
 }

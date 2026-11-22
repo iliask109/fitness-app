@@ -12,6 +12,8 @@ import Progress from './pages/Progress';
 import Settings from './pages/Settings';
 import AdminUsers from './pages/AdminUsers';
 import AdminUser from './pages/AdminUser';
+import Onboarding from './pages/Onboarding';
+import { useProfile } from './lib/useProfile';
 
 const TABS = [
   { key: '', label: 'בית', icon: '🏠' },
@@ -22,11 +24,32 @@ const TABS = [
 ];
 
 export default function App() {
-  const { user, loading, isAdmin } = useAuth();
-  const route = useRoute();
-
+  const { user, loading } = useAuth();
   if (loading) return <div className="center muted">טוען…</div>;
   if (!user) return <Login />;
+  return <Shell key={user.id} />;
+}
+
+/** The signed-in app. Until the training profile is filled in, only the onboarding page is shown. */
+function Shell() {
+  const { isAdmin, signOut } = useAuth();
+  const route = useRoute();
+  const me = useProfile();
+
+  if (me.loading && !me.profile.onboarded_at) return <div className="center muted">טוען…</div>;
+  if (!me.profile.onboarded_at && !me.error) {
+    return (
+      <div className="app">
+        <header className="topbar">
+          <span className="brand">💪 FitLogix</span>
+          <button className="btn small" onClick={signOut}>התנתקות</button>
+        </header>
+        <main className="content onboarding-only">
+          <Onboarding profile={me.profile} save={me.save} onDone={() => { me.reload(); navigate("/"); }} />
+        </main>
+      </div>
+    );
+  }
 
   const [section = '', sub] = route.path;
   let page;
@@ -36,6 +59,7 @@ export default function App() {
     case 'nutrition': page = <Nutrition />; break;
     case 'progress': page = <Progress />; break;
     case 'settings': page = <Settings />; break;
+    case 'profile-setup': page = <Onboarding editing profile={me.profile} save={me.save} onDone={() => { me.reload(); navigate('/settings'); }} />; break;
     case 'admin': page = sub ? <AdminUser id={sub} /> : <AdminUsers />; break;
     default: page = <Dashboard />;
   }
