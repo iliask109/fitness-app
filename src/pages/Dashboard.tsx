@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTable } from '../lib/useTable';
 import { useProfile } from '../lib/useProfile';
 import type { BodyWeight, Workout } from '../lib/types';
-import { formatDate, todayISO, weekStart, workoutVolume } from '../lib/utils';
+import { formatDate, workoutVolume } from '../lib/utils';
+import WeekView from '../components/WeekView';
 
 /** Current time, refreshed every few seconds so the clock and greeting stay up to date. */
 function useNow() {
@@ -22,13 +23,10 @@ function greeting(hour: number) {
 
 export default function Dashboard() {
   const now = useNow();
-  const today = todayISO();
   const { profile } = useProfile();
   const workouts = useTable<Workout>('workouts');
   const weights = useTable<BodyWeight>('body_weights');
 
-  const week = weekStart(today);
-  const weekWorkouts = workouts.rows.filter((w) => w.date >= week);
   const sorted = useMemo(() => [...workouts.rows].sort((a, b) => b.date.localeCompare(a.date)), [workouts.rows]);
   const lastWeight = [...weights.rows].sort((a, b) => b.date.localeCompare(a.date))[0];
 
@@ -44,10 +42,12 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <WeekView workouts={workouts.rows} goal={profile.training_days || 3} />
+
       <div className="grid2">
         <div className="card stat">
-          <span className="stat-num">{weekWorkouts.length}</span>
-          <span className="muted">אימונים השבוע</span>
+          <span className="stat-num">{workouts.rows.length}</span>
+          <span className="muted">אימונים בסך הכול</span>
         </div>
         <div className="card stat">
           <span className="stat-num">{lastWeight ? lastWeight.weight : '–'}</span>
@@ -55,10 +55,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="row gap">
-        <a className="btn primary grow" href="#/workouts/new">+ אימון חדש</a>
-        <a className="btn grow" href="#/nutrition">+ ארוחה</a>
-      </div>
+      <a className="btn primary big" href="#/workouts/new">+ אימון חדש</a>
 
       <div className="card">
         <h3>אימונים אחרונים</h3>
