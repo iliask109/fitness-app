@@ -74,3 +74,11 @@ begin
     execute format('create index if not exists %I on public.%I (user_id)', t || '_user_idx', t);
   end loop;
 end $$;
+
+-- Newer Supabase projects don't grant table access to signed-in users by default.
+-- RLS above still limits every user to their own rows.
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on
+  public.profiles, public.workouts, public.programs,
+  public.meals, public.body_weights, public.water_logs
+to authenticated;
