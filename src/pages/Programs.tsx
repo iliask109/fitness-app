@@ -1,7 +1,9 @@
 import { useTable } from '../lib/useTable';
 import { navigate } from '../lib/router';
 import { PROGRAM_TEMPLATES } from '../lib/templates';
+import { DAY_STYLES, dayStyle } from '../lib/dayStyle';
 import type { Program } from '../lib/types';
+import DayCard from '../components/DayCard';
 
 export default function Programs() {
   const { rows, loading, save } = useTable<Program>('programs');
@@ -20,34 +22,43 @@ export default function Programs() {
       </div>
 
       {loading && <p className="muted">טוען…</p>}
+      {!loading && rows.length === 0 && (
+        <div className="card muted">עוד אין לך תוכניות. צור תוכנית חדשה או הוסף אחת מהתוכניות המוכנות למטה.</div>
+      )}
+
       {rows.map((p) => (
-        <div key={p.id} className="card">
+        <section key={p.id} className="program-section">
           <div className="row between">
-            <strong>{p.name}</strong>
-            <a className="btn small" href={`#/programs/${p.id}`}>עריכה</a>
+            <div>
+              <h3 style={{ margin: 0 }}>{p.name}</h3>
+              <span className="muted small">{p.days.length} ימי אימון</span>
+            </div>
+            <a className="btn small" href={`#/programs/${p.id}`}>✏️ עריכה</a>
           </div>
-          <div className="stack tight">
-            {p.days.map((d, i) => (
-              <div key={i} className="list-item">
-                <div>
-                  <div>{d.name}</div>
-                  <div className="muted small">{d.exercises.map((e) => e.name).join(' · ')}</div>
-                </div>
-                <a className="btn primary small" href={`#/workouts/new?program=${p.id}&day=${i}`}>▶ התחלה</a>
-              </div>
-            ))}
+          <div className="day-cards">
+            {p.days.map((d, i) => <DayCard key={i} day={d} startHref={`#/workouts/new?program=${p.id}&day=${i}`} />)}
           </div>
-        </div>
+        </section>
       ))}
 
-      <h3>תוכניות מוכנות</h3>
+      <h3 style={{ marginTop: 8 }}>✨ תוכניות מוכנות</h3>
       {PROGRAM_TEMPLATES.map((t, i) => (
-        <div key={t.name} className="card row between">
-          <div>
+        <div key={t.name} className="card template-card">
+          <div className="row between">
             <strong>{t.name}</strong>
-            <div className="muted small">{t.description} · {t.days.length} ימי אימון</div>
+            <button className="btn primary small" onClick={() => addTemplate(i)}>+ הוספה</button>
           </div>
-          <button className="btn small" onClick={() => addTemplate(i)}>הוספה</button>
+          <span className="muted small">{t.description}</span>
+          <div className="chips">
+            {t.days.map((d) => {
+              const s = DAY_STYLES[dayStyle(d)];
+              return (
+                <span key={d.name} className="style-chip" style={{ '--accent': s.color } as React.CSSProperties}>
+                  {s.icon} {d.name}
+                </span>
+              );
+            })}
+          </div>
         </div>
       ))}
     </div>

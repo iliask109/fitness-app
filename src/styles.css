@@ -1,13 +1,13 @@
 :root {
   --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --track: #e2e8f0;
-  --green: #16a34a; --blue: #2563eb; --cyan: #0891b2; --amber: #d97706; --pink: #db2777; --red: #dc2626;
+  --green: #16a34a; --blue: #2563eb; --cyan: #0891b2; --amber: #d97706; --pink: #db2777; --red: #dc2626; --purple: #7c3aed;
   --primary: #16a34a; --primary-text: #fff;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0b1120; --card: #131c2e; --text: #e2e8f0; --muted: #94a3b8; --border: #1f2a40; --track: #1f2a40;
-    --green: #22c55e; --blue: #60a5fa; --cyan: #22d3ee; --amber: #fbbf24; --pink: #f472b6; --red: #f87171;
+    --green: #22c55e; --blue: #60a5fa; --cyan: #22d3ee; --amber: #fbbf24; --pink: #f472b6; --red: #f87171; --purple: #a78bfa;
     --primary: #22c55e; --primary-text: #052e16;
     color-scheme: dark;
   }
@@ -218,3 +218,36 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 .program-day > span:first-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .program-day-name { font-weight: 700; }
 .program-day-go { color: var(--blue); font-size: 18px; flex: none; }
+
+/* program day cards */
+.program-section { display: flex; flex-direction: column; gap: 10px; }
+.day-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.day-card {
+  position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 6px;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 22%, var(--card)) 0%, var(--card) 55%);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border)); border-radius: 16px; padding: 14px;
+}
+.day-card::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--accent); }
+.day-card-top { display: flex; justify-content: space-between; align-items: center; }
+.day-card-icon {
+  font-size: 22px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.day-card-badge {
+  font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.day-card-title { font-size: 16px; }
+.day-card-list { list-style: none; margin: 2px 0 0; padding: 0; display: flex; flex-direction: column; gap: 3px; font-size: 13px; flex: 1; }
+.day-card-list li { display: flex; justify-content: space-between; gap: 6px; }
+.day-card-list li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.day-card-start {
+  margin-top: 6px; text-align: center; font-weight: 700; padding: 9px; border-radius: 10px;
+  background: var(--accent); color: var(--bg);
+}
+.template-card { display: flex; flex-direction: column; gap: 8px; }
+.style-chip {
+  font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+}
