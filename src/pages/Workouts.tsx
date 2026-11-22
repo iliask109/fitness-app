@@ -1,18 +1,22 @@
+import { useState } from 'react';
 import { useTable } from '../lib/useTable';
+import ProgramPicker from '../components/ProgramPicker';
 import type { Workout } from '../lib/types';
 import { formatDate, workoutVolume } from '../lib/utils';
 
 export default function Workouts() {
   const { rows, loading } = useTable<Workout>('workouts');
+  const [picking, setPicking] = useState(false);
   const sorted = [...rows].sort((a, b) => b.date.localeCompare(a.date) || (b.created_at ?? '').localeCompare(a.created_at ?? ''));
 
   return (
     <div className="stack">
-      <div className="row between">
-        <h2>האימונים שלי</h2>
-        <a className="btn primary" href="#/workouts/new">+ אימון חדש</a>
+      <h2>האימונים שלי</h2>
+      <div className="grid2">
+        <a className="btn primary big" href="#/workouts/new">+ אימון חדש</a>
+        <button className="btn blue big" onClick={() => setPicking(true)}>📋 תוכנית שמורה</button>
       </div>
-      <p className="muted small">רוצה להתחיל מתוכנית? היכנס ל<a href="#/programs">תוכניות</a> ובחר יום אימון.</p>
+      {picking && <ProgramPicker onClose={() => setPicking(false)} />}
       {loading && <p className="muted">טוען…</p>}
       {!loading && sorted.length === 0 && <div className="card muted">עוד לא נרשמו אימונים.</div>}
       {sorted.map((w) => {

@@ -206,3 +206,15 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 .weight-input input { font-size: 40px; font-weight: 800; text-align: center; max-width: 180px; padding: 6px; }
 @keyframes fade { from { opacity: 0; } }
 @keyframes slide-up { from { transform: translateY(40px); opacity: 0; } }
+
+/* blue button + program picker */
+.btn.blue { background: var(--blue); border-color: var(--blue); color: #fff; }
+@media (prefers-color-scheme: dark) { .btn.blue { color: #0b1120; } }
+.sheet-scroll { max-height: 80vh; overflow-y: auto; }
+.program-day {
+  font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; text-align: start;
+}
+.program-day > span:first-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.program-day-name { font-weight: 700; }
+.program-day-go { color: var(--blue); font-size: 18px; flex: none; }
