@@ -16,6 +16,8 @@ interface AuthCtx {
   user: AppUser | null;
   loading: boolean;
   isAdmin: boolean;
+  /** False until the admin check for the current user has finished. */
+  adminChecked: boolean;
   adminCheckError?: string;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, details: SignUpDetails) => Promise<{ needsConfirm: boolean }>;
@@ -30,11 +32,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCheckError, setAdminCheckError] = useState<string>();
+  const [adminChecked, setAdminChecked] = useState(false);
 
   useEffect(() => {
     setIsAdmin(false);
+    setAdminChecked(false);
     setAdminCheckError(undefined);
-    if (user) checkIsAdmin(user.id).then((r) => { setIsAdmin(r.admin); setAdminCheckError(r.error); });
+    if (user) checkIsAdmin(user.id).then((r) => { setIsAdmin(r.admin); setAdminCheckError(r.error); setAdminChecked(true); });
   }, [user?.id]);
 
   useEffect(() => {
@@ -70,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     loading,
     isAdmin,
+    adminChecked,
     adminCheckError,
     async signIn(email, password) {
       if (!supabase) return demoLogin(email);

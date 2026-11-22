@@ -30,6 +30,8 @@ export default function AdminUsers() {
   if (!users) return <p className="muted">טוען…</p>;
 
   const weekAgo = addDays(todayISO(), -7);
+  // Stats count trainees only, not admins.
+  const trainees = users.filter((u) => !u.is_admin);
   const shown = users
     .filter((u) => (u.email + ' ' + fullName(u)).toLowerCase().includes(q.trim().toLowerCase()))
     .filter((u) => filter === 'all' || (filter === 'active' && isActive(u)) || (filter === 'inactive' && !isActive(u)) || (filter === 'banned' && u.banned));
@@ -39,10 +41,10 @@ export default function AdminUsers() {
       <h2>🛡️ ניהול משתמשים</h2>
 
       <div className="grid2">
-        <div className="card stat"><span className="stat-num">{users.length}</span><span className="muted small">משתמשים</span></div>
-        <div className="card stat"><span className="stat-num">{users.filter((u) => u.last_workout && u.last_workout >= weekAgo).length}</span><span className="muted small">התאמנו השבוע</span></div>
-        <div className="card stat"><span className="stat-num">{users.reduce((a, u) => a + u.workouts, 0)}</span><span className="muted small">אימונים בסך הכול</span></div>
-        <div className="card stat"><span className="stat-num">{users.filter((u) => u.created_at.slice(0, 10) >= weekAgo).length}</span><span className="muted small">נרשמו השבוע</span></div>
+        <div className="card stat"><span className="stat-num">{trainees.length}</span><span className="muted small">מתאמנים</span></div>
+        <div className="card stat"><span className="stat-num">{trainees.filter((u) => u.last_workout && u.last_workout >= weekAgo).length}</span><span className="muted small">התאמנו השבוע</span></div>
+        <div className="card stat"><span className="stat-num">{trainees.reduce((a, u) => a + u.workouts, 0)}</span><span className="muted small">אימונים בסך הכול</span></div>
+        <div className="card stat"><span className="stat-num">{trainees.filter((u) => u.created_at.slice(0, 10) >= weekAgo).length}</span><span className="muted small">נרשמו השבוע</span></div>
       </div>
 
       <input placeholder="🔍 חיפוש לפי שם או אימייל" value={q} onChange={(e) => setQ(e.target.value)} />

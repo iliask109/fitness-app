@@ -14,6 +14,7 @@ import AdminUsers from './pages/AdminUsers';
 import AdminUser from './pages/AdminUser';
 import Onboarding from './pages/Onboarding';
 import { useProfile } from './lib/useProfile';
+import AdminAccount from './pages/AdminAccount';
 
 const TABS = [
   { key: '', label: 'בית', icon: '🏠' },
@@ -30,9 +31,49 @@ export default function App() {
   return <Shell key={user.id} />;
 }
 
-/** The signed-in app. Until the training profile is filled in, only the onboarding page is shown. */
+/** Admins get the management app only; everyone else gets the training app. */
 function Shell() {
-  const { isAdmin, signOut } = useAuth();
+  const { isAdmin, adminChecked } = useAuth();
+  if (!adminChecked) return <div className="center muted">טוען…</div>;
+  return isAdmin ? <AdminShell /> : <UserShell />;
+}
+
+const ADMIN_TABS = [
+  { key: 'admin', label: 'משתמשים', icon: '👥' },
+  { key: 'settings', label: 'חשבון', icon: '⚙️' },
+];
+
+function AdminShell() {
+  const route = useRoute();
+  const [section = '', sub] = route.path;
+  const tab = section === 'settings' ? 'settings' : 'admin';
+  const page = section === 'settings' ? <AdminAccount />
+    : section === 'admin' && sub ? <AdminUser id={sub} />
+    : <AdminUsers />;
+
+  return (
+    <div className="app">
+      <header className="topbar">
+        <span className="brand">💪 FitLogix</span>
+        {isDemo && <span className="badge">מצב הדגמה</span>}
+        <span className="chip tag-admin">🛡️ מנהל</span>
+      </header>
+      <main className="content">{page}</main>
+      <nav className="tabbar">
+        {ADMIN_TABS.map((t) => (
+          <a key={t.key} href={'#/' + t.key} className={tab === t.key ? 'active' : ''}>
+            <span className="tab-icon">{t.icon}</span>
+            <span>{t.label}</span>
+          </a>
+        ))}
+      </nav>
+    </div>
+  );
+}
+
+/** The training app. Until the training profile is filled in, only the onboarding page is shown. */
+function UserShell() {
+  const { signOut } = useAuth();
   const route = useRoute();
   const me = useProfile();
 
@@ -60,7 +101,6 @@ function Shell() {
     case 'progress': page = <Progress />; break;
     case 'settings': page = <Settings />; break;
     case 'profile-setup': page = <Onboarding editing profile={me.profile} save={me.save} onDone={() => { me.reload(); navigate('/settings'); }} />; break;
-    case 'admin': page = sub ? <AdminUser id={sub} /> : <AdminUsers />; break;
     default: page = <Dashboard />;
   }
 
@@ -69,7 +109,6 @@ function Shell() {
       <header className="topbar">
         <span className="brand">💪 FitLogix</span>
         {isDemo && <span className="badge">מצב הדגמה</span>}
-        {isAdmin && <button className="icon-btn" onClick={() => navigate('/admin')} aria-label="ניהול משתמשים">🛡️</button>}
         <button className="icon-btn" onClick={() => navigate('/settings')} aria-label="הגדרות">⚙️</button>
       </header>
       <main className="content">{page}</main>
