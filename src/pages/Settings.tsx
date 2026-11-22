@@ -14,7 +14,7 @@ const FIELDS = [
 ] as const;
 
 export default function Settings() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const { profile, loading, save } = useProfile();
   const [form, setForm] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
@@ -51,6 +51,7 @@ export default function Settings() {
         </div>
         <button className="btn primary">{saved ? '✓ נשמר' : 'שמירה'}</button>
       </form>
+      {isAdmin && <a className="btn" href="#/admin">🛡️ ניהול משתמשים</a>}
       <div className="card stack tight">
         <div className="muted small">מחובר בתור</div>
         <div dir="ltr" style={{ textAlign: 'right' }}>{user?.email}</div>

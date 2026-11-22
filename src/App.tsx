@@ -10,6 +10,8 @@ import ProgramEditor from './pages/ProgramEditor';
 import Nutrition from './pages/Nutrition';
 import Progress from './pages/Progress';
 import Settings from './pages/Settings';
+import AdminUsers from './pages/AdminUsers';
+import AdminUser from './pages/AdminUser';
 
 const TABS = [
   { key: '', label: 'בית', icon: '🏠' },
@@ -20,7 +22,7 @@ const TABS = [
 ];
 
 export default function App() {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const route = useRoute();
 
   if (loading) return <div className="center muted">טוען…</div>;
@@ -34,6 +36,7 @@ export default function App() {
     case 'nutrition': page = <Nutrition />; break;
     case 'progress': page = <Progress />; break;
     case 'settings': page = <Settings />; break;
+    case 'admin': page = sub ? <AdminUser id={sub} /> : <AdminUsers />; break;
     default: page = <Dashboard />;
   }
 
@@ -42,6 +45,7 @@ export default function App() {
       <header className="topbar">
         <span className="brand">💪 FitTrack</span>
         {isDemo && <span className="badge">מצב הדגמה</span>}
+        {isAdmin && <button className="icon-btn" onClick={() => navigate('/admin')} aria-label="ניהול משתמשים">🛡️</button>}
         <button className="icon-btn" onClick={() => navigate('/settings')} aria-label="הגדרות">⚙️</button>
       </header>
       <main className="content">{page}</main>

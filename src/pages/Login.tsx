@@ -53,6 +53,7 @@ export default function Login() {
 }
 
 function translate(m: string) {
+  if (/banned/i.test(m)) return 'החשבון שלך נחסם. פנה למנהל';
   if (/invalid login/i.test(m)) return 'אימייל או סיסמה שגויים';
   if (/already registered/i.test(m)) return 'המשתמש כבר קיים. נסה להתחבר';
   if (/email not confirmed/i.test(m)) return 'צריך לאשר את האימייל לפני ההתחברות';

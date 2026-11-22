@@ -28,3 +28,14 @@ export function weekStart(iso: string) {
   d.setDate(d.getDate() - d.getDay());
   return toISO(d);
 }
+
+/** "היום", "אתמול", "לפני 5 ימים" for a date or timestamp. */
+export function daysAgo(value: string | null | undefined) {
+  if (!value) return 'אף פעם';
+  const days = Math.round((new Date(todayISO() + 'T12:00:00').getTime() - new Date(value.slice(0, 10) + 'T12:00:00').getTime()) / 86400000);
+  if (days <= 0) return 'היום';
+  if (days === 1) return 'אתמול';
+  if (days < 30) return `לפני ${days} ימים`;
+  if (days < 365) return `לפני ${Math.round(days / 30)} חודשים`;
+  return `לפני ${Math.round(days / 365)} שנים`;
+}

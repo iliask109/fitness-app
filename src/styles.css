@@ -131,3 +131,19 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 .login-card { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 14px; text-align: center; padding: 28px 22px; }
 .login-logo { font-size: 44px; }
 .login form { text-align: start; }
+
+/* admin */
+.chip.selected { background: var(--primary); color: var(--primary-text); }
+.tag-admin { background: color-mix(in srgb, var(--blue) 25%, transparent); }
+.tag-banned { background: color-mix(in srgb, var(--red) 25%, transparent); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--track); flex: none; }
+.dot.on { background: var(--green); }
+.avatar {
+  width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; flex: none;
+  background: var(--primary); color: var(--primary-text); font-size: 20px; font-weight: 800;
+}
+.workout-details { border-top: 1px solid var(--border); padding: 8px 0; }
+.workout-details:first-of-type { border-top: none; }
+.workout-details summary { display: flex; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; }
+.workout-details summary::-webkit-details-marker { display: none; }
+.workout-details[open] summary { margin-bottom: 6px; }

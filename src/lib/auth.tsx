@@ -1,11 +1,13 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { supabase } from './supabase';
+import { checkIsAdmin, isDemoBanned, recordDemoLogin } from './admin';
 
 export interface AppUser { id: string; email: string }
 
 interface AuthCtx {
   user: AppUser | null;
   loading: boolean;
+  isAdmin: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<{ needsConfirm: boolean }>;
   signOut: () => Promise<void>;
@@ -17,6 +19,12 @@ const DEMO_KEY = 'fittrack:demo-user';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(false);
+    if (user) checkIsAdmin(user.id).then(setIsAdmin);
+  }, [user]);
 
   useEffect(() => {
     if (!supabase) {
@@ -41,6 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const demoLogin = (email: string) => {
     const u = { id: 'demo-' + email.toLowerCase(), email };
+    if (isDemoBanned(u.id)) throw new Error('User is banned');
+    recordDemoLogin(u.id, email);
     localStorage.setItem(DEMO_KEY, JSON.stringify(u));
     setUser(u);
   };
@@ -48,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value: AuthCtx = {
     user,
     loading,
+    isAdmin,
     async signIn(email, password) {
       if (!supabase) return demoLogin(email);
       const { error } = await supabase.auth.signInWithPassword({ email, password });
