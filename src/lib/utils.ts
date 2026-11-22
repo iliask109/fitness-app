@@ -20,6 +20,17 @@ export function workoutVolume(w: Workout) {
   return w.exercises.reduce(
     (sum, ex) => sum + ex.sets.filter((s) => s.done).reduce((a, s) => a + s.reps * s.weight, 0), 0);
 }
+/** Age in whole years from a YYYY-MM-DD birth date. */
+export function ageFromBirthDate(iso: string) {
+  const b = new Date(iso + 'T12:00:00'), now = new Date();
+  let age = now.getFullYear() - b.getFullYear();
+  if (now.getMonth() < b.getMonth() || (now.getMonth() === b.getMonth() && now.getDate() < b.getDate())) age--;
+  return age;
+}
+/** Current age: from the birth date when known, otherwise the age entered at sign-up. */
+export function currentAge(p: { age?: number | null; birth_date?: string | null }) {
+  return p.birth_date ? ageFromBirthDate(p.birth_date) : p.age ?? null;
+}
 export const round = (n: number, d = 0) => Math.round(n * 10 ** d) / 10 ** d;
 
 /** Start of the week (Sunday, as in Israel) for a date. */

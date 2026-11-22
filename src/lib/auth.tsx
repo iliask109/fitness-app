@@ -1,8 +1,16 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { supabase } from './supabase';
 import { checkIsAdmin, isDemoBanned, recordDemoLogin } from './admin';
+import { saveRow } from './db';
 
 export interface AppUser { id: string; email: string }
+
+export interface SignUpDetails {
+  first_name: string;
+  last_name: string;
+  age: number;
+  birth_date?: string;
+}
 
 interface AuthCtx {
   user: AppUser | null;
@@ -10,7 +18,7 @@ interface AuthCtx {
   isAdmin: boolean;
   adminCheckError?: string;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<{ needsConfirm: boolean }>;
+  signUp: (email: string, password: string, details: SignUpDetails) => Promise<{ needsConfirm: boolean }>;
   signOut: () => Promise<void>;
 }
 
@@ -68,9 +76,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
     },
-    async signUp(email, password) {
-      if (!supabase) { demoLogin(email); return { needsConfirm: false }; }
-      const { data, error } = await supabase.auth.signUp({ email, password });
+    async signUp(email, password, details) {
+      const meta = { ...details, birth_date: details.birth_date || null, display_name: details.first_name };
+      if (!supabase) {
+        const id = 'demo-' + email.toLowerCase();
+        await saveRow(id, 'profiles', { id, ...meta });
+        demoLogin(email);
+        return { needsConfirm: false };
+      }
+      // The details travel as user metadata; a database trigger (update-2-signup.sql) creates the profile.
+      const { data, error } = await supabase.auth.signUp({ email, password, options: { data: meta } });
       if (error) throw error;
       return { needsConfirm: !data.session };
     },

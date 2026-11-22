@@ -8,6 +8,10 @@ export interface AdminUser {
   banned: boolean;
   is_admin: boolean;
   display_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  age: number | null;
+  birth_date: string | null;
   workouts: number;
   last_workout: string | null;
   last_weight: number | null;
@@ -36,6 +40,11 @@ export function recordDemoLogin(id: string, email: string) {
   return list.find((x) => x.id === id)!;
 }
 
+/** "First Last", falling back to the display name or the email's user part. */
+export function fullName(u: Pick<AdminUser, 'first_name' | 'last_name' | 'display_name' | 'email'>) {
+  return [u.first_name, u.last_name].filter(Boolean).join(' ') || u.display_name || u.email.split('@')[0];
+}
+
 /* ---------- API ---------- */
 /** Whether the signed-in user is an admin; `error` explains a failed check (shown in Settings). */
 export async function checkIsAdmin(uid: string): Promise<{ admin: boolean; error?: string }> {
@@ -56,10 +65,12 @@ export async function listUsers(): Promise<AdminUser[]> {
   return demoUsers().map((u) => {
     const workouts = demoRows<{ date: string }>(u.id, 'workouts');
     const weights = demoRows<{ date: string; weight: number }>(u.id, 'body_weights').sort((a, b) => b.date.localeCompare(a.date));
-    const profile = demoRows<{ display_name?: string }>(u.id, 'profiles')[0];
+    const profile = demoRows<{ display_name?: string; first_name?: string; last_name?: string; age?: number; birth_date?: string }>(u.id, 'profiles')[0];
     return {
       id: u.id, email: u.email, created_at: u.created_at, last_sign_in_at: u.last_sign_in_at,
       banned: !!u.banned, is_admin: !!u.is_admin, display_name: profile?.display_name ?? null,
+      first_name: profile?.first_name ?? null, last_name: profile?.last_name ?? null,
+      age: profile?.age ?? null, birth_date: profile?.birth_date ?? null,
       workouts: workouts.length,
       last_workout: workouts.map((w) => w.date).sort().at(-1) ?? null,
       last_weight: weights[0]?.weight ?? null,

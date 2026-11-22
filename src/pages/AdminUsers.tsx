@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../lib/auth';
-import { AdminUser, listUsers } from '../lib/admin';
-import { addDays, daysAgo, formatDate, todayISO } from '../lib/utils';
+import { AdminUser, fullName, listUsers } from '../lib/admin';
+import { addDays, currentAge, daysAgo, formatDate, todayISO } from '../lib/utils';
 
 type Filter = 'all' | 'active' | 'inactive' | 'banned';
 const FILTERS: { key: Filter; label: string }[] = [
@@ -31,7 +31,7 @@ export default function AdminUsers() {
 
   const weekAgo = addDays(todayISO(), -7);
   const shown = users
-    .filter((u) => (u.email + ' ' + (u.display_name ?? '')).toLowerCase().includes(q.trim().toLowerCase()))
+    .filter((u) => (u.email + ' ' + fullName(u)).toLowerCase().includes(q.trim().toLowerCase()))
     .filter((u) => filter === 'all' || (filter === 'active' && isActive(u)) || (filter === 'inactive' && !isActive(u)) || (filter === 'banned' && u.banned));
 
   return (
@@ -58,7 +58,7 @@ export default function AdminUsers() {
           <div className="row between">
             <div className="row gap">
               <span className={'dot' + (isActive(u) ? ' on' : '')} />
-              <strong>{u.display_name || u.email.split('@')[0]}</strong>
+              <strong>{fullName(u)}</strong>
               {u.is_admin && <span className="chip tag-admin">מנהל</span>}
               {u.banned && <span className="chip tag-banned">חסום</span>}
             </div>
@@ -68,6 +68,7 @@ export default function AdminUsers() {
           <div className="chips">
             <span className="chip">{u.workouts} אימונים</span>
             <span className="chip">אימון אחרון: {daysAgo(u.last_workout)}</span>
+            {currentAge(u) != null && <span className="chip">גיל {currentAge(u)}</span>}
             {u.last_weight != null && <span className="chip">{u.last_weight} ק״ג</span>}
             <span className="chip">הצטרף {formatDate(u.created_at.slice(0, 10), { day: 'numeric', month: 'short', year: '2-digit' })}</span>
           </div>

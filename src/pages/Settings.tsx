@@ -3,6 +3,7 @@ import { useAuth } from '../lib/auth';
 import { useProfile } from '../lib/useProfile';
 import { isDemo } from '../lib/supabase';
 import { navigate } from '../lib/router';
+import { ageFromBirthDate, todayISO } from '../lib/utils';
 
 const FIELDS = [
   ['calorie_goal', 'יעד קלוריות יומי'],
@@ -21,7 +22,11 @@ export default function Settings() {
 
   useEffect(() => {
     if (loading) return;
-    const f: Record<string, string> = { display_name: profile.display_name ?? '' };
+    const f: Record<string, string> = {
+      first_name: profile.first_name ?? profile.display_name ?? '', last_name: profile.last_name ?? '',
+      age: profile.birth_date ? String(ageFromBirthDate(profile.birth_date)) : profile.age == null ? '' : String(profile.age),
+      birth_date: profile.birth_date ?? '',
+    };
     for (const [k] of FIELDS) f[k] = profile[k] == null ? '' : String(profile[k]);
     setForm(f);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -29,7 +34,12 @@ export default function Settings() {
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    const patch: Record<string, unknown> = { display_name: form.display_name || null };
+    const age = Number(form.age);
+    const patch: Record<string, unknown> = {
+      first_name: form.first_name.trim() || null, last_name: form.last_name.trim() || null,
+      display_name: form.first_name.trim() || null,
+      age: Number.isInteger(age) && age > 0 ? age : null, birth_date: form.birth_date || null,
+    };
     for (const [k] of FIELDS) patch[k] = form[k] === '' ? (k === 'weight_goal' ? null : profile[k]) : Number(form[k]);
     await save(patch);
     setSaved(true);
@@ -40,7 +50,18 @@ export default function Settings() {
     <div className="stack">
       <h2>הגדרות</h2>
       <form onSubmit={submit} className="card stack">
-        <label>שם להצגה<input value={form.display_name ?? ''} onChange={(e) => setForm({ ...form, display_name: e.target.value })} /></label>
+        <h3>👤 פרטים אישיים</h3>
+        <div className="grid2">
+          <label>שם פרטי<input value={form.first_name ?? ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></label>
+          <label>שם משפחה<input value={form.last_name ?? ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></label>
+          <label>גיל<input type="number" min={10} max={120} value={form.age ?? ''} onChange={(e) => setForm({ ...form, age: e.target.value })} /></label>
+          <label><span>תאריך לידה <span className="optional">(לא חובה)</span></span>
+            <input type="date" max={todayISO()} value={form.birth_date ?? ''} onChange={(e) => {
+              const v = e.target.value;
+              setForm({ ...form, birth_date: v, age: v ? String(ageFromBirthDate(v)) : form.age });
+            }} /></label>
+        </div>
+        <h3>🎯 יעדים</h3>
         <div className="grid2">
           {FIELDS.map(([k, label]) => (
             <label key={k}>{label}

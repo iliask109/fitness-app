@@ -28,7 +28,7 @@ export default function Dashboard() {
 
   return (
     <div className="stack">
-      <h2>{greet}{profile.display_name ? `, ${profile.display_name}` : ''} 👋</h2>
+      <h2>{greet}{(profile.first_name || profile.display_name) ? `, ${profile.first_name || profile.display_name}` : ''} 👋</h2>
       <p className="muted">{formatDate(today, { weekday: 'long', day: 'numeric', month: 'long' })}</p>
 
       <div className="card rings">

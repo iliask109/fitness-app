@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../lib/auth';
-import { AdminUser as AdminUserT, deleteUser, listUsers, setAdmin, setBanned } from '../lib/admin';
+import { AdminUser as AdminUserT, deleteUser, fullName, listUsers, setAdmin, setBanned } from '../lib/admin';
 import { listRows } from '../lib/db';
 import { navigate } from '../lib/router';
 import { BodyWeight, DEFAULT_PROFILE, Meal, Profile, Workout } from '../lib/types';
-import { addDays, daysAgo, formatDate, round, todayISO, weekStart, workoutVolume } from '../lib/utils';
+import { addDays, currentAge, daysAgo, formatDate, todayISO, weekStart, workoutVolume } from '../lib/utils';
 import ProgressCharts from '../components/ProgressCharts';
 
 interface Data { workouts: Workout[]; meals: Meal[]; weights: BodyWeight[]; profile: Profile }
@@ -38,7 +38,8 @@ export default function AdminUser({ id }: { id: string }) {
   if (!u || !data) return <p className="muted">טוען…</p>;
 
   const isMe = u.id === me?.id;
-  const name = u.display_name || u.email.split('@')[0];
+  const name = fullName(u);
+  const age = currentAge(u);
 
   async function act(fn: () => Promise<void>, done?: () => void) {
     setBusy(true);
@@ -71,6 +72,12 @@ export default function AdminUser({ id }: { id: string }) {
             <div className="muted small" dir="ltr" style={{ textAlign: 'right' }}>{u.email}</div>
           </div>
         </div>
+        {(age != null || u.birth_date) && (
+          <div className="small">
+            {age != null && <>גיל {age}</>}
+            {u.birth_date && <span className="muted"> · נולד/ה {formatDate(u.birth_date, { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
+          </div>
+        )}
         <div className="muted small">
           הצטרף {formatDate(u.created_at.slice(0, 10), { day: 'numeric', month: 'long', year: 'numeric' })} ·
           התחברות אחרונה: {daysAgo(u.last_sign_in_at)}

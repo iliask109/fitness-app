@@ -1,4 +1,4 @@
--- FitTrack admin area. Run once in Supabase: SQL Editor -> New query -> paste -> Run.
+-- FitLogix admin area. Run once in Supabase: SQL Editor -> New query -> paste -> Run.
 -- Then make yourself an admin with the line at the bottom of this file.
 
 create table if not exists public.admins (
@@ -24,10 +24,12 @@ begin
 end $$;
 
 -- All users with a short summary. Returns nothing for non-admins.
-create or replace function public.admin_list_users()
+drop function if exists public.admin_list_users();
+create function public.admin_list_users()
 returns table (
   id uuid, email text, created_at timestamptz, last_sign_in_at timestamptz,
   banned boolean, is_admin boolean, display_name text,
+  first_name text, last_name text, age int, birth_date date,
   workouts bigint, last_workout date, last_weight numeric
 )
 language sql stable security definer set search_path = public
@@ -36,11 +38,14 @@ as $$
     u.id, u.email::text, u.created_at, u.last_sign_in_at,
     coalesce(u.banned_until > now(), false),
     exists (select 1 from public.admins a where a.user_id = u.id),
-    (select p.display_name from public.profiles p where p.user_id = u.id limit 1),
+    p.display_name, p.first_name, p.last_name, p.age, p.birth_date,
     (select count(*) from public.workouts w where w.user_id = u.id),
     (select max(w.date) from public.workouts w where w.user_id = u.id),
     (select b.weight from public.body_weights b where b.user_id = u.id order by b.date desc limit 1)
   from auth.users u
+  left join lateral (
+    select * from public.profiles pr where pr.user_id = u.id limit 1
+  ) p on true
   where public.is_admin()
   order by u.created_at desc
 $$;

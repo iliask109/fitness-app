@@ -1,4 +1,4 @@
-# FitTrack 💪
+# FitLogix 💪
 
 A fitness web app in Hebrew (right-to-left): workout tracking, training programs, nutrition and progress.
 

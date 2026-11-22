@@ -1,4 +1,4 @@
--- FitTrack schema. Run once in Supabase: SQL Editor -> New query -> paste -> Run.
+-- FitLogix schema. Run once in Supabase: SQL Editor -> New query -> paste -> Run.
 -- Every table has the same shape (id, user_id, created_at + data columns),
 -- and Row Level Security makes each user see only their own rows.
 
@@ -7,6 +7,10 @@ create table if not exists public.profiles (
   user_id uuid not null default auth.uid() references auth.users on delete cascade,
   created_at timestamptz not null default now(),
   display_name text,
+  first_name text,
+  last_name text,
+  age int,
+  birth_date date,
   calorie_goal int not null default 2200,
   protein_goal int not null default 140,
   carbs_goal int not null default 250,

@@ -43,7 +43,7 @@ export default function App() {
   return (
     <div className="app">
       <header className="topbar">
-        <span className="brand">💪 FitTrack</span>
+        <span className="brand">💪 FitLogix</span>
         {isDemo && <span className="badge">מצב הדגמה</span>}
         {isAdmin && <button className="icon-btn" onClick={() => navigate('/admin')} aria-label="ניהול משתמשים">🛡️</button>}
         <button className="icon-btn" onClick={() => navigate('/settings')} aria-label="הגדרות">⚙️</button>

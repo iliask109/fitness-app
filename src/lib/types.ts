@@ -37,6 +37,10 @@ export interface WaterLog extends BaseRow { date: string; glasses: number }
 
 export interface Profile extends BaseRow {
   display_name?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  age?: number | null;
+  birth_date?: string | null;
   calorie_goal: number;
   protein_goal: number;
   carbs_goal: number;
