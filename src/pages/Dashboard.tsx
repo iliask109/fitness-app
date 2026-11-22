@@ -4,6 +4,7 @@ import { useProfile } from '../lib/useProfile';
 import type { BodyWeight, Workout } from '../lib/types';
 import { formatDate, workoutVolume } from '../lib/utils';
 import WeekView from '../components/WeekView';
+import WeightDialog from '../components/WeightDialog';
 
 /** Current time, refreshed every few seconds so the clock and greeting stay up to date. */
 function useNow() {
@@ -26,6 +27,7 @@ export default function Dashboard() {
   const { profile } = useProfile();
   const workouts = useTable<Workout>('workouts');
   const weights = useTable<BodyWeight>('body_weights');
+  const [weightOpen, setWeightOpen] = useState(false);
 
   const sorted = useMemo(() => [...workouts.rows].sort((a, b) => b.date.localeCompare(a.date)), [workouts.rows]);
   const lastWeight = [...weights.rows].sort((a, b) => b.date.localeCompare(a.date))[0];
@@ -55,7 +57,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <a className="btn primary big" href="#/workouts/new">+ אימון חדש</a>
+      <div className="grid2">
+        <a className="btn primary big" href="#/workouts/new">+ אימון חדש</a>
+        <button className="btn big" onClick={() => setWeightOpen(true)}>+ משקל חדש</button>
+      </div>
+      {weightOpen && <WeightDialog weights={weights.rows} save={weights.save} onClose={() => setWeightOpen(false)} />}
 
       <div className="card">
         <h3>אימונים אחרונים</h3>

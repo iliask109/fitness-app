@@ -62,7 +62,7 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
         <div className="row between">
           <h3>⚖️ משקל גוף</h3>
           {first !== undefined && last !== undefined && weightData.length > 1 && (
-            <span className={last <= first ? 'good' : 'muted'}>{last - first > 0 ? '+' : ''}{round(last - first, 1)} ק״ג</span>
+            <span className={last <= first ? 'good' : 'muted'}><span dir="ltr">{last - first > 0 ? '+' : ''}{round(last - first, 1)}</span> ק״ג</span>
           )}
         </div>
         {weightForm}

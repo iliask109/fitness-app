@@ -77,18 +77,19 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
     setBusy(true);
     setError(null);
     try {
+      if (weight) {
+        // The weight entered here is also the first point on the body-weight chart.
+        // Saved before the profile: saving the profile switches to the home screen, which must already see it.
+        const today = todayISO();
+        const existing = (await listRows<BodyWeight>(user!.id, 'body_weights')).find((r) => r.date === today);
+        await saveRow<BodyWeight>(user!.id, 'body_weights', { id: existing?.id, date: today, weight: Number(weight) });
+      }
       await save({
         height_cm: Math.round(Number(height)),
         experience, fitness_goal: goal, training_days: days,
         training_locations: locations, equipment,
         onboarded_at: profile.onboarded_at ?? new Date().toISOString(),
       });
-      if (weight) {
-        // The weight entered here is also the first point on the body-weight chart.
-        const today = todayISO();
-        const existing = (await listRows<BodyWeight>(user!.id, 'body_weights')).find((r) => r.date === today);
-        await saveRow<BodyWeight>(user!.id, 'body_weights', { id: existing?.id, date: today, weight: Number(weight) });
-      }
       onDone();
     } catch (e) {
       const m = (e as Error).message;
