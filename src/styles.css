@@ -304,3 +304,13 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .lg-planned { border: 2px dashed var(--muted); }
 .planned-detail { border: 2px dashed color-mix(in srgb, var(--accent) 50%, transparent); }
 .planned-chip { background: color-mix(in srgb, var(--accent) 18%, transparent); font-weight: 700; }
+
+/* weekday picker on programs */
+.weekday-picker { background: var(--card); border-radius: 20px; padding: 12px 14px; box-shadow: 0 2px 0 var(--border); transition: box-shadow .3s; }
+.weekday-picker.highlight { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 45%, transparent); }
+.weekday-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.weekday-row button {
+  font: inherit; font-weight: 700; aspect-ratio: 1; max-height: 46px; border-radius: 14px; cursor: pointer;
+  border: 2px solid var(--border); background: var(--bg); color: var(--text);
+}
+.weekday-row button.on { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }

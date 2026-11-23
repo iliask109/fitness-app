@@ -25,7 +25,10 @@ export interface ProgramDay { name: string; exercises: ProgramExercise[] }
 /** A day index into Program.days, or a rest day. */
 export type ScheduleSlot = number | 'rest';
 /** "cycle": repeat the pattern day after day. "weekly": train on fixed weekdays (0 = Sunday), cycling through the days. */
-export type ProgramSchedule = { kind: 'cycle'; pattern: ScheduleSlot[] } | { kind: 'weekly'; weekdays: number[] };
+export type ProgramSchedule =
+  | { kind: 'cycle'; pattern: ScheduleSlot[] }
+  /** `required`: how many weekdays this program asks for (e.g. 4 for Push/Pull/Legs). */
+  | { kind: 'weekly'; weekdays: number[]; required?: number };
 export interface Program extends BaseRow { name: string; days: ProgramDay[]; schedule?: ProgramSchedule | null }
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';

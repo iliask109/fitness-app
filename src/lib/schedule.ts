@@ -15,6 +15,16 @@ export function scheduleOf(p: Program): ProgramSchedule {
   return { kind: 'cycle', pattern: [...p.days.map((_, i) => i as ScheduleSlot), 'rest'] };
 }
 
+/** How many weekdays the program asks for: 4 for Push/Pull/Legs and Upper/Lower, 3 for beginners; null = any. */
+export function requiredDays(p: Program): number | null {
+  if (p.schedule?.kind === 'weekly' && p.schedule.required) return p.schedule.required;
+  const names = p.days.map((d) => d.name).join(' ');
+  if (/מתחילים|כל הגוף/.test(p.name)) return 3;
+  if (p.days.length === 3 && /push|דחיפה/i.test(names) && /pull|משיכה/i.test(names)) return 4;
+  if (p.days.length === 2 && /עליון|upper/i.test(names) && /תחתון|lower/i.test(names)) return 4;
+  return null;
+}
+
 export function describeSchedule(p: Program): string {
   const s = scheduleOf(p);
   if (s.kind === 'weekly') return `${s.weekdays.length} אימונים בשבוע: ${s.weekdays.map((d) => WEEKDAY_LETTERS[d]).join(', ')}`;

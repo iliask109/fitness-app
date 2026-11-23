@@ -1,5 +1,4 @@
 import { useTable } from '../lib/useTable';
-import { navigate } from '../lib/router';
 import { PROGRAM_TEMPLATES } from '../lib/templates';
 import { DAY_STYLES, dayStyle } from '../lib/dayStyle';
 import type { Program } from '../lib/types';
@@ -7,18 +6,29 @@ import DayCard from '../components/DayCard';
 import { useProfile } from '../lib/useProfile';
 import { activeProgram, describeSchedule } from '../lib/schedule';
 import type { Workout } from '../lib/types';
+import WeekdayPicker from '../components/WeekdayPicker';
+import { useState } from 'react';
 
 export default function Programs() {
   const { rows, loading, save } = useTable<Program>('programs');
   const workouts = useTable<Workout>('workouts');
   const me = useProfile();
   const active = activeProgram(rows, workouts.rows, me.profile);
+  const [justAdded, setJustAdded] = useState<string | null>(null);
+
+  async function saveDays(p: Program, weekdays: number[], required: number | null) {
+    await save({ ...p, schedule: { kind: 'weekly', weekdays, ...(required ? { required } : {}) } });
+    // The weekly goal on the home screen follows the active program's days.
+    if (active?.id === p.id) await me.save({ training_days: weekdays.length });
+  }
 
   async function addTemplate(i: number) {
     const t = PROGRAM_TEMPLATES[i];
     const p = await save({ name: t.name, days: structuredClone(t.days), schedule: t.schedule });
-    await me.save({ active_program_id: p.id });
-    navigate(`/programs/${p.id}`);
+    await me.save({ active_program_id: p.id, ...(t.schedule.kind === 'weekly' ? { training_days: t.schedule.weekdays.length } : {}) });
+    // Stay here so the new program's training days can be picked right away.
+    setJustAdded(p.id);
+    setTimeout(() => document.getElementById('program-' + p.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
   }
 
   return (
@@ -34,7 +44,7 @@ export default function Programs() {
       )}
 
       {rows.map((p) => (
-        <section key={p.id} className="program-section">
+        <section key={p.id} id={'program-' + p.id} className="program-section">
           <div className="row between">
             <div className="stack tight" style={{ gap: 2, minWidth: 0 }}>
               <div className="row gap">
@@ -44,10 +54,11 @@ export default function Programs() {
               <span className="muted small">📅 {describeSchedule(p)}</span>
             </div>
             <div className="row gap">
-              {active?.id !== p.id && <button className="btn small" onClick={() => me.save({ active_program_id: p.id })}>⭐ הפעלה</button>}
+              {active?.id !== p.id && <button className="btn small" onClick={() => { const sc = p.schedule; me.save({ active_program_id: p.id, ...(sc?.kind === 'weekly' ? { training_days: sc.weekdays.length } : {}) }); }}>⭐ הפעלה</button>}
               <a className="btn small" href={`#/programs/${p.id}`}>✏️ עריכה</a>
             </div>
           </div>
+          <WeekdayPicker program={p} highlight={justAdded === p.id} onSave={(days, req) => saveDays(p, days, req)} />
           <div className="day-cards">
             {p.days.map((d, i) => <DayCard key={i} day={d} startHref={`#/workouts/new?program=${p.id}&day=${i}`} />)}
           </div>

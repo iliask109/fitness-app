@@ -5,7 +5,7 @@ export const PROGRAM_TEMPLATES: { name: string; description: string; schedule: P
   {
     name: 'מתחילים: כל הגוף',
     description: '3 אימונים בשבוע, כל הגוף בכל אימון',
-    schedule: { kind: 'weekly', weekdays: [0, 2, 4] },
+    schedule: { kind: 'weekly', weekdays: [0, 2, 4], required: 3 },
     days: [
       { name: 'אימון A', exercises: [
         { name: 'סקוואט', sets: 3, reps: 8 }, { name: 'לחיצת חזה במוט', sets: 3, reps: 8 },
@@ -17,8 +17,8 @@ export const PROGRAM_TEMPLATES: { name: string; description: string; schedule: P
   },
   {
     name: 'Push / Pull / Legs',
-    description: 'דחיפה, משיכה ורגליים, ואז יום מנוחה',
-    schedule: { kind: 'cycle', pattern: [0, 1, 2, 'rest'] },
+    description: '4 אימונים בשבוע: דחיפה, משיכה ורגליים ברוטציה',
+    schedule: { kind: 'weekly', weekdays: [0, 1, 3, 4], required: 4 },
     days: [
       { name: 'Push: דחיפה', exercises: [
         { name: 'לחיצת חזה במוט', sets: 4, reps: 6 }, { name: 'לחיצת חזה בשיפוע עליון', sets: 3, reps: 10 },
@@ -36,8 +36,8 @@ export const PROGRAM_TEMPLATES: { name: string; description: string; schedule: P
   },
   {
     name: 'עליון / תחתון',
-    description: 'עליון, תחתון, ואז יום מנוחה',
-    schedule: { kind: 'cycle', pattern: [0, 1, 'rest'] },
+    description: '4 אימונים בשבוע: עליון ותחתון לסירוגין',
+    schedule: { kind: 'weekly', weekdays: [0, 1, 3, 4], required: 4 },
     days: [
       { name: 'עליון', exercises: [
         { name: 'לחיצת חזה במוט', sets: 4, reps: 6 }, { name: 'חתירה במוט', sets: 4, reps: 6 },
