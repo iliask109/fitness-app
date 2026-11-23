@@ -1,7 +1,7 @@
 import { ReactNode, useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { BodyWeight, Meal, Profile, Workout } from '../lib/types';
-import { addDays, e1rm, formatDate, round, todayISO, weekStart, workoutVolume } from '../lib/utils';
+import { addDays, formatDate, round, todayISO, weekStart, workoutVolume } from '../lib/utils';
 
 const axis = { fontSize: 11, fill: 'var(--muted)' };
 const tooltipStyle = { contentStyle: { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, direction: 'rtl' as const } };
@@ -34,18 +34,20 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
     return { label: formatDate(d), kcal: meals.filter((m) => m.date === d).reduce((a, m) => a + m.calories, 0) };
   }), [meals]);
 
+  // Working weight per workout = the heaviest completed set of that exercise (more reps wins a tie).
   const { prs, history } = useMemo(() => {
-    const prs = new Map<string, { weight: number; reps: number; e: number; date: string }>();
-    const history = new Map<string, { date: string; e: number }[]>();
+    const prs = new Map<string, { weight: number; reps: number; date: string }>();
+    const history = new Map<string, { date: string; weight: number; reps: number }[]>();
+    const heavier = (a: { weight: number; reps: number }, b: { weight: number; reps: number }) =>
+      a.weight > b.weight || (a.weight === b.weight && a.reps > b.reps);
     for (const wk of [...workouts].sort((a, b) => a.date.localeCompare(b.date))) {
       for (const ex of wk.exercises) {
         const done = ex.sets.filter((s) => s.done && s.weight > 0);
         if (!done.length) continue;
-        const top = done.reduce((b, s) => (e1rm(s.weight, s.reps) > e1rm(b.weight, b.reps) ? s : b));
-        const e = round(e1rm(top.weight, top.reps), 1);
+        const top = done.reduce((b, s) => (heavier(s, b) ? s : b));
         const cur = prs.get(ex.name);
-        if (!cur || e > cur.e) prs.set(ex.name, { weight: top.weight, reps: top.reps, e, date: wk.date });
-        history.set(ex.name, [...(history.get(ex.name) ?? []), { date: formatDate(wk.date), e }]);
+        if (!cur || heavier(top, cur)) prs.set(ex.name, { weight: top.weight, reps: top.reps, date: wk.date });
+        history.set(ex.name, [...(history.get(ex.name) ?? []), { date: formatDate(wk.date), weight: top.weight, reps: top.reps }]);
       }
     }
     return { prs, history };
@@ -114,20 +116,22 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
       </div>
 
       <div className="card stack tight">
-        <h3>📈 כוח לפי תרגיל (1RM משוער)</h3>
+        <h3>📈 מעקב משקלי עבודה</h3>
         {exerciseNames.length === 0 ? <p className="muted small">עוד אין סטים שהושלמו באימונים.</p> : (
           <>
-            <select value={selected} onChange={(e) => setChosen(e.target.value)}>
+            <select value={selected} onChange={(e) => setChosen(e.target.value)} aria-label="תרגיל">
               {exerciseNames.map((n) => <option key={n}>{n}</option>)}
             </select>
+            <GainSummary points={history.get(selected) ?? []} />
             <div dir="ltr" className="chart">
               <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={history.get(selected)} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />
                   <XAxis dataKey="date" tick={axis} />
                   <YAxis tick={axis} domain={['auto', 'auto']} />
-                  <Tooltip {...tooltipStyle} formatter={(v: number) => [`${v} ק״ג`, '1RM משוער']} />
-                  <Line type="monotone" dataKey="e" stroke="var(--pink)" strokeWidth={2.5} dot={{ r: 3 }} />
+                  <Tooltip {...tooltipStyle}
+                    formatter={(v: number, _n: string, item: { payload?: { reps: number } }) => [`${v} ק״ג × ${item.payload?.reps ?? ''}`, 'משקל עבודה']} />
+                  <Line type="monotone" dataKey="weight" stroke="var(--pink)" strokeWidth={2.5} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -138,17 +142,33 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
       {prs.size > 0 && (
         <div className="card">
           <h3>🏆 שיאים אישיים</h3>
-          {[...prs.entries()].sort((a, b) => b[1].e - a[1].e).map(([name, pr]) => (
+          {[...prs.entries()].sort((a, b) => b[1].weight - a[1].weight).map(([name, pr]) => (
             <div key={name} className="list-item">
               <div>
                 <div>{name}</div>
-                <div className="muted small">{pr.weight} ק״ג × {pr.reps} · {formatDate(pr.date)}</div>
+                <div className="muted small">{pr.reps} חזרות · {formatDate(pr.date)}</div>
               </div>
-              <strong>{pr.e} ק״ג</strong>
+              <strong>{pr.weight} ק״ג</strong>
             </div>
           ))}
         </div>
       )}
     </>
+  );
+}
+
+/** "40 kg ← 50 kg · +10 kg since the start" for the selected exercise. */
+function GainSummary({ points }: { points: { weight: number }[] }) {
+  if (!points.length) return null;
+  const first = points[0].weight, last = points[points.length - 1].weight;
+  if (points.length === 1) return <div className="gain muted small">משקל התחלה: {first} ק״ג. אחרי האימון הבא תראה כמה התקדמת.</div>;
+  const diff = round(last - first, 1);
+  return (
+    <div className="gain">
+      <span className="small muted">התחלה <strong className="gain-num">{first}</strong> ק״ג ← עכשיו <strong className="gain-num">{last}</strong> ק״ג</span>
+      <span className={'gain-badge ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : '')}>
+        {diff > 0 ? <><span dir="ltr">+{diff}</span> ק״ג מההתחלה 💪</> : diff < 0 ? <><span dir="ltr">{diff}</span> ק״ג מההתחלה</> : 'אותו משקל כמו בהתחלה'}
+      </span>
+    </div>
   );
 }
