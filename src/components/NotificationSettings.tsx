@@ -19,7 +19,17 @@ export default function NotificationSettings() {
   /** Notifications are on for the account, but this device isn't registered (e.g. after signing out here). */
   const notHere = enabled && onDevice === false;
 
-  useEffect(() => { deviceSubscribed().then(setOnDevice); }, []);
+  // Already allowed on this phone and on for the account: register silently instead of asking to switch it on.
+  useEffect(() => {
+    (async () => {
+      let here = await deviceSubscribed();
+      if (!here && enabled && support.ok && Notification.permission === 'granted') {
+        try { await enablePushOnDevice(user!.id); here = true; } catch { /* the notice below explains */ }
+      }
+      setOnDevice(here);
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
 
   async function turnOn() {
     setBusy(true); setMsg(null);
@@ -85,6 +95,7 @@ export default function NotificationSettings() {
         </p>
       )}
 
+      {enabled && onDevice === true && <p className="good small" style={{ margin: 0 }}>📱 המכשיר הזה מקבל התראות ✓</p>}
       {notHere && support.ok && (
         <p className="notice" style={{ margin: 0 }}>📱 ההתראות פעילות בחשבון, אבל המכשיר הזה עוד לא רשום (למשל אחרי התנתקות). הדלק את המתג כדי לקבל התראות גם כאן.</p>
       )}
