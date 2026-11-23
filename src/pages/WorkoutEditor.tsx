@@ -36,12 +36,19 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
     saveDraft(user.id, { workout: w, startedAt: started.current, updatedAt: Date.now() });
   }, [w, isNew, user]);
 
-  /** The sets from the most recent previous workout containing this exercise. */
+  /**
+   * The completed sets (reps and weight) from the most recent earlier workout that did this exercise.
+   * Workouts where none of its sets were completed are skipped.
+   */
   const lastSets = (name: string): SetEntry[] | undefined => {
-    const prev = [...workouts.rows]
-      .filter((x) => x.id !== id && x.exercises.some((e) => e.name === name))
-      .sort((a, b) => b.date.localeCompare(a.date))[0];
-    return prev?.exercises.find((e) => e.name === name)?.sets;
+    const earlier = [...workouts.rows]
+      .filter((x) => x.id !== id)
+      .sort((a, b) => b.date.localeCompare(a.date) || (b.created_at ?? '').localeCompare(a.created_at ?? ''));
+    for (const wk of earlier) {
+      const done = wk.exercises.find((e) => e.name === name)?.sets.filter((x) => x.done);
+      if (done?.length) return done;
+    }
+    return undefined;
   };
 
   useEffect(() => {
@@ -61,7 +68,11 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
       const prev = lastSets(pe.name);
       return {
         name: pe.name,
-        sets: Array.from({ length: pe.sets }, (_, i) => ({ reps: pe.reps, weight: prev?.[i]?.weight ?? prev?.[0]?.weight ?? 0, done: false })),
+        // Same reps and weight as last time, set by set; extra sets repeat the last one; first time uses the program.
+        sets: Array.from({ length: pe.sets }, (_, i) => {
+          const from = prev?.[i] ?? prev?.[prev.length - 1];
+          return { reps: from?.reps ?? pe.reps, weight: from?.weight ?? 0, done: false };
+        }),
       };
     });
     setW({
