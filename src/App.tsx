@@ -23,6 +23,7 @@ import ExerciseLibrary from './pages/ExerciseLibrary';
 import WorkoutView from './pages/WorkoutView';
 import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
+import ConnectionBanner from './components/ConnectionBanner';
 
 const TABS = [
   { key: '', label: 'בית', icon: '🏠' },
@@ -78,7 +79,7 @@ function AdminShell() {
         <span className="chip tag-admin">🛡️ מנהל</span>
         <ThemeToggle />
       </header>
-      <main className="content">{page}</main>
+      <main className="content"><ConnectionBanner />{page}</main>
       <nav className="tabbar">
         {ADMIN_TABS.map((t) => (
           <a key={t.key} href={'#/' + t.key} className={tab === t.key ? 'active' : ''}>
@@ -142,7 +143,7 @@ function UserShell() {
         <ThemeToggle />
         <button className="icon-btn" onClick={() => navigate('/settings')} aria-label="הגדרות">⚙️</button>
       </header>
-      <main className="content">{page}</main>
+      <main className="content"><ConnectionBanner />{page}</main>
       <nav className="tabbar">
         {TABS.map((t) => (
           <a key={t.key} href={'#/' + t.key} className={section === t.key ? 'active' : ''}>

@@ -1,48 +1,41 @@
-import { useCallback, useEffect, useState } from 'react';
-import { deleteRow, listRows, saveRow } from './db';
+import { useCallback, useEffect, useSyncExternalStore } from 'react';
+import { deleteRow } from './db';
 import { useAuth } from './auth';
 import type { BaseRow, TableName } from './types';
+import { entryFor, errorListeners, isStale, load, saveToTable, set, Snapshot } from './tableStore';
 
-/** Loads a table for the current user and exposes save/remove that keep local state in sync. */
+export { refreshTables, saveToTable, clearTables } from './tableStore';
+
+const EMPTY: Snapshot = { rows: [], loading: true, error: null };
+
+/** Rows of one table for the signed-in user, with save/remove that update every screen at once. */
 export function useTable<T extends BaseRow>(table: TableName) {
   const { user } = useAuth();
-  const [rows, setRows] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const e = user ? entryFor(user.id, table) : null;
 
-  const reload = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      setRows(await listRows<T>(user.id, table));
-      setError(null);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, [user, table]);
+  const snap = useSyncExternalStore(
+    useCallback((f: () => void) => {
+      if (!e) return () => {};
+      e.subs.add(f);
+      return () => { e.subs.delete(f); errorListeners.forEach((g) => g()); };
+    }, [e]),
+    () => (e ? e.snap : EMPTY),
+  );
 
-  useEffect(() => { reload(); }, [reload]);
+  useEffect(() => { if (e && (isStale(e) || e.snap.error)) load(e); }, [e]);
+
+  const reload = useCallback(async () => { if (e) { e.loadedAt = 0; await load(e); } }, [e]);
 
   const save = useCallback(async (row: Partial<T>) => {
     if (!user) throw new Error('not signed in');
-    const saved = await saveRow<T>(user.id, table, row);
-    setRows((prev) => {
-      const i = prev.findIndex((r) => r.id === saved.id);
-      if (i < 0) return [...prev, saved];
-      const next = [...prev];
-      next[i] = { ...next[i], ...saved };
-      return next;
-    });
-    return saved;
+    return saveToTable<T>(user.id, table, row);
   }, [user, table]);
 
   const remove = useCallback(async (id: string) => {
-    if (!user) return;
+    if (!user || !e) return;
     await deleteRow(user.id, table, id);
-    setRows((prev) => prev.filter((r) => r.id !== id));
-  }, [user, table]);
+    set(e, { rows: e.snap.rows.filter((r) => r.id !== id) });
+  }, [user, table, e]);
 
-  return { rows, loading, error, save, remove, reload };
+  return { rows: snap.rows as T[], loading: snap.loading, error: snap.error, save, remove, reload };
 }

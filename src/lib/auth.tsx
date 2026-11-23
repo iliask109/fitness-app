@@ -3,6 +3,7 @@ import { supabase } from './supabase';
 import { checkIsAdmin, isDemoBanned, recordDemoLogin } from './admin';
 import { saveRow } from './db';
 import { disablePushOnDevice } from './push';
+import { clearTables } from './tableStore';
 
 export interface AppUser { id: string; email: string }
 
@@ -124,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setMustSetPassword(false);
       // This device stops getting the signed-out user's reminders.
       if (user) await disablePushOnDevice(user.id);
+      clearTables();
       if (!supabase) { localStorage.removeItem(DEMO_KEY); setUser(null); return; }
       await supabase.auth.signOut();
     },

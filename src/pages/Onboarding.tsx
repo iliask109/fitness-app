@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../lib/auth';
-import { listRows, saveRow } from '../lib/db';
+import { listRows } from '../lib/db';
+import { saveToTable } from '../lib/tableStore';
 import type { BodyWeight, Profile } from '../lib/types';
 import { todayISO } from '../lib/utils';
 import {
@@ -82,7 +83,7 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
         // Saved before the profile: saving the profile switches to the home screen, which must already see it.
         const today = todayISO();
         const existing = (await listRows<BodyWeight>(user!.id, 'body_weights')).find((r) => r.date === today);
-        await saveRow<BodyWeight>(user!.id, 'body_weights', { id: existing?.id, date: today, weight: Number(weight) });
+        await saveToTable<BodyWeight>(user!.id, 'body_weights', { id: existing?.id, date: today, weight: Number(weight) });
       }
       await save({
         height_cm: Math.round(Number(height)),
