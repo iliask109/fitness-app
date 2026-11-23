@@ -28,7 +28,7 @@ export default function Workouts() {
   const styles = useMemo(() => new Map(sorted.map((w) => [w.id, styleOf(w)])), [sorted]);
   const perDay = useMemo(() => { const m = new Map<string, number>(); for (const w of rows) m.set(w.date, (m.get(w.date) ?? 0) + 1); return m; }, [rows]);
   const groups = useMemo(() => new Map(sorted.map((w) => [w.id, groupName(w, programs.rows)])), [sorted, programs.rows]);
-  /** Filter chips: the program's day names first (in order, even with no workouts yet), then any other names used. */
+  /** Filter chips for workouts actually done: the program's day names first (in program order), then any other names used. */
   const nameChips = useMemo(() => {
     const counts = new Map<string, number>();
     for (const w of sorted) if (!date || w.date === date) counts.set(groups.get(w.id)!, (counts.get(groups.get(w.id)!) ?? 0) + 1);
@@ -39,8 +39,8 @@ export default function Workouts() {
       const sample = sorted.find((w) => groups.get(w.id) === n);
       const st = day ? dayStyle(day) : sample ? styles.get(sample.id)! : dayStyle({ name: n, exercises: [] });
       return { name: n, count: counts.get(n) ?? 0, style: st, fromProgram: !!day };
-    });
-  }, [sorted, groups, programs.rows, styles, date]);
+    }).filter((c) => c.count > 0 || c.name === name); // keep a selected chip so it can be cleared
+  }, [sorted, groups, programs.rows, styles, date, name]);
 
   const shown = sorted.filter((w) => (!date || w.date === date) && (!name || groups.get(w.id) === name));
   const filtering = !!date || !!name;
@@ -69,7 +69,7 @@ export default function Workouts() {
           <div className="chips" role="group" aria-label="סינון לפי שם האימון">
             <button className={'chip btn-chip' + (!name ? ' selected' : '')} onClick={() => setName(null)}>הכול ({sorted.filter((w) => !date || w.date === date).length})</button>
             {nameChips.map((c) => (
-              <button key={c.name} className={'chip btn-chip' + (name === c.name ? ' selected' : '') + (c.count ? '' : ' empty')}
+              <button key={c.name} className={'chip btn-chip' + (name === c.name ? ' selected' : '')}
                 onClick={() => setName(name === c.name ? null : c.name)} title={c.fromProgram ? 'מהתוכנית שלך' : 'שם שנתת לאימון'}>
                 {DAY_STYLES[c.style].icon} {c.name} ({c.count})
               </button>
