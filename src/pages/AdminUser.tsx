@@ -133,7 +133,7 @@ export default function AdminUser({ id }: { id: string }) {
             {w.exercises.map((ex, i) => (
               <div key={i} className="small">
                 <strong>{ex.name}:</strong>{' '}
-                <span className="muted">{ex.sets.filter((s) => s.done).map((s) => `${s.weight}×${s.reps}`).join(', ') || 'לא הושלמו סטים'}</span>
+                <span className="muted" dir={ex.sets.some((s) => s.done) ? 'ltr' : undefined}>{ex.sets.filter((s) => s.done).map((s) => `${s.weight}×${s.reps}`).join(', ') || 'לא הושלמו סטים'}</span>
               </div>
             ))}
             {w.notes && <div className="muted small">💬 {w.notes}</div>}

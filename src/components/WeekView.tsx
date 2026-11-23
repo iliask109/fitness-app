@@ -111,7 +111,7 @@ export default function WeekView({ workouts, goal, program }: { workouts: Workou
               const done = ex.sets.filter((s) => s.done);
               return (
                 <div key={i} className="small">
-                  {ex.name} <span className="muted">· {done.length ? done.map((s) => (s.weight ? `${s.weight}×${s.reps}` : `${s.reps}`)).join(', ') : 'לא הושלמו סטים'}</span>
+                  {ex.name} <span className="muted">· {done.length ? <span dir="ltr">{done.map((s) => (s.weight ? `${s.weight}×${s.reps}` : `${s.reps}`)).join(', ')}</span> : 'לא הושלמו סטים'}</span>
                 </div>
               );
             })}
