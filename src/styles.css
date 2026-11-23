@@ -314,3 +314,12 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
   border: 2px solid var(--border); background: var(--bg); color: var(--text);
 }
 .weekday-row button.on { background: var(--primary); border-color: var(--primary); color: var(--primary-text); }
+
+/* one program at a time: everything else collapsed and blurred */
+.confirm-card { border: 2px solid color-mix(in srgb, var(--red) 40%, transparent) !important; }
+.locked-area { margin-top: 6px; }
+.locked-note { background: var(--card); border-radius: 16px; padding: 10px 14px; color: var(--muted); box-shadow: 0 2px 0 var(--border); }
+.locked-list { display: flex; flex-direction: column; gap: 6px; filter: blur(2.5px) grayscale(.4); opacity: .55; pointer-events: none; user-select: none; }
+.locked-row { display: flex; flex-direction: column; gap: 4px; background: var(--card); border-radius: 16px; padding: 8px 12px; }
+.locked-row .style-chip { font-size: 11px; padding: 2px 8px; }
+@media (prefers-reduced-motion: no-preference) { .locked-list { transition: filter .3s, opacity .3s; } }

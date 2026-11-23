@@ -12,6 +12,8 @@ export default function ProgramEditor({ id }: { id: string }) {
 
   useEffect(() => {
     if (p || programs.loading) return;
+    // One program at a time: a new one only when there is none.
+    if (isNew && programs.rows.length) { navigate('/programs'); return; }
     if (isNew) return setP({ id: crypto.randomUUID(), name: 'תוכנית חדשה', days: [{ name: 'יום 1', exercises: [] }] });
     const found = programs.rows.find((x) => x.id === id);
     if (found) setP(structuredClone(found)); else navigate('/programs');
