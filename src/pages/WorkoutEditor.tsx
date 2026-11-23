@@ -14,11 +14,11 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
   const programs = useTable<Program>('programs');
   const [w, setW] = useState<Workout | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [timerKey, setTimerKey] = useState(0);
   const [restSec, setRestSec] = useState(90);
   const [openIdx, setOpenIdx] = useState<number | null | undefined>(undefined);
   const started = useRef(Date.now());
-  const isNew = id === 'new';
   const { user } = useAuth();
   /** An unfinished workout from earlier, offered when starting a new one. */
   const [pendingDraft, setPendingDraft] = useState<WorkoutDraft | null>(null);
@@ -32,9 +32,9 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
 
   // Keep an unfinished new workout on the device after every change (once a set is done).
   useEffect(() => {
-    if (!isNew || !w || !user || !hasProgress(w)) return;
+    if (!w || !user || !hasProgress(w)) return;
     saveDraft(user.id, { workout: w, startedAt: started.current, updatedAt: Date.now() });
-  }, [w, isNew, user]);
+  }, [w, user]);
 
   /**
    * The completed sets (reps and weight) from the most recent earlier workout that did this exercise.
@@ -66,12 +66,6 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
 
   useEffect(() => {
     if (w || workouts.loading || programs.loading) return;
-    if (!isNew) {
-      const found = workouts.rows.find((x) => x.id === id);
-      setW(found ? structuredClone(found) : null);
-      if (!found) navigate('/workouts');
-      return;
-    }
     const draft = user ? loadDraft(user.id) : null;
     if (draft && query.get('resume')) { resume(draft); return; }
     if (draft) setPendingDraft(draft);
@@ -136,29 +130,24 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
 
   async function save() {
     setSaving(true);
+    setSaveError(null);
     try {
-      const duration = isNew ? Math.max(1, Math.round((Date.now() - started.current) / 60000)) : w!.duration_min;
+      const duration = Math.max(1, Math.round((Date.now() - started.current) / 60000));
       await workouts.save({ ...w!, duration_min: duration });
-      if (isNew && user) clearDraft(user.id);
+      if (user) clearDraft(user.id);
       navigate('/workouts');
     } catch (e) {
-      alert('שמירה נכשלה: ' + (e as Error).message);
+      // The workout stays on the device as a draft, so nothing is lost; say so.
+      setSaveError(navigator.onLine === false
+        ? 'אין חיבור לאינטרנט. האימון שמור בטלפון, אפשר לנסות לשמור שוב כשהחיבור יחזור.'
+        : 'השמירה נכשלה: ' + (e as Error).message + '. האימון שמור בטלפון, נסה שוב.');
       setSaving(false);
     }
   }
 
-  async function remove() {
-    if (!confirm('למחוק את האימון?')) return;
-    await workouts.remove(w!.id);
-    navigate('/workouts');
-  }
-
   return (
     <div className="stack">
-      <div className="row between">
-        <a href="#/workouts" className="muted">→ חזרה</a>
-        {!isNew && <button className="btn danger small" onClick={remove}>מחיקה</button>}
-      </div>
+      <a href="#/workouts" className="muted">→ חזרה</a>
       {pendingDraft && (
         <div className="card resume-card stack tight" role="region" aria-label="אימון שלא הסתיים">
           <strong>⏸️ יש לך אימון שלא הסתיים: {pendingDraft.workout.name}</strong>
@@ -276,8 +265,9 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
       <label>הערות<textarea rows={2} value={w.notes ?? ''} onChange={(e) => update((d) => { d.notes = e.target.value; })} /></label>
 
       <div className="muted small">נפח כולל: {Math.round(workoutVolume(w)).toLocaleString()} ק״ג</div>
+      {saveError && <p className="notice" style={{ margin: 0 }}>{saveError}</p>}
       <button className="btn primary big" onClick={save} disabled={saving || w.exercises.length === 0}>
-        {saving ? 'שומר…' : isNew ? 'סיום ושמירת אימון' : 'שמירת שינויים'}
+        {saving ? 'שומר…' : 'סיום ושמירת אימון'}
       </button>
 
       {timerKey > 0 && <div className="timer-spacer" />}

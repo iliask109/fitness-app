@@ -13,8 +13,6 @@ export function addDays(iso: string, n: number) {
 export function formatDate(iso: string, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('he-IL', opts);
 }
-/** Estimated one-rep max (Epley). */
-export const e1rm = (weight: number, reps: number) => (reps <= 1 ? weight : weight * (1 + reps / 30));
 
 export function workoutVolume(w: Workout) {
   return w.exercises.reduce(
