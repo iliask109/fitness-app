@@ -15,11 +15,18 @@ export interface Workout extends BaseRow {
   notes?: string | null;
   duration_min?: number | null;
   exercises: WorkoutExercise[];
+  /** Set when the workout was started from a program day; drives "today's workout". */
+  program_id?: string | null;
+  program_day?: number | null;
 }
 
 export interface ProgramExercise { name: string; sets: number; reps: number }
 export interface ProgramDay { name: string; exercises: ProgramExercise[] }
-export interface Program extends BaseRow { name: string; days: ProgramDay[] }
+/** A day index into Program.days, or a rest day. */
+export type ScheduleSlot = number | 'rest';
+/** "cycle": repeat the pattern day after day. "weekly": train on fixed weekdays (0 = Sunday), cycling through the days. */
+export type ProgramSchedule = { kind: 'cycle'; pattern: ScheduleSlot[] } | { kind: 'weekly'; weekdays: number[] };
+export interface Program extends BaseRow { name: string; days: ProgramDay[]; schedule?: ProgramSchedule | null }
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 export interface Meal extends BaseRow {
@@ -49,6 +56,8 @@ export interface Profile extends BaseRow {
   equipment?: string[] | null;
   /** Set when the training profile was completed; until then the app shows the onboarding page. */
   onboarded_at?: string | null;
+  /** The program "today's workout" follows. */
+  active_program_id?: string | null;
   calorie_goal: number;
   protein_goal: number;
   carbs_goal: number;

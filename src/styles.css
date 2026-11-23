@@ -278,3 +278,13 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .code-input { font-size: 28px; letter-spacing: .4em; text-align: center; font-variant-numeric: tabular-nums; }
 .check-row { flex-direction: row; align-items: center; gap: 8px; color: var(--text); }
 .check-row input { width: auto; }
+
+/* today's workout */
+.today-card { --accent: var(--primary); border: 2px solid color-mix(in srgb, var(--accent) 40%, transparent) !important;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, var(--card)), var(--card) 60%); }
+.today-label { font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--accent); }
+.today-title { font-size: 20px; display: block; }
+.today-start { background: var(--accent); border-color: var(--accent); color: var(--on-color); }
+.today-rest { display: flex; gap: 14px; align-items: center; }
+.today-big-icon { font-size: 40px; }
+.active-chip { background: color-mix(in srgb, var(--amber) 22%, transparent); font-weight: 700; }

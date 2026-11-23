@@ -41,7 +41,10 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
         sets: Array.from({ length: pe.sets }, (_, i) => ({ reps: pe.reps, weight: prev?.[i]?.weight ?? prev?.[0]?.weight ?? 0, done: false })),
       };
     });
-    setW({ id: crypto.randomUUID(), date: todayISO(), name: day ? `${day.name}` : 'אימון', exercises, notes: '' });
+    setW({
+      id: crypto.randomUUID(), date: todayISO(), name: day ? `${day.name}` : 'אימון', exercises, notes: '',
+      program_id: day ? prog!.id : null, program_day: day ? Number(query.get('day') ?? 0) : null,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workouts.loading, programs.loading]);
 

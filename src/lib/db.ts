@@ -30,9 +30,17 @@ export async function listRows<T extends BaseRow>(userId: string, table: TableNa
 export async function saveRow<T extends BaseRow>(userId: string, table: TableName, row: Partial<T>): Promise<T> {
   const full = { ...row, id: row.id ?? crypto.randomUUID(), user_id: userId } as T;
   if (supabase) {
-    const { data, error } = await supabase.from(table).upsert(full).select().single();
-    if (error) throw error;
-    return normalize(data) as T;
+    const payload = { ...full } as unknown as Record<string, unknown>;
+    // If a column from a newer update isn't in the database yet, save without it instead of failing.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const { data, error } = await supabase.from(table).upsert(payload).select().single();
+      if (!error) return normalize(data) as T;
+      const missing = /Could not find the '(\w+)' column/.exec(error.message)?.[1];
+      if (!missing || !(missing in payload)) throw error;
+      console.warn(`Column ${table}.${missing} is missing; run the latest supabase/update-*.sql. Saved without it.`);
+      delete payload[missing];
+    }
+    throw new Error('save failed');
   }
   const rows = readLocal<T>(userId, table);
   const i = rows.findIndex((r) => r.id === full.id);

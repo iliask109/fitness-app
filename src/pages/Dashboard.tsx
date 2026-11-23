@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTable } from '../lib/useTable';
 import { useProfile } from '../lib/useProfile';
-import type { BodyWeight, Workout } from '../lib/types';
+import type { BodyWeight, Program, Workout } from '../lib/types';
+import TodayCard from '../components/TodayCard';
+import { activeProgram } from '../lib/schedule';
 import { formatDate, workoutVolume } from '../lib/utils';
 import WeekView from '../components/WeekView';
 import WeightDialog from '../components/WeightDialog';
@@ -27,6 +29,7 @@ export default function Dashboard() {
   const { profile } = useProfile();
   const workouts = useTable<Workout>('workouts');
   const weights = useTable<BodyWeight>('body_weights');
+  const programs = useTable<Program>('programs');
   const [weightOpen, setWeightOpen] = useState(false);
 
   const sorted = useMemo(() => [...workouts.rows].sort((a, b) => b.date.localeCompare(a.date)), [workouts.rows]);
@@ -43,6 +46,8 @@ export default function Dashboard() {
           <span className="muted">{now.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </div>
       </div>
+
+      {!programs.loading && !workouts.loading && <TodayCard program={activeProgram(programs.rows, workouts.rows, profile)} workouts={workouts.rows} />}
 
       <WeekView workouts={workouts.rows} goal={profile.training_days || 3} />
 

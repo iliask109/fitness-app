@@ -18,6 +18,7 @@ create table if not exists public.profiles (
   training_locations jsonb,
   equipment jsonb,
   onboarded_at timestamptz,
+  active_program_id text,
   calorie_goal int not null default 2200,
   protein_goal int not null default 140,
   carbs_goal int not null default 250,
@@ -34,7 +35,9 @@ create table if not exists public.workouts (
   name text not null,
   notes text,
   duration_min int,
-  exercises jsonb not null default '[]'
+  exercises jsonb not null default '[]',
+  program_id text,
+  program_day int
 );
 
 create table if not exists public.programs (
@@ -42,7 +45,8 @@ create table if not exists public.programs (
   user_id uuid not null default auth.uid() references auth.users on delete cascade,
   created_at timestamptz not null default now(),
   name text not null,
-  days jsonb not null default '[]'
+  days jsonb not null default '[]',
+  schedule jsonb
 );
 
 create table if not exists public.meals (

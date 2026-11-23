@@ -4,13 +4,20 @@ import { PROGRAM_TEMPLATES } from '../lib/templates';
 import { DAY_STYLES, dayStyle } from '../lib/dayStyle';
 import type { Program } from '../lib/types';
 import DayCard from '../components/DayCard';
+import { useProfile } from '../lib/useProfile';
+import { activeProgram, describeSchedule } from '../lib/schedule';
+import type { Workout } from '../lib/types';
 
 export default function Programs() {
   const { rows, loading, save } = useTable<Program>('programs');
+  const workouts = useTable<Workout>('workouts');
+  const me = useProfile();
+  const active = activeProgram(rows, workouts.rows, me.profile);
 
   async function addTemplate(i: number) {
     const t = PROGRAM_TEMPLATES[i];
-    const p = await save({ name: t.name, days: structuredClone(t.days) });
+    const p = await save({ name: t.name, days: structuredClone(t.days), schedule: t.schedule });
+    await me.save({ active_program_id: p.id });
     navigate(`/programs/${p.id}`);
   }
 
@@ -29,11 +36,17 @@ export default function Programs() {
       {rows.map((p) => (
         <section key={p.id} className="program-section">
           <div className="row between">
-            <div>
-              <h3 style={{ margin: 0 }}>{p.name}</h3>
-              <span className="muted small">{p.days.length} ימי אימון</span>
+            <div className="stack tight" style={{ gap: 2, minWidth: 0 }}>
+              <div className="row gap">
+                <h3 style={{ margin: 0 }}>{p.name}</h3>
+                {active?.id === p.id && <span className="chip active-chip">⭐ התוכנית הפעילה</span>}
+              </div>
+              <span className="muted small">📅 {describeSchedule(p)}</span>
             </div>
-            <a className="btn small" href={`#/programs/${p.id}`}>✏️ עריכה</a>
+            <div className="row gap">
+              {active?.id !== p.id && <button className="btn small" onClick={() => me.save({ active_program_id: p.id })}>⭐ הפעלה</button>}
+              <a className="btn small" href={`#/programs/${p.id}`}>✏️ עריכה</a>
+            </div>
           </div>
           <div className="day-cards">
             {p.days.map((d, i) => <DayCard key={i} day={d} startHref={`#/workouts/new?program=${p.id}&day=${i}`} />)}
