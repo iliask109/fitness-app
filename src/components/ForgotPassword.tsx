@@ -42,7 +42,7 @@ export default function ForgotPassword({ initialEmail, onBack }: { initialEmail:
   async function verify(e: FormEvent) {
     e.preventDefault();
     const clean = code.replace(/\D/g, '');
-    if (clean.length < 6) { setError('הקוד מכיל 6 ספרות'); return; }
+    if (clean.length < 6) { setError('נא להזין את כל הקוד מהמייל'); return; }
     setBusy(true);
     setError(null);
     try {
@@ -62,7 +62,7 @@ export default function ForgotPassword({ initialEmail, onBack }: { initialEmail:
           <p className="muted small" style={{ margin: 0 }}>נשלח לך מייל עם קוד זמני. הקוד בתוקף לשעה, ואחרי שתזין אותו תבחר סיסמה חדשה.</p>
         ) : (
           <p className="muted small" style={{ margin: 0 }}>
-            אם יש חשבון עם הכתובת <span dir="ltr">{email}</span>, נשלח אליו מייל עם קוד בן 6 ספרות. הקוד בתוקף לשעה.
+            אם יש חשבון עם הכתובת <span dir="ltr">{email}</span>, נשלח אליו מייל עם קוד זמני. הקוד בתוקף לשעה.
             לא מוצא? כדאי לבדוק גם בתיקיית הספאם.
           </p>
         )}
@@ -77,8 +77,8 @@ export default function ForgotPassword({ initialEmail, onBack }: { initialEmail:
         <form onSubmit={verify} className="stack" noValidate>
           {demoCode && <p className="notice" style={{ margin: 0 }}>מצב הדגמה (אין שליחת מיילים): הקוד הוא <strong dir="ltr">{demoCode}</strong></p>}
           <label>קוד מהמייל
-            <input id="reset-code" className="code-input" inputMode="numeric" autoComplete="one-time-code" dir="ltr" maxLength={10}
-              placeholder="••••••" value={code} onChange={(e) => { setCode(e.target.value.replace(/\D/g, '')); setError(null); }} autoFocus />
+            <input id="reset-code" className="code-input" inputMode="numeric" autoComplete="one-time-code" dir="ltr"
+              placeholder="••••••••" value={code} onChange={(e) => { setCode(e.target.value.replace(/\D/g, '').slice(0, 10)); setError(null); }} autoFocus />
           </label>
           <button className="btn primary" disabled={busy}>{busy ? 'בודק…' : 'אימות והמשך'}</button>
           <div className="row between small">
