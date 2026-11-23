@@ -5,6 +5,7 @@ import type { Program, SetEntry, Workout, WorkoutExercise } from '../lib/types';
 import { todayISO, workoutVolume, e1rm, round } from '../lib/utils';
 import ExercisePicker from '../components/ExercisePicker';
 import RestTimer from '../components/RestTimer';
+import ExerciseInfo from '../components/ExerciseInfo';
 
 export default function WorkoutEditor({ id, query }: { id: string; query: URLSearchParams }) {
   const workouts = useTable<Workout>('workouts');
@@ -103,7 +104,7 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
         return (
           <div key={ei} className="card exercise">
             <div className="row between">
-              <strong>{ex.name}</strong>
+              <span className="row gap"><strong>{ex.name}</strong><ExerciseInfo name={ex.name} icon /></span>
               <button className="icon-btn" aria-label="הסרת תרגיל"
                 onClick={() => update((d) => { d.exercises.splice(ei, 1); })}>🗑️</button>
             </div>

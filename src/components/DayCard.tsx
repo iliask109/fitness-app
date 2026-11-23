@@ -1,5 +1,6 @@
 import type { ProgramDay } from '../lib/types';
 import { DAY_STYLES, dayStyle, estimateMinutes } from '../lib/dayStyle';
+import ExerciseInfo from './ExerciseInfo';
 
 /** One training day as a colored card: style badge, length estimate, exercises and a start button. */
 export default function DayCard({ day, startHref }: { day: ProgramDay; startHref?: string }) {
@@ -17,7 +18,7 @@ export default function DayCard({ day, startHref }: { day: ProgramDay; startHref
       <span className="muted small">{day.exercises.length} תרגילים{day.exercises.length > 0 && ` · כ-${estimateMinutes(day)} דק׳`}</span>
       <ul className="day-card-list">
         {shown.map((e, i) => (
-          <li key={i}><span>{e.name}</span><span className="muted" dir="ltr">{e.sets}×{e.reps}</span></li>
+          <li key={i}><span><ExerciseInfo name={e.name} /></span><span className="muted" dir="ltr">{e.sets}×{e.reps}</span></li>
         ))}
         {more > 0 && <li className="muted">ועוד {more}…</li>}
         {day.exercises.length === 0 && <li className="muted">אין תרגילים עדיין</li>}

@@ -19,6 +19,7 @@ import { syncDeviceSubscription } from './lib/push';
 import AdminAccount from './pages/AdminAccount';
 import AdminTemplates from './pages/AdminTemplates';
 import AdminTemplateEditor from './pages/AdminTemplateEditor';
+import ExerciseLibrary from './pages/ExerciseLibrary';
 import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
 
@@ -124,6 +125,7 @@ function UserShell() {
     case 'nutrition': page = <Nutrition />; break;
     case 'progress': page = <Progress />; break;
     case 'settings': page = <Settings />; break;
+    case 'exercises': page = <ExerciseLibrary />; break;
     case 'profile-setup': page = <Onboarding editing profile={me.profile} save={me.save} onDone={() => { me.reload(); navigate('/settings'); }} />; break;
     default: page = <Dashboard />;
   }

@@ -2,6 +2,7 @@ import type { Program, Workout } from '../lib/types';
 import { DAY_STYLES, dayStyle, estimateMinutes } from '../lib/dayStyle';
 import { planToday, whenLabel } from '../lib/schedule';
 import { todayISO } from '../lib/utils';
+import ExerciseInfo from './ExerciseInfo';
 
 /** "Today's workout" from the active program: what to train, or a rest day, and what comes next. */
 export default function TodayCard({ program, workouts }: { program: Program | null; workouts: Workout[] }) {
@@ -59,7 +60,7 @@ export default function TodayCard({ program, workouts }: { program: Program | nu
         </div>
       </div>
       <div className="chips">
-        {day.exercises.map((e, i) => <span key={i} className="chip">{e.name}</span>)}
+        {day.exercises.map((e, i) => <span key={i} className="chip"><ExerciseInfo name={e.name} /></span>)}
       </div>
       <a className="btn big today-start" href={`#/workouts/new?program=${program.id}&day=${plan.dayIndex}`}>▶ התחלת האימון</a>
     </div>

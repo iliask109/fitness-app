@@ -359,3 +359,27 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .category-head:disabled { cursor: default; opacity: 1; }
 .template-category.collapsed .category-head { background: var(--card); border-radius: 20px; padding: 10px 12px; box-shadow: 0 2px 0 var(--border); opacity: .75; }
 .category-chevron { font-size: 18px; color: var(--muted); }
+
+/* exercise guides */
+.info-btn {
+  font: inherit; font-size: 16px; line-height: 1; width: 26px; height: 26px; border-radius: 50%; flex: none; cursor: pointer;
+  border: none; background: color-mix(in srgb, var(--blue) 15%, transparent); color: var(--blue);
+}
+.guide-link {
+  font: inherit; color: inherit; background: none; border: none; padding: 0; cursor: pointer; text-align: start;
+  text-decoration: underline dotted color-mix(in srgb, var(--muted) 70%, transparent); text-underline-offset: 3px;
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.guide h4 { margin: 0 0 4px; font-size: 14px; }
+.guide-muscles { background: var(--bg); border-radius: 14px; padding: 8px 12px; font-size: 14px; }
+.guide-block { display: flex; flex-direction: column; }
+.guide-steps, .guide-list { margin: 0; padding-inline-start: 22px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.55; }
+.guide-steps li::marker { color: var(--primary); font-weight: 700; }
+.guide-block.avoid .guide-list li::marker { color: var(--red); }
+.library-row {
+  font: inherit; color: var(--text); background: none; border: none; border-top: 1px solid var(--border);
+  padding: 10px 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; cursor: pointer; text-align: start;
+}
+.library-row:first-of-type { border-top: none; }
+.library-row > span:first-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.library-name { font-weight: 600; }

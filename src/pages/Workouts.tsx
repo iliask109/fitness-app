@@ -11,7 +11,10 @@ export default function Workouts() {
 
   return (
     <div className="stack">
-      <h2>האימונים שלי</h2>
+      <div className="row between">
+        <h2>האימונים שלי</h2>
+        <a className="btn small" href="#/exercises">📖 מדריך תרגילים</a>
+      </div>
       <div className="grid2">
         <a className="btn primary big" href="#/workouts/new">+ אימון חדש</a>
         <button className="btn blue big" onClick={() => setPicking(true)}>📋 תוכנית שמורה</button>
