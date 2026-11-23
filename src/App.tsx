@@ -20,6 +20,7 @@ import AdminAccount from './pages/AdminAccount';
 import AdminTemplates from './pages/AdminTemplates';
 import AdminTemplateEditor from './pages/AdminTemplateEditor';
 import ExerciseLibrary from './pages/ExerciseLibrary';
+import WorkoutView from './pages/WorkoutView';
 import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
 
@@ -120,7 +121,10 @@ function UserShell() {
   const [section = '', sub] = route.path;
   let page;
   switch (section) {
-    case 'workouts': page = sub ? <WorkoutEditor key={sub + "?" + route.query.toString()} id={sub} query={route.query} /> : <Workouts />; break;
+    // New workouts are edited; finished ones from the history are read-only.
+    case 'workouts': page = !sub ? <Workouts /> : sub === 'new'
+      ? <WorkoutEditor key={sub + "?" + route.query.toString()} id={sub} query={route.query} />
+      : <WorkoutView id={sub} />; break;
     case 'programs': page = sub ? <ProgramEditor id={sub} /> : <Programs />; break;
     case 'nutrition': page = <Nutrition />; break;
     case 'progress': page = <Progress />; break;
