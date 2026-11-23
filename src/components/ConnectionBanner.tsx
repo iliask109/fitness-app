@@ -1,20 +1,41 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
-import { failedTables, refreshTables, subscribeErrors } from '../lib/tableStore';
+import { useAuth } from '../lib/auth';
+import { failedTables, flushOutbox, pendingCount, refreshTables, subscribeErrors, subscribeOutbox } from '../lib/tableStore';
 
-/** Shown at the top when data could not be loaded, so an empty screen isn't mistaken for lost data. */
+/**
+ * Connection status at the top: offline (with how many changes wait to be sent), a failed load,
+ * or changes still waiting to be sent after the connection is back.
+ */
 export default function ConnectionBanner() {
+  const { user } = useAuth();
   const failed = useSyncExternalStore(subscribeErrors, () => failedTables().length);
+  const pending = useSyncExternalStore(subscribeOutbox, () => (user ? pendingCount(user.id) : 0));
   const [online, setOnline] = useState(() => navigator.onLine);
   useEffect(() => {
     const on = () => setOnline(true), off = () => setOnline(false);
     window.addEventListener('online', on); window.addEventListener('offline', off);
     return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); };
   }, []);
-  if (!failed && online) return null;
-  return (
-    <div className="conn-banner" role="alert">
-      <span>{online ? '⚠️ לא הצלחנו לטעון את הנתונים מהשרת.' : '📡 אין חיבור לאינטרנט. מה שמוצג אולי לא מעודכן.'}</span>
-      {online && <button className="btn small" onClick={() => refreshTables(true)}>נסה שוב</button>}
-    </div>
-  );
+
+  const waiting = pending ? ` ${pending === 1 ? 'שינוי אחד ממתין' : `${pending} שינויים ממתינים`} לסנכרון.` : '';
+  if (!online) {
+    return <div className="conn-banner offline" role="status">📡 אין חיבור לאינטרנט. אפשר להמשיך להתאמן, הכול נשמר בטלפון.{waiting}</div>;
+  }
+  if (failed) {
+    return (
+      <div className="conn-banner" role="alert">
+        <span>⚠️ לא הצלחנו לטעון את הנתונים מהשרת. מוצג מה שנשמר בטלפון.{waiting}</span>
+        <button className="btn small" onClick={() => { if (user) flushOutbox(user.id); refreshTables(true); }}>נסה שוב</button>
+      </div>
+    );
+  }
+  if (pending && user) {
+    return (
+      <div className="conn-banner" role="status">
+        <span>⏳{waiting}</span>
+        <button className="btn small" onClick={() => flushOutbox(user.id)}>סנכרון עכשיו</button>
+      </div>
+    );
+  }
+  return null;
 }

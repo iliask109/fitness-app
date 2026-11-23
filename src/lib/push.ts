@@ -19,8 +19,9 @@ export function pushSupport(): PushSupport {
   return { ok: true };
 }
 
+/** The build id in the URL makes each deploy install a fresh offline copy of the app. */
 export function registerServiceWorker() {
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch((e) => console.warn('service worker', e));
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register(`/sw.js?v=${__BUILD_ID__}`).catch((e) => console.warn('service worker', e));
 }
 
 function keyBytes(base64: string) {

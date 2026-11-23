@@ -41,6 +41,17 @@ const DEMO_RESET_KEY = 'fitlogix:demo-reset';
 /** Survives a refresh, so a recovery sign-in cannot skip choosing a new password by reloading. */
 const MUST_SET_KEY = 'fitlogix:must-set-password';
 const RESET_VALID_MS = 60 * 60 * 1000;
+const ADMIN_FLAG = (id: string) => `fitlogix:is-admin:${id}`;
+
+/** The user saved by Supabase on this device, used only while offline. */
+function savedUserWhenOffline(): AppUser | null {
+  if (navigator.onLine) return null;
+  try {
+    const key = Object.keys(localStorage).find((k) => /^sb-.*-auth-token$/.test(k));
+    const u = key && JSON.parse(localStorage.getItem(key)!)?.user;
+    return u?.id ? { id: u.id, email: u.email ?? '' } : null;
+  } catch { return null; }
+}
 
 function readFlag() {
   try { return localStorage.getItem(MUST_SET_KEY) === '1'; } catch { return false; }
@@ -62,7 +73,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAdmin(false);
     setAdminChecked(false);
     setAdminCheckError(undefined);
-    if (user) checkIsAdmin(user.id).then((r) => { setIsAdmin(r.admin); setAdminCheckError(r.error); setAdminChecked(true); });
+    if (user) checkIsAdmin(user.id).then((r) => {
+      // Offline the check fails; use the last known answer so an admin still gets the admin app.
+      let admin = r.admin;
+      try {
+        if (r.error) admin = localStorage.getItem(ADMIN_FLAG(user.id)) === '1';
+        else localStorage.setItem(ADMIN_FLAG(user.id), r.admin ? '1' : '0');
+      } catch { /* ignore */ }
+      setIsAdmin(admin); setAdminCheckError(r.error); setAdminChecked(true);
+    });
   }, [user?.id]);
 
   useEffect(() => {
@@ -76,9 +95,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     supabase.auth.getSession().then(({ data }) => {
       const u = data.session?.user;
-      setUser(u ? { id: u.id, email: u.email ?? '' } : null);
+      // Offline with an expired token the session can't be refreshed; keep the saved user so the app still opens.
+      setUser(u ? { id: u.id, email: u.email ?? '' } : savedUserWhenOffline());
       setLoading(false);
-    });
+    }).catch(() => { setUser(savedUserWhenOffline()); setLoading(false); });
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       // Arrived through the reset link in the email: require a new password before anything else.
       if (event === 'PASSWORD_RECOVERY') setMustSetPassword(true);

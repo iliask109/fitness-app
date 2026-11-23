@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
-import { deleteRow } from './db';
 import { useAuth } from './auth';
 import type { BaseRow, TableName } from './types';
-import { entryFor, errorListeners, isStale, load, saveToTable, set, Snapshot } from './tableStore';
+import { entryFor, errorListeners, isStale, load, removeFromTable, saveToTable, Snapshot } from './tableStore';
 
 export { refreshTables, saveToTable, clearTables } from './tableStore';
 
@@ -32,10 +31,9 @@ export function useTable<T extends BaseRow>(table: TableName) {
   }, [user, table]);
 
   const remove = useCallback(async (id: string) => {
-    if (!user || !e) return;
-    await deleteRow(user.id, table, id);
-    set(e, { rows: e.snap.rows.filter((r) => r.id !== id) });
-  }, [user, table, e]);
+    if (!user) return;
+    await removeFromTable(user.id, table, id);
+  }, [user, table]);
 
   return { rows: snap.rows as T[], loading: snap.loading, error: snap.error, save, remove, reload };
 }

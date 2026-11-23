@@ -2,6 +2,9 @@ import { useMemo, useState } from 'react';
 import { useTable } from '../lib/useTable';
 import ProgramPicker from '../components/ProgramPicker';
 import WorkoutCalendar from '../components/WorkoutCalendar';
+import { useSyncExternalStore } from 'react';
+import { useAuth } from '../lib/auth';
+import { pendingIds, subscribeOutbox } from '../lib/tableStore';
 import type { Program, Workout } from '../lib/types';
 import { formatDate, workoutVolume } from '../lib/utils';
 import { DAY_STYLES, DayStyleKey, dayStyle } from '../lib/dayStyle';
@@ -19,6 +22,9 @@ function groupName(w: Workout, programs: Program[]) {
 export default function Workouts() {
   const { rows, loading } = useTable<Workout>('workouts');
   const [picking, setPicking] = useState(false);
+  const { user } = useAuth();
+  const pendingKey = useSyncExternalStore(subscribeOutbox, () => (user ? [...pendingIds(user.id)].join(',') : ''));
+  const pending = new Set(pendingKey ? pendingKey.split(',') : []);
   const [showCalendar, setShowCalendar] = useState(false);
   const [date, setDate] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(null);
@@ -103,6 +109,7 @@ export default function Workouts() {
               <span className="chip">{sets} סטים</span>
               <span className="chip">{Math.round(workoutVolume(w)).toLocaleString()} ק״ג</span>
               {w.duration_min ? <span className="chip">{w.duration_min} דק׳</span> : null}
+              {pending.has(w.id) && <span className="chip pending-chip">⏳ ממתין לסנכרון</span>}
             </div>
           </a>
         );

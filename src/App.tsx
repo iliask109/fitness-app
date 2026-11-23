@@ -12,6 +12,7 @@ import Onboarding from './pages/Onboarding';
 import { useProfile } from './lib/useProfile';
 import { lazy, Suspense, useEffect } from 'react';
 import { syncDeviceSubscription } from './lib/push';
+import { startSync } from './lib/tableStore';
 import WorkoutView from './pages/WorkoutView';
 import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
@@ -105,6 +106,8 @@ function UserShell() {
   useEffect(() => {
     if (!me.loading && user) syncDeviceSubscription(user.id, remindersOn);
   }, [me.loading, user, remindersOn]);
+  // Send changes made offline (now, when the connection returns, and every minute).
+  useEffect(() => { if (user) startSync(user.id); }, [user]);
 
   if (me.loading && !me.profile.onboarded_at) return <div className="center muted">טוען…</div>;
   if (!me.profile.onboarded_at && !me.error) {

@@ -12,6 +12,7 @@ A Hebrew (RTL) fitness web app: training programs with a weekly schedule, workou
 - **Reminders**: push notifications at a chosen time on training days, or when no workout was done this week.
 - **Admin**: users (progress, block, delete, make admin) and the ready-made programs (add, edit, delete).
 - **Account**: password recovery by emailed code, change password, light/dark theme.
+- **Offline**: the app opens and works without internet (from the last loaded data); workouts and other changes made offline are saved on the device and sent when the connection returns.
 
 ## Run locally
 
@@ -71,4 +72,5 @@ GitHub Actions runs the type checks, tests and build on every push (`.github/wor
 - `src/lib/`: logic without UI: `db.ts` (Supabase or demo storage), `tableStore.ts` + `useTable.ts` (one shared copy of each table), `schedule.ts` (today's workout and the week plan), `reminders.ts` (who gets a reminder and what it says), `templates.ts`, `exerciseGuide.ts`.
 - `api/`: Vercel functions: `reminders.ts` (called by pg_cron), `test-push.ts`. `api/_lib/reminders.js` is generated from `src/lib/reminders.ts` by `npm run build:api` (part of `npm run build`).
 - `supabase/`: `setup.sql` (generated, new projects), the individual schema/update files, the reset-password email template.
-- `public/sw.js`: service worker that shows notifications (no caching).
+- `public/sw.js`: service worker: keeps the app files for offline use (pages network-first, `/assets/*` from `precache-manifest.json`, written by a plugin in `vite.config.ts`) and shows notifications. Supabase and `/api` are never cached.
+- Offline data: `src/lib/tableStore.ts` keeps a device copy of each table and an outbox of changes made offline, sent on reconnect, on app open and every minute.
