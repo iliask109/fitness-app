@@ -80,6 +80,24 @@ export function planToday(p: Program, workouts: Workout[], today: string): Today
   return r.train ? { kind: 'train', dayIndex: r.dayIndex } : { kind: 'rest', next: nextAfter(today, last) };
 }
 
+/**
+ * The plan for each day from today to `until`, assuming the user follows it: today and later days
+ * without a workout get "train <day>" or "rest". Today is skipped when a workout was already done.
+ */
+export function projectDays(p: Program, workouts: Workout[], today: string, until: string) {
+  const out: Record<string, { train: true; dayIndex: number } | { train: false }> = {};
+  if (!p.days.length) return out;
+  const s = scheduleOf(p);
+  let last: Last = lastProgramWorkout(p, workouts);
+  for (let date = today; date <= until; date = addDays(date, 1)) {
+    if (date === today && last?.date === today) continue;
+    const r = planFor(p, s, date, last);
+    out[date] = r;
+    if (r.train) last = { date, dayIndex: r.dayIndex };
+  }
+  return out;
+}
+
 /** The program the user follows: their explicit choice, else the one they trained from last, else the newest. */
 export function activeProgram(programs: Program[], workouts: Workout[], profile: Profile): Program | null {
   if (!programs.length) return null;

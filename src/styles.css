@@ -288,3 +288,19 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .today-rest { display: flex; gap: 14px; align-items: center; }
 .today-big-icon { font-size: 40px; }
 .active-chip { background: color-mix(in srgb, var(--amber) 22%, transparent); font-weight: 700; }
+
+/* planned days in the week chart */
+.week-bar { position: relative; display: flex; justify-content: center; }
+.week-bar.planned {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 2px dashed color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.week-bar-icon { font-size: 13px; margin-top: 4px; }
+.week-rest { width: 100%; text-align: center; font-size: 16px; opacity: .8; }
+.week-legend { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.week-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.week-legend i { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+.lg-done { background: var(--primary); }
+.lg-planned { border: 2px dashed var(--muted); }
+.planned-detail { border: 2px dashed color-mix(in srgb, var(--accent) 50%, transparent); }
+.planned-chip { background: color-mix(in srgb, var(--accent) 18%, transparent); font-weight: 700; }

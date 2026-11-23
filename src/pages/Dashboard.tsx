@@ -30,6 +30,7 @@ export default function Dashboard() {
   const workouts = useTable<Workout>('workouts');
   const weights = useTable<BodyWeight>('body_weights');
   const programs = useTable<Program>('programs');
+  const active = programs.loading ? null : activeProgram(programs.rows, workouts.rows, profile);
   const [weightOpen, setWeightOpen] = useState(false);
 
   const sorted = useMemo(() => [...workouts.rows].sort((a, b) => b.date.localeCompare(a.date)), [workouts.rows]);
@@ -47,9 +48,9 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {!programs.loading && !workouts.loading && <TodayCard program={activeProgram(programs.rows, workouts.rows, profile)} workouts={workouts.rows} />}
+      {!programs.loading && !workouts.loading && <TodayCard program={active} workouts={workouts.rows} />}
 
-      <WeekView workouts={workouts.rows} goal={profile.training_days || 3} />
+      <WeekView workouts={workouts.rows} goal={profile.training_days || 3} program={active} />
 
       <div className="grid2">
         <div className="card stat">
