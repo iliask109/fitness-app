@@ -29,7 +29,7 @@ export default function TodayCard({ program, workouts }: { program: Program | nu
       <div className="card today-card stack tight" style={{ '--accent': done ? 'var(--primary)' : 'var(--blue)' } as React.CSSProperties}>
         <div className="row between">
           <span className="today-label">האימון של היום</span>
-          <a className="muted small" href="#/programs">{program.name}</a>
+          <a className="muted small" href={`#/programs?focus=${program.id}`}>{program.name} · 📅 ימי אימון</a>
         </div>
         <div className="today-rest">
           <span className="today-big-icon">{done ? '✅' : '😴'}</span>
@@ -49,7 +49,7 @@ export default function TodayCard({ program, workouts }: { program: Program | nu
     <div className="card today-card stack tight" style={{ '--accent': style.color } as React.CSSProperties}>
       <div className="row between">
         <span className="today-label">האימון של היום</span>
-        <a className="muted small" href="#/programs">{program.name}</a>
+        <a className="muted small" href={`#/programs?focus=${program.id}`}>{program.name} · 📅 ימי אימון</a>
       </div>
       <div className="row gap">
         <span className="day-card-icon">{style.icon}</span>

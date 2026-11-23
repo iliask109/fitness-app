@@ -7,7 +7,8 @@ import { useProfile } from '../lib/useProfile';
 import { activeProgram, describeSchedule } from '../lib/schedule';
 import type { Workout } from '../lib/types';
 import WeekdayPicker from '../components/WeekdayPicker';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRoute } from '../lib/router';
 
 export default function Programs() {
   const { rows, loading, save } = useTable<Program>('programs');
@@ -15,6 +16,13 @@ export default function Programs() {
   const me = useProfile();
   const active = activeProgram(rows, workouts.rows, me.profile);
   const [justAdded, setJustAdded] = useState<string | null>(null);
+  // "#/programs?focus=<id>" (from the home screen) jumps to that program's training days.
+  const focus = useRoute().query.get('focus');
+  useEffect(() => {
+    if (!focus || loading) return;
+    setJustAdded(focus);
+    setTimeout(() => document.getElementById('program-' + focus)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }, [focus, loading]);
 
   async function saveDays(p: Program, weekdays: number[], required: number | null) {
     await save({ ...p, schedule: { kind: 'weekly', weekdays, ...(required ? { required } : {}) } });
@@ -72,7 +80,7 @@ export default function Programs() {
             <strong>{t.name}</strong>
             <button className="btn primary small" onClick={() => addTemplate(i)}>+ הוספה</button>
           </div>
-          <span className="muted small">{t.description}</span>
+          <span className="muted small">{t.description}. אחרי ההוספה תבחר את ימי האימון שלך.</span>
           <div className="chips">
             {t.days.map((d) => {
               const s = DAY_STYLES[dayStyle(d)];

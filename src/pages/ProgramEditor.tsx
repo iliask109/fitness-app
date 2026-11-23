@@ -3,6 +3,7 @@ import { useTable } from '../lib/useTable';
 import { navigate } from '../lib/router';
 import type { Program } from '../lib/types';
 import ExercisePicker from '../components/ExercisePicker';
+import WeekdayPicker from '../components/WeekdayPicker';
 
 export default function ProgramEditor({ id }: { id: string }) {
   const programs = useTable<Program>('programs');
@@ -60,6 +61,9 @@ export default function ProgramEditor({ id }: { id: string }) {
       ))}
 
       <button className="btn dashed" onClick={() => update((d) => { d.days.push({ name: `יום ${d.days.length + 1}`, exercises: [] }); })}>+ הוספת יום אימון</button>
+
+      <WeekdayPicker program={p} doneText="✓ יישמר עם התוכנית"
+        onSave={async (weekdays, required) => update((d) => { d.schedule = { kind: 'weekly', weekdays, ...(required ? { required } : {}) }; })} />
       <button className="btn primary big" onClick={save}>שמירת תוכנית</button>
     </div>
   );
