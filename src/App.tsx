@@ -17,6 +17,8 @@ import { useProfile } from './lib/useProfile';
 import { useEffect } from 'react';
 import { syncDeviceSubscription } from './lib/push';
 import AdminAccount from './pages/AdminAccount';
+import AdminTemplates from './pages/AdminTemplates';
+import AdminTemplateEditor from './pages/AdminTemplateEditor';
 import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
 
@@ -53,14 +55,16 @@ function Shell() {
 
 const ADMIN_TABS = [
   { key: 'admin', label: 'משתמשים', icon: '👥' },
+  { key: 'admin-programs', label: 'תוכניות', icon: '📋' },
   { key: 'settings', label: 'חשבון', icon: '⚙️' },
 ];
 
 function AdminShell() {
   const route = useRoute();
   const [section = '', sub] = route.path;
-  const tab = section === 'settings' ? 'settings' : 'admin';
+  const tab = section === 'settings' || section === 'admin-programs' ? section : 'admin';
   const page = section === 'settings' ? <AdminAccount />
+    : section === 'admin-programs' ? (sub ? <AdminTemplateEditor key={sub} id={sub} /> : <AdminTemplates />)
     : section === 'admin' && sub ? <AdminUser id={sub} />
     : <AdminUsers />;
 

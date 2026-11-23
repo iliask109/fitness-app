@@ -10,6 +10,9 @@ export const TEMPLATE_CATEGORIES: { key: TemplateCategory; label: string; icon: 
 ];
 
 export interface ProgramTemplate {
+  /** Set for templates stored in the database (managed by admins). */
+  id?: string;
+  sort_order?: number;
   name: string;
   description: string;
   category: TemplateCategory;
