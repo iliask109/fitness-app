@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { EXERCISE_GROUPS } from '../lib/exercises';
 import { EXERCISE_GUIDE } from '../lib/exerciseGuide';
-import { ExerciseGuideSheet } from '../components/ExerciseInfo';
+import ExerciseGuideSheet from '../components/ExerciseGuideSheet';
 
 /** All exercises by muscle group, with search; tap one for how to do it. */
 export default function ExerciseLibrary() {

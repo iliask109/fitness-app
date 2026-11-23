@@ -7,24 +7,26 @@ import Workouts from './pages/Workouts';
 import WorkoutEditor from './pages/WorkoutEditor';
 import Programs from './pages/Programs';
 import ProgramEditor from './pages/ProgramEditor';
-import Nutrition from './pages/Nutrition';
-import Progress from './pages/Progress';
 import Settings from './pages/Settings';
-import AdminUsers from './pages/AdminUsers';
-import AdminUser from './pages/AdminUser';
 import Onboarding from './pages/Onboarding';
 import { useProfile } from './lib/useProfile';
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { syncDeviceSubscription } from './lib/push';
-import AdminAccount from './pages/AdminAccount';
-import AdminTemplates from './pages/AdminTemplates';
-import AdminTemplateEditor from './pages/AdminTemplateEditor';
-import ExerciseLibrary from './pages/ExerciseLibrary';
 import WorkoutView from './pages/WorkoutView';
 import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
 import ConnectionBanner from './components/ConnectionBanner';
 import SchemaWarning from './components/SchemaWarning';
+
+// Loaded on first visit: the charts, the admin area and the exercise guide are large and not needed at start.
+const Nutrition = lazy(() => import('./pages/Nutrition'));
+const Progress = lazy(() => import('./pages/Progress'));
+const AdminUsers = lazy(() => import('./pages/AdminUsers'));
+const AdminUser = lazy(() => import('./pages/AdminUser'));
+const AdminTemplates = lazy(() => import('./pages/AdminTemplates'));
+const AdminTemplateEditor = lazy(() => import('./pages/AdminTemplateEditor'));
+const ExerciseLibrary = lazy(() => import('./pages/ExerciseLibrary'));
+const AdminAccount = lazy(() => import('./pages/AdminAccount'));
 
 const TABS = [
   { key: '', label: 'בית', icon: '🏠' },
@@ -80,7 +82,7 @@ function AdminShell() {
         <span className="chip tag-admin">🛡️ מנהל</span>
         <ThemeToggle />
       </header>
-      <main className="content"><ConnectionBanner /><SchemaWarning />{page}</main>
+      <main className="content"><ConnectionBanner /><SchemaWarning /><Suspense fallback={<p className="muted">טוען…</p>}>{page}</Suspense></main>
       <nav className="tabbar">
         {ADMIN_TABS.map((t) => (
           <a key={t.key} href={'#/' + t.key} className={tab === t.key ? 'active' : ''}>
@@ -144,7 +146,7 @@ function UserShell() {
         <ThemeToggle />
         <button className="icon-btn" onClick={() => navigate('/settings')} aria-label="הגדרות">⚙️</button>
       </header>
-      <main className="content"><ConnectionBanner />{page}</main>
+      <main className="content"><ConnectionBanner /><Suspense fallback={<p className="muted">טוען…</p>}>{page}</Suspense></main>
       <nav className="tabbar">
         {TABS.map((t) => (
           <a key={t.key} href={'#/' + t.key} className={section === t.key ? 'active' : ''}>
