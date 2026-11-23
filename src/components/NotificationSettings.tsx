@@ -14,6 +14,14 @@ export default function NotificationSettings() {
   const [onDevice, setOnDevice] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  // Re-check when coming back from the phone's settings, so allowing notifications there shows up right away.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const onBack = () => { if (document.visibilityState === 'visible') setTick((t) => t + 1); };
+    document.addEventListener('visibilitychange', onBack);
+    window.addEventListener('focus', onBack);
+    return () => { document.removeEventListener('visibilitychange', onBack); window.removeEventListener('focus', onBack); };
+  }, []);
   const support = pushSupport();
   const enabled = !!profile.reminder_enabled;
   /** Notifications are on for the account, but this device isn't registered (e.g. after signing out here). */
@@ -90,7 +98,10 @@ export default function NotificationSettings() {
           {support.reason === 'ios-install'
             ? 'באייפון, התראות עובדות רק כשהאפליקציה מותקנת: לחץ על כפתור השיתוף ⬆️ ← "הוסף למסך הבית", ואז פתח את FitLogix מהמסך הבית.'
             : support.reason === 'blocked'
-              ? 'ההתראות חסומות בדפדפן הזה. כדי לאפשר: סמל המנעול ליד כתובת האתר ← הרשאות ← התראות ← אפשר.'
+              ? <>ההתראות חסומות בדפדפן עבור האתר הזה, ולכן הוא לא יכול לבקש אישור שוב. כדי לאפשר:<br />
+                  <strong>בכרום באנדרואיד:</strong> לחץ על הסמל שמשמאל לכתובת האתר (מנעול או פסים) ← הרשאות ← התראות ← אפשר.<br />
+                  <strong>אם האפליקציה מותקנת במסך הבית:</strong> לחיצה ארוכה על האייקון ← פרטי אפליקציה (ⓘ) ← התראות ← הפעלה.<br />
+                  אחר כך חזור לכאן.</>
               : 'הדפדפן הזה לא תומך בהתראות. נסה ב-Chrome, או התקן את האפליקציה למסך הבית.'}
         </p>
       )}
