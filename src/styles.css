@@ -344,3 +344,9 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .notif-prompt { border: 2px solid color-mix(in srgb, var(--amber) 45%, transparent) !important;
   background: linear-gradient(160deg, color-mix(in srgb, var(--amber) 14%, var(--card)), var(--card) 65%); }
 .notif-prompt-icon { font-size: 30px; }
+
+/* ready-made program categories */
+.template-category { margin-top: 6px; }
+.category-icon { font-size: 26px; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 14px; background: var(--card); box-shadow: 0 2px 0 var(--border); flex: none; }
+.category-title { font-size: 17px; }
+.fits-chip { background: color-mix(in srgb, var(--primary) 20%, transparent); color: var(--primary); font-weight: 700; }

@@ -18,6 +18,11 @@ const NAME_RULES: [RegExp, DayStyleKey][] = [
   [/תחתון|רגליים|lower|legs?\b/i, 'lower'],
   [/דחיפה|push/i, 'push'],
   [/משיכה|pull/i, 'pull'],
+  // Body-part split days ("ידיים ובטן" is arms first, so this comes before the core rule).
+  [/ידיים|arms/i, 'upper'],
+  [/חזה|chest/i, 'push'],
+  [/^גב|back/i, 'pull'],
+  [/כתפיים|shoulders/i, 'push'],
   [/כל הגוף|full/i, 'full'],
   [/בטן|ליבה|core|abs/i, 'core'],
 ];

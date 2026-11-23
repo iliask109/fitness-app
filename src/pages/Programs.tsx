@@ -1,5 +1,5 @@
 import { useTable } from '../lib/useTable';
-import { PROGRAM_TEMPLATES } from '../lib/templates';
+import { PROGRAM_TEMPLATES, TEMPLATE_CATEGORIES } from '../lib/templates';
 import { DAY_STYLES, dayStyle } from '../lib/dayStyle';
 import type { Program } from '../lib/types';
 import DayCard from '../components/DayCard';
@@ -50,6 +50,11 @@ export default function Programs() {
   }
 
   const locked = !!active;
+  // Categories where the user said they train (details page) come first.
+  const where = me.profile.training_locations ?? [];
+  const categories = TEMPLATE_CATEGORIES
+    .map((c) => ({ ...c, fits: where.includes(c.key) }))
+    .sort((a, b) => Number(b.fits) - Number(a.fits));
   const others = rows.filter((p) => p.id !== active?.id);
 
   const programSection = (p: Program) => (
@@ -110,16 +115,29 @@ export default function Programs() {
         <>
           <div className="card muted">עוד אין לך תוכנית. בחר אחת מהתוכניות המוכנות או בנה תוכנית משלך.</div>
           <h3 style={{ marginTop: 8 }}>✨ תוכניות מוכנות</h3>
-          {PROGRAM_TEMPLATES.map((t, i) => (
-            <div key={t.name} className="card template-card">
-              <div className="row between">
-                <strong>{t.name}</strong>
-                <button className="btn primary small" onClick={() => addTemplate(i)}>+ בחירה</button>
+          {categories.map((c) => (
+            <section key={c.key} className="template-category stack tight">
+              <div className="row gap">
+                <span className="category-icon">{c.icon}</span>
+                <div className="grow">
+                  <div className="row gap"><strong className="category-title">{c.label}</strong>{c.fits && <span className="chip fits-chip">מתאים לך</span>}</div>
+                  <span className="muted small">{c.note}</span>
+                </div>
               </div>
-              <span className="muted small">{t.description}. אחרי הבחירה תבחר את ימי האימון שלך.</span>
-              {styleChips(t.days)}
-            </div>
+              {PROGRAM_TEMPLATES.map((t, i) => t.category !== c.key ? null : (
+                <div key={t.name} className="card template-card">
+                  <div className="row between">
+                    <strong>{t.name}</strong>
+                    <button className="btn primary small" onClick={() => addTemplate(i)}>+ בחירה</button>
+                  </div>
+                  <span className="muted small">{t.description}</span>
+                  <span className="small">🧰 {t.equipment}</span>
+                  {styleChips(t.days)}
+                </div>
+              ))}
+            </section>
           ))}
+          <p className="muted small" style={{ margin: 0 }}>אחרי הבחירה תוכל לבחור את ימי האימון שלך.</p>
         </>
       )}
 
@@ -128,7 +146,7 @@ export default function Programs() {
           <div className="locked-note small">🔒 אפשר להתאמן לפי תוכנית אחת בכל פעם. כדי לבחור תוכנית אחרת, לחץ "🔄 החלפת תוכנית".</div>
           <div className="locked-list" aria-disabled="true" {...{ inert: '' }}>
             {[...others.map((p) => ({ key: p.id, name: p.name, days: p.days })),
-              ...PROGRAM_TEMPLATES.map((t) => ({ key: t.name, name: t.name, days: t.days }))].map((x) => (
+              ...PROGRAM_TEMPLATES.map((t) => ({ key: t.name, name: `${TEMPLATE_CATEGORIES.find((c) => c.key === t.category)?.icon} ${t.name}`, days: t.days }))].map((x) => (
               <div key={x.key} className="locked-row">
                 <strong>{x.name}</strong>
                 {styleChips(x.days)}
