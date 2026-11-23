@@ -24,6 +24,7 @@ import WorkoutView from './pages/WorkoutView';
 import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
 import ConnectionBanner from './components/ConnectionBanner';
+import SchemaWarning from './components/SchemaWarning';
 
 const TABS = [
   { key: '', label: 'בית', icon: '🏠' },
@@ -79,7 +80,7 @@ function AdminShell() {
         <span className="chip tag-admin">🛡️ מנהל</span>
         <ThemeToggle />
       </header>
-      <main className="content"><ConnectionBanner />{page}</main>
+      <main className="content"><ConnectionBanner /><SchemaWarning />{page}</main>
       <nav className="tabbar">
         {ADMIN_TABS.map((t) => (
           <a key={t.key} href={'#/' + t.key} className={tab === t.key ? 'active' : ''}>
