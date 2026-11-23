@@ -24,3 +24,12 @@ create policy "own rows" on public.push_subscriptions for all
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 create index if not exists push_subscriptions_user_idx on public.push_subscriptions (user_id);
 grant select, insert, update, delete on public.push_subscriptions to authenticated;
+
+-- The reminder server uses the secret (service_role) key. It skips RLS, but newer Supabase
+-- projects still require table privileges for it, like for signed-in users.
+grant usage on schema public to service_role;
+grant select, insert, update, delete on
+  public.profiles, public.workouts, public.programs,
+  public.meals, public.body_weights, public.water_logs,
+  public.push_subscriptions
+to service_role;
