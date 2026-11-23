@@ -6,6 +6,8 @@ import { todayISO, workoutVolume, formatDate } from '../lib/utils';
 import ExercisePicker from '../components/ExercisePicker';
 import RestTimer from '../components/RestTimer';
 import ExerciseInfo from '../components/ExerciseInfo';
+import { useAuth } from '../lib/auth';
+import { clearDraft, hasProgress, loadDraft, saveDraft, WorkoutDraft } from '../lib/workoutDraft';
 
 export default function WorkoutEditor({ id, query }: { id: string; query: URLSearchParams }) {
   const workouts = useTable<Workout>('workouts');
@@ -17,6 +19,22 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
   const [openIdx, setOpenIdx] = useState<number | null | undefined>(undefined);
   const started = useRef(Date.now());
   const isNew = id === 'new';
+  const { user } = useAuth();
+  /** An unfinished workout from earlier, offered when starting a new one. */
+  const [pendingDraft, setPendingDraft] = useState<WorkoutDraft | null>(null);
+
+  const resume = (d: WorkoutDraft) => {
+    started.current = d.startedAt;
+    setOpenIdx(undefined);
+    setW(structuredClone(d.workout));
+    setPendingDraft(null);
+  };
+
+  // Keep an unfinished new workout on the device after every change (once a set is done).
+  useEffect(() => {
+    if (!isNew || !w || !user || !hasProgress(w)) return;
+    saveDraft(user.id, { workout: w, startedAt: started.current, updatedAt: Date.now() });
+  }, [w, isNew, user]);
 
   /** The sets from the most recent previous workout containing this exercise. */
   const lastSets = (name: string): SetEntry[] | undefined => {
@@ -34,6 +52,9 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
       if (!found) navigate('/workouts');
       return;
     }
+    const draft = user ? loadDraft(user.id) : null;
+    if (draft && query.get('resume')) { resume(draft); return; }
+    if (draft) setPendingDraft(draft);
     const prog = programs.rows.find((p) => p.id === query.get('program'));
     const day = prog?.days[Number(query.get('day') ?? 0)];
     const exercises: WorkoutExercise[] = (day?.exercises ?? []).map((pe) => {
@@ -94,6 +115,7 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
     try {
       const duration = isNew ? Math.max(1, Math.round((Date.now() - started.current) / 60000)) : w!.duration_min;
       await workouts.save({ ...w!, duration_min: duration });
+      if (isNew && user) clearDraft(user.id);
       navigate('/workouts');
     } catch (e) {
       alert('שמירה נכשלה: ' + (e as Error).message);
@@ -113,6 +135,16 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
         <a href="#/workouts" className="muted">→ חזרה</a>
         {!isNew && <button className="btn danger small" onClick={remove}>מחיקה</button>}
       </div>
+      {pendingDraft && (
+        <div className="card resume-card stack tight" role="region" aria-label="אימון שלא הסתיים">
+          <strong>⏸️ יש לך אימון שלא הסתיים: {pendingDraft.workout.name}</strong>
+          <span className="muted small">התחלת לפני {Math.max(1, Math.round((Date.now() - pendingDraft.startedAt) / 60000))} דק׳. להמשיך אותו או להתחיל אימון חדש?</span>
+          <div className="row gap">
+            <button className="btn primary grow" onClick={() => resume(pendingDraft)}>▶ המשך אותו</button>
+            <button className="btn" onClick={() => { if (user) clearDraft(user.id); setPendingDraft(null); }}>התחלת אימון חדש</button>
+          </div>
+        </div>
+      )}
       <input className="title-input" value={w.name} onChange={(e) => update((d) => { d.name = e.target.value; })} />
       <div className="row gap">
         {/* The date is the day the workout was done: set when it starts, not editable. */}

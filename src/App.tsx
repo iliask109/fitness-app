@@ -120,7 +120,7 @@ function UserShell() {
   const [section = '', sub] = route.path;
   let page;
   switch (section) {
-    case 'workouts': page = sub ? <WorkoutEditor id={sub} query={route.query} /> : <Workouts />; break;
+    case 'workouts': page = sub ? <WorkoutEditor key={sub + "?" + route.query.toString()} id={sub} query={route.query} /> : <Workouts />; break;
     case 'programs': page = sub ? <ProgramEditor id={sub} /> : <Programs />; break;
     case 'nutrition': page = <Nutrition />; break;
     case 'progress': page = <Progress />; break;
