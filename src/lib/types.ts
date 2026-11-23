@@ -7,7 +7,7 @@ export interface BaseRow {
 }
 
 export interface SetEntry { reps: number; weight: number; done: boolean }
-export interface WorkoutExercise { name: string; sets: SetEntry[] }
+export interface WorkoutExercise { name: string; sets: SetEntry[]; /** Free text for this exercise in this workout. */ notes?: string }
 
 export interface Workout extends BaseRow {
   date: string;

@@ -51,6 +51,19 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
     return undefined;
   };
 
+  /** The most recent note written on this exercise in an earlier workout. */
+  const lastNote = (name: string): string | undefined => {
+    const earlier = [...workouts.rows]
+      .filter((x) => x.id !== id)
+      .sort((a, b) => b.date.localeCompare(a.date) || (b.created_at ?? '').localeCompare(a.created_at ?? ''));
+    for (const wk of earlier) {
+      const note = wk.exercises.find((e) => e.name === name)?.notes?.trim();
+      if (note) return note;
+    }
+    return undefined;
+  };
+  const [noteOpen, setNoteOpen] = useState<number | null>(null);
+
   useEffect(() => {
     if (w || workouts.loading || programs.loading) return;
     if (!isNew) {
@@ -189,7 +202,7 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
               onClick={() => setOpenIdx(ei)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenIdx(ei); } }}>
               <span className={'ex-badge' + (complete ? ' on' : '')}>{complete ? '✓' : ei + 1}</span>
               <span className="grow ex-summary">
-                <strong>{ex.name}</strong>
+                <strong>{ex.name}{ex.notes?.trim() ? ' 📝' : ''}</strong>
                 <span className="muted small">
                   {done.length}/{ex.sets.length} סטים{top && <> · {top.weight ? <span dir="ltr">{top.weight}×{top.reps}</span> : `${top.reps} חזרות`}</>}
                 </span>
@@ -233,6 +246,24 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
               </div>
               {top && top.weight > 0 && <span className="muted small">סט כבד: {top.weight} ק״ג × {top.reps}</span>}
             </div>
+            {(() => {
+              const before = lastNote(ex.name);
+              const editing = noteOpen === ei || !!ex.notes;
+              return (
+                <div className="ex-note stack tight">
+                  {before && <div className="muted small prev-note">📝 בפעם הקודמת: {before}</div>}
+                  {editing ? (
+                    <label className="small">הערה לתרגיל
+                      <textarea id={`ex-note-${ei}`} rows={2} value={ex.notes ?? ''} autoFocus={noteOpen === ei && !ex.notes}
+                        placeholder="למשל: גובה מושב 4, להרגיש בישבן, כאב קל בברך"
+                        onChange={(e) => update((d) => { d.exercises[ei].notes = e.target.value; })} />
+                    </label>
+                  ) : (
+                    <button className="btn small dashed" onClick={() => setNoteOpen(ei)}>📝 הוספת הערה</button>
+                  )}
+                </div>
+              );
+            })()}
             {complete && <button className="btn small" onClick={() => setOpenIdx(firstUnfinished(w.exercises))}>סגירה ✓</button>}
           </div>
         );

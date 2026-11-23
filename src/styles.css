@@ -407,3 +407,5 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .resume-card { border: 2px solid color-mix(in srgb, var(--amber) 55%, transparent) !important;
   background: linear-gradient(160deg, color-mix(in srgb, var(--amber) 16%, var(--card)), var(--card) 65%); }
 .resume-icon { font-size: 28px; }
+.ex-note { border-top: 1px dashed var(--border); padding-top: 8px; }
+.prev-note { background: var(--bg); border-radius: 12px; padding: 6px 10px; }
