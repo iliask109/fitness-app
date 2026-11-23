@@ -4,8 +4,9 @@ import { isDemo } from '../lib/supabase';
 import { ageFromBirthDate, todayISO } from '../lib/utils';
 import { authErrorHe } from '../lib/authErrors';
 import ForgotPassword from '../components/ForgotPassword';
+import { GENDERS, Gender } from '../lib/gender';
 
-const emptySignup = { first_name: '', last_name: '', age: '', birth_date: '' };
+const emptySignup = { first_name: '', last_name: '', age: '', birth_date: '', gender: '' as Gender | '' };
 
 export default function Login() {
   const { signIn, signUp } = useAuth();
@@ -26,6 +27,7 @@ export default function Login() {
     if (mode === 'in') return null;
     if (!details.first_name.trim()) return 'נא למלא שם פרטי';
     if (!details.last_name.trim()) return 'נא למלא שם משפחה';
+    if (!details.gender) return 'נא לבחור מגדר';
     const age = Number(details.age);
     if (!Number.isInteger(age) || age < 10 || age > 120) return 'נא למלא גיל תקין (10 עד 120)';
     if (details.birth_date && details.birth_date > todayISO()) return 'תאריך הלידה לא יכול להיות בעתיד';
@@ -48,6 +50,7 @@ export default function Login() {
           last_name: details.last_name.trim(),
           age: Number(details.age),
           birth_date: details.birth_date || undefined,
+          gender: details.gender as Gender,
         });
         if (needsConfirm) setMsg('נשלח אליך מייל לאישור החשבון. אחרי האישור אפשר להתחבר.');
       }
@@ -85,6 +88,15 @@ export default function Login() {
                       onChange={(e) => setDetails({ ...details, first_name: e.target.value })} /></label>
                     <label>שם משפחה<input required autoComplete="family-name" value={details.last_name}
                       onChange={(e) => setDetails({ ...details, last_name: e.target.value })} /></label>
+                  </div>
+                  <div className="stack tight">
+                    <span className="small muted" style={{ textAlign: 'start' }}>מגדר</span>
+                    <div className="segmented" role="radiogroup" aria-label="מגדר">
+                      {GENDERS.map((g) => (
+                        <button key={g.key} type="button" role="radio" aria-checked={details.gender === g.key}
+                          className={details.gender === g.key ? 'on' : ''} onClick={() => setDetails({ ...details, gender: g.key })}>{g.label}</button>
+                      ))}
+                    </div>
                   </div>
                   <div className="grid2">
                     <label>גיל<input type="number" inputMode="numeric" min={10} max={120} required value={details.age}

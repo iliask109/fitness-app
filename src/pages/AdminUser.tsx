@@ -73,8 +73,9 @@ export default function AdminUser({ id }: { id: string }) {
             <div className="muted small" dir="ltr" style={{ textAlign: 'right' }}>{u.email}</div>
           </div>
         </div>
-        {(age != null || u.birth_date) && (
+        {(age != null || u.birth_date || data.profile.gender) && (
           <div className="small">
+            {data.profile.gender && <>{data.profile.gender === 'male' ? 'זכר' : 'נקבה'} · </>}
             {age != null && <>גיל {age}</>}
             {u.birth_date && <span className="muted"> · נולד/ה {formatDate(u.birth_date, { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
           </div>

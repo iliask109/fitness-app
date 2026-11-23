@@ -6,6 +6,7 @@ import { navigate } from '../lib/router';
 import { ageFromBirthDate, todayISO } from '../lib/utils';
 import { ThemePicker } from '../components/ThemeControls';
 import SetPassword from '../components/SetPassword';
+import { GENDERS } from '../lib/gender';
 import NotificationSettings from '../components/NotificationSettings';
 
 const FIELDS = [
@@ -29,6 +30,7 @@ export default function Settings() {
       first_name: profile.first_name ?? profile.display_name ?? '', last_name: profile.last_name ?? '',
       age: profile.birth_date ? String(ageFromBirthDate(profile.birth_date)) : profile.age == null ? '' : String(profile.age),
       birth_date: profile.birth_date ?? '',
+      gender: profile.gender ?? '',
     };
     for (const [k] of FIELDS) f[k] = profile[k] == null ? '' : String(profile[k]);
     setForm(f);
@@ -42,6 +44,7 @@ export default function Settings() {
       first_name: form.first_name.trim() || null, last_name: form.last_name.trim() || null,
       display_name: form.first_name.trim() || null,
       age: Number.isInteger(age) && age > 0 ? age : null, birth_date: form.birth_date || null,
+      gender: form.gender === 'male' || form.gender === 'female' ? form.gender : null,
     };
     for (const [k] of FIELDS) patch[k] = form[k] === '' ? (k === 'weight_goal' ? null : profile[k]) : Number(form[k]);
     await save(patch);
@@ -63,6 +66,13 @@ export default function Settings() {
               const v = e.target.value;
               setForm({ ...form, birth_date: v, age: v ? String(ageFromBirthDate(v)) : form.age });
             }} /></label>
+        </div>
+        <span className="small muted">מגדר</span>
+        <div className="segmented" role="radiogroup" aria-label="מגדר">
+          {GENDERS.map((g) => (
+            <button key={g.key} type="button" role="radio" aria-checked={form.gender === g.key}
+              className={form.gender === g.key ? 'on' : ''} onClick={() => setForm({ ...form, gender: g.key })}>{g.label}</button>
+          ))}
         </div>
         <a className="btn" href="#/profile-setup">🏋️ עריכת פרופיל אימון (גובה, מטרה, ציוד…)</a>
         <h3>🎯 יעדים</h3>

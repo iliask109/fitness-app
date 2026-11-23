@@ -11,6 +11,7 @@ export interface SignUpDetails {
   last_name: string;
   age: number;
   birth_date?: string;
+  gender: 'male' | 'female';
 }
 
 interface AuthCtx {

@@ -51,6 +51,7 @@ export interface Profile extends BaseRow {
   last_name?: string | null;
   age?: number | null;
   birth_date?: string | null;
+  gender?: 'male' | 'female' | null;
   height_cm?: number | null;
   experience?: string | null;
   fitness_goal?: string | null;
