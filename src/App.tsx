@@ -15,6 +15,7 @@ import AdminUser from './pages/AdminUser';
 import Onboarding from './pages/Onboarding';
 import { useProfile } from './lib/useProfile';
 import AdminAccount from './pages/AdminAccount';
+import { ThemeToggle } from './components/ThemeControls';
 
 const TABS = [
   { key: '', label: 'בית', icon: '🏠' },
@@ -57,6 +58,7 @@ function AdminShell() {
         <a className="brand" href="#/admin" aria-label="מסך הבית">FitLogix</a>
         {isDemo && <span className="badge">מצב הדגמה</span>}
         <span className="chip tag-admin">🛡️ מנהל</span>
+        <ThemeToggle />
       </header>
       <main className="content">{page}</main>
       <nav className="tabbar">
@@ -83,6 +85,7 @@ function UserShell() {
       <div className="app">
         <header className="topbar">
           <span className="brand">FitLogix</span>
+          <ThemeToggle />
           <button className="btn small" onClick={signOut}>התנתקות</button>
         </header>
         <main className="content onboarding-only">
@@ -109,6 +112,7 @@ function UserShell() {
       <header className="topbar">
         <a className="brand" href="#/" aria-label="מסך הבית">FitLogix</a>
         {isDemo && <span className="badge">מצב הדגמה</span>}
+        <ThemeToggle />
         <button className="icon-btn" onClick={() => navigate('/settings')} aria-label="הגדרות">⚙️</button>
       </header>
       <main className="content">{page}</main>

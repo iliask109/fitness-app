@@ -4,6 +4,7 @@ import { useProfile } from '../lib/useProfile';
 import { isDemo } from '../lib/supabase';
 import { navigate } from '../lib/router';
 import { ageFromBirthDate, todayISO } from '../lib/utils';
+import { ThemePicker } from '../components/ThemeControls';
 
 const FIELDS = [
   ['calorie_goal', 'יעד קלוריות יומי'],
@@ -73,6 +74,7 @@ export default function Settings() {
         </div>
         <button className="btn primary">{saved ? '✓ נשמר' : 'שמירה'}</button>
       </form>
+      <ThemePicker />
       <div className="card stack tight">
         <div className="muted small">מחובר בתור</div>
         <div dir="ltr" style={{ textAlign: 'right' }}>{user?.email}</div>

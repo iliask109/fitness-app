@@ -1,16 +1,25 @@
+/* "Soft & rounded" look: mint green, round shapes, Varela Round.
+   Light by default; dark follows the device, or the user's explicit choice via data-theme on <html>. */
 :root {
-  --bg: #f1f5f9; --card: #ffffff; --text: #0f172a; --muted: #64748b; --border: #e2e8f0; --track: #e2e8f0;
-  --green: #16a34a; --blue: #2563eb; --cyan: #0891b2; --amber: #d97706; --pink: #db2777; --red: #dc2626; --purple: #7c3aed;
-  --primary: #16a34a; --primary-text: #fff;
+  --bg: #EDF5F0; --card: #FFFFFF; --text: #1D2B26; --muted: #66786F; --border: #D9E8DF; --track: #E1EDE6;
+  --green: #2E9E7A; --blue: #4A86E8; --cyan: #3BB3C3; --amber: #EE9A4D; --pink: #E8789A; --red: #D9534F; --purple: #9B7BE0;
+  --primary: #2E9E7A; --primary-text: #FFFFFF; --on-color: #FFFFFF;
+  --font: 'Varela Round', 'Rubik', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b1120; --card: #131c2e; --text: #e2e8f0; --muted: #94a3b8; --border: #1f2a40; --track: #1f2a40;
-    --green: #22c55e; --blue: #60a5fa; --cyan: #22d3ee; --amber: #fbbf24; --pink: #f472b6; --red: #f87171; --purple: #a78bfa;
-    --primary: #22c55e; --primary-text: #052e16;
+  :root:not([data-theme="light"]) {
+    --bg: #0E1613; --card: #17221E; --text: #E4EFE9; --muted: #8FA59A; --border: #25342E; --track: #25342E;
+    --green: #4CC29B; --blue: #7BA7F0; --cyan: #5CCAD6; --amber: #F2B072; --pink: #F096B0; --red: #F08A8A; --purple: #B9A2F0;
+    --primary: #4CC29B; --primary-text: #07130F; --on-color: #07130F;
     color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1613; --card: #17221E; --text: #E4EFE9; --muted: #8FA59A; --border: #25342E; --track: #25342E;
+  --green: #4CC29B; --blue: #7BA7F0; --cyan: #5CCAD6; --amber: #F2B072; --pink: #F096B0; --red: #F08A8A; --purple: #B9A2F0;
+  --primary: #4CC29B; --primary-text: #07130F; --on-color: #07130F;
+  color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
@@ -18,7 +27,7 @@ html { scroll-padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
 .timer-spacer { height: 64px; }
 body {
   background: var(--bg); color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", "Rubik", Arial, sans-serif;
+  font-family: var(--font);
   font-size: 15px; line-height: 1.45; -webkit-tap-highlight-color: transparent;
 }
 a { color: var(--blue); text-decoration: none; }
@@ -208,8 +217,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 @keyframes slide-up { from { transform: translateY(40px); opacity: 0; } }
 
 /* blue button + program picker */
-.btn.blue { background: var(--blue); border-color: var(--blue); color: #fff; }
-@media (prefers-color-scheme: dark) { .btn.blue { color: #0b1120; } }
+.btn.blue { background: var(--blue); border-color: var(--blue); color: var(--on-color); }
 .sheet-scroll { max-height: 80vh; overflow-y: auto; }
 .program-day {
   font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
@@ -243,7 +251,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 .day-card-list li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .day-card-start {
   margin-top: 6px; text-align: center; font-weight: 700; padding: 9px; border-radius: 10px;
-  background: var(--accent); color: var(--bg);
+  background: var(--accent); color: var(--on-color);
 }
 .template-card { display: flex; flex-direction: column; gap: 8px; }
 .style-chip {
@@ -251,3 +259,15 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
   color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
 }
+
+/* Soft & rounded shapes (kept last so they win over the base rules above) */
+input, select, textarea { font-family: inherit; border-radius: 14px; }
+.card, .day-card { border-radius: 26px; border-color: transparent; box-shadow: 0 2px 0 var(--border); }
+.btn, .day-card-start, .check, .segmented, .segmented button { border-radius: 999px; }
+.option, .program-day, .day-workout { border-radius: 20px; }
+.week-day { border-radius: 18px; }
+.week-bar { border-radius: 99px; }
+.day-picker button { border-radius: 16px; }
+.sheet { border-radius: 28px 28px 0 0; }
+.theme-btn { font-size: 18px; }
+.segmented button { white-space: nowrap; }
