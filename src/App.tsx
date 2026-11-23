@@ -14,6 +14,8 @@ import AdminUsers from './pages/AdminUsers';
 import AdminUser from './pages/AdminUser';
 import Onboarding from './pages/Onboarding';
 import { useProfile } from './lib/useProfile';
+import { useEffect } from 'react';
+import { syncDeviceSubscription } from './lib/push';
 import AdminAccount from './pages/AdminAccount';
 import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
@@ -85,9 +87,14 @@ function AdminShell() {
 
 /** The training app. Until the training profile is filled in, only the onboarding page is shown. */
 function UserShell() {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const route = useRoute();
   const me = useProfile();
+  const remindersOn = !!me.profile.reminder_enabled;
+  // Once notifications are allowed, keep this device registered on every app open (e.g. after signing back in).
+  useEffect(() => {
+    if (!me.loading && user) syncDeviceSubscription(user.id, remindersOn);
+  }, [me.loading, user, remindersOn]);
 
   if (me.loading && !me.profile.onboarded_at) return <div className="center muted">טוען…</div>;
   if (!me.profile.onboarded_at && !me.error) {

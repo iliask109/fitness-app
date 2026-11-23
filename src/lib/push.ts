@@ -87,3 +87,24 @@ export async function sendTestNotification(): Promise<TestResult> {
   if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
   return body.sent > 0 ? { kind: 'sent', devices: body.sent } : { kind: 'failed', codes: body.failed ?? [] };
 }
+
+const PROMPT_SNOOZE_KEY = 'fitlogix:notif-prompt-snoozed-until';
+const SNOOZE_DAYS = 7;
+
+/** "Not now" on the home-screen prompt hides it for a week. */
+export function promptSnoozed() {
+  try { return Number(localStorage.getItem(PROMPT_SNOOZE_KEY) || 0) > Date.now(); } catch { return false; }
+}
+export function snoozePrompt() {
+  try { localStorage.setItem(PROMPT_SNOOZE_KEY, String(Date.now() + SNOOZE_DAYS * 86400000)); } catch { /* ignore */ }
+}
+
+/**
+ * Re-registers this device when notifications are already allowed and the account has reminders on.
+ * Runs on every app open, so after signing back in (or if the browser renewed its subscription)
+ * reminders keep working without turning anything on again. Never shows a permission prompt.
+ */
+export async function syncDeviceSubscription(userId: string, remindersOn: boolean) {
+  if (!remindersOn || !pushSupport().ok || Notification.permission !== 'granted') return;
+  try { await enablePushOnDevice(userId); } catch (e) { console.warn('push sync', e); }
+}

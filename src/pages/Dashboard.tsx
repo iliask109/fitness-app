@@ -7,6 +7,7 @@ import { activeProgram } from '../lib/schedule';
 import { formatDate, workoutVolume } from '../lib/utils';
 import WeekView from '../components/WeekView';
 import WeightDialog from '../components/WeightDialog';
+import NotificationPrompt from '../components/NotificationPrompt';
 
 /** Current time, refreshed every few seconds so the clock and greeting stay up to date. */
 function useNow() {
@@ -47,6 +48,8 @@ export default function Dashboard() {
           <span className="muted">{now.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </div>
       </div>
+
+      <NotificationPrompt />
 
       {!programs.loading && !workouts.loading && <TodayCard program={active} workouts={workouts.rows} />}
 

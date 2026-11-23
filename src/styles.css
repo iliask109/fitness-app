@@ -339,3 +339,8 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .switch input:checked + span { background: var(--primary); }
 .switch input:checked + span::after { transform: translateX(-22px); }
 .switch input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* notification permission prompt on home */
+.notif-prompt { border: 2px solid color-mix(in srgb, var(--amber) 45%, transparent) !important;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--amber) 14%, var(--card)), var(--card) 65%); }
+.notif-prompt-icon { font-size: 30px; }
