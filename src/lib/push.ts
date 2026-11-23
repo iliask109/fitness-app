@@ -43,6 +43,7 @@ async function registration() {
 /** True when this device is already subscribed. */
 export async function deviceSubscribed() {
   if (!pushSupport().ok) return false;
+  if (!supabase) return Notification.permission === 'granted'; // demo mode has no real subscription
   const reg = await navigator.serviceWorker.getRegistration();
   return !!(await reg?.pushManager.getSubscription());
 }
@@ -70,16 +71,19 @@ export async function disablePushOnDevice(userId: string) {
   } catch { /* nothing to undo */ }
 }
 
+export type TestResult = { kind: 'sent'; devices: number } | { kind: 'no-devices' } | { kind: 'failed'; codes: number[] };
+
 /** Sends a test reminder: through the server when online, or locally in demo mode. */
-export async function sendTestNotification(): Promise<'sent' | 'no-devices'> {
+export async function sendTestNotification(): Promise<TestResult> {
   if (!supabase) {
     const reg = await registration();
     await reg.showNotification('FitLogix 🔔', { body: 'ההתראות עובדות! (מצב הדגמה)', icon: '/icon-192.png', dir: 'rtl', lang: 'he' });
-    return 'sent';
+    return { kind: 'sent', devices: 1 };
   }
   const { data } = await supabase.auth.getSession();
   const res = await fetch('/api/test-push', { method: 'POST', headers: { Authorization: `Bearer ${data.session?.access_token ?? ''}` } });
-  if (res.status === 404) return 'no-devices';
-  if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || `HTTP ${res.status}`);
-  return 'sent';
+  if (res.status === 404) return { kind: 'no-devices' };
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+  return body.sent > 0 ? { kind: 'sent', devices: body.sent } : { kind: 'failed', codes: body.failed ?? [] };
 }

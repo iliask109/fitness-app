@@ -12,10 +12,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { data: subs } = await db.from('push_subscriptions').select('*').eq('user_id', user.id);
     if (!subs?.length) return res.status(404).json({ error: 'no devices' });
-    const sent = await sendToSubscriptions(db, subs as SubscriptionRow[], {
+    const result = await sendToSubscriptions(db, subs as SubscriptionRow[], {
       title: 'FitLogix 🔔', body: 'ההתראות עובדות! נזכיר לך כשיגיע זמן האימון.', url: '/#/settings',
     });
-    return res.status(200).json({ sent });
+    return res.status(200).json({ devices: subs.length, ...result });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: (err as Error).message });

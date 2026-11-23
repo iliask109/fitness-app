@@ -16,6 +16,8 @@ export default function NotificationSettings() {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const support = pushSupport();
   const enabled = !!profile.reminder_enabled;
+  /** Notifications are on for the account, but this device isn't registered (e.g. after signing out here). */
+  const notHere = enabled && onDevice === false;
 
   useEffect(() => { deviceSubscribed().then(setOnDevice); }, []);
 
@@ -49,9 +51,12 @@ export default function NotificationSettings() {
   async function test() {
     setBusy(true); setMsg(null);
     try {
+      if (onDevice === false) await enablePushOnDevice(user!.id).then(() => setOnDevice(true));
       const r = await sendTestNotification();
-      setMsg(r === 'sent' ? { ok: true, text: '✓ נשלחה התראת בדיקה. היא אמורה להופיע תוך כמה שניות.' }
-        : { ok: false, text: 'אין מכשיר רשום להתראות. לחץ "הפעלה במכשיר הזה".' });
+      if (r.kind === 'sent') setMsg({ ok: true, text: `✓ נשלחה התראת בדיקה${r.devices > 1 ? ` ל-${r.devices} מכשירים` : ''}. היא אמורה להופיע תוך כמה שניות.` });
+      else if (r.kind === 'no-devices') setMsg({ ok: false, text: 'המכשיר לא נרשם להתראות. כבה והדלק את המתג ונסה שוב.' });
+      else setMsg({ ok: false, text: `שירות ההתראות דחה את השליחה (קוד ${r.codes.join(', ') || '?'}).`
+        + (r.codes.some((c) => c === 401 || c === 403) ? ' כנראה שהמשתנה VAPID_PRIVATE_KEY ב-Vercel לא הועתק נכון.' : ' כבה והדלק את המתג ונסה שוב.') });
     } catch (e) {
       setMsg({ ok: false, text: 'השליחה נכשלה: ' + (e as Error).message });
     } finally { setBusy(false); }
@@ -64,7 +69,7 @@ export default function NotificationSettings() {
         <h3 style={{ margin: 0 }}>🔔 התראות לאימונים</h3>
         {support.ok && (
           <label className="switch" aria-label="התראות לאימונים">
-            <input type="checkbox" checked={enabled} disabled={busy} onChange={(e) => (e.target.checked ? turnOn() : turnOff())} />
+            <input type="checkbox" checked={enabled && !notHere} disabled={busy} onChange={(e) => (e.target.checked ? turnOn() : turnOff())} />
             <span />
           </label>
         )}
@@ -78,6 +83,10 @@ export default function NotificationSettings() {
               ? 'ההתראות חסומות בדפדפן הזה. כדי לאפשר: סמל המנעול ליד כתובת האתר ← הרשאות ← התראות ← אפשר.'
               : 'הדפדפן הזה לא תומך בהתראות. נסה ב-Chrome, או התקן את האפליקציה למסך הבית.'}
         </p>
+      )}
+
+      {notHere && support.ok && (
+        <p className="notice" style={{ margin: 0 }}>📱 ההתראות פעילות בחשבון, אבל המכשיר הזה עוד לא רשום (למשל אחרי התנתקות). הדלק את המתג כדי לקבל התראות גם כאן.</p>
       )}
 
       {enabled && (
@@ -97,9 +106,6 @@ export default function NotificationSettings() {
             התראה אם עוד לא התאמנתי השבוע (מיום שלישי)
           </label>
           <p className="muted small" style={{ margin: 0 }}>לכל היותר התראה אחת ביום, בשעה שבחרת. אם כבר התאמנת באותו יום, לא תקבל התראה.</p>
-          {support.ok && onDevice === false && (
-            <button className="btn" disabled={busy} onClick={turnOn}>📱 הפעלה במכשיר הזה</button>
-          )}
           <button className="btn" disabled={busy} onClick={test}>שליחת התראת בדיקה</button>
         </>
       )}

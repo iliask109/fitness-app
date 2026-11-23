@@ -27,21 +27,26 @@ function ensureVapid() {
 
 export interface SubscriptionRow { id: string; user_id: string; endpoint: string; p256dh: string; auth: string }
 
-/** Sends to every device of a user; deletes subscriptions the browser has revoked. Returns how many arrived. */
+/**
+ * Sends to every device of a user; deletes subscriptions the browser has revoked (404/410).
+ * Returns how many arrived and the status code of each failure.
+ */
 export async function sendToSubscriptions(
   db: ReturnType<typeof adminClient>, subs: SubscriptionRow[], payload: { title: string; body: string; url: string },
-): Promise<number> {
+): Promise<{ sent: number; failed: number[] }> {
   ensureVapid();
   let sent = 0;
+  const failed: number[] = [];
   for (const s of subs) {
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 60 * 60 });
       sent++;
     } catch (err) {
-      const code = (err as { statusCode?: number }).statusCode;
+      const code = (err as { statusCode?: number }).statusCode ?? 0;
+      failed.push(code);
       if (code === 404 || code === 410) await db.from('push_subscriptions').delete().eq('id', s.id);
-      else console.error('push failed', code, (err as Error).message);
+      else console.error('push failed', code, (err as Error).message, (err as { body?: string }).body);
     }
   }
-  return sent;
+  return { sent, failed };
 }

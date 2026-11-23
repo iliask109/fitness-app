@@ -26,7 +26,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!msg) continue;
 
       const { data: subs } = await db.from('push_subscriptions').select('*').eq('user_id', uid);
-      const sent = subs?.length ? await sendToSubscriptions(db, subs as SubscriptionRow[], msg) : 0;
+      const sent = subs?.length ? (await sendToSubscriptions(db, subs as SubscriptionRow[], msg)).sent : 0;
       // Mark the day as handled even with no devices, so a user isn't re-checked every 15 minutes.
       await db.from('profiles').update({ last_reminded_on: localNow(now, profile.reminder_tz || 'Asia/Jerusalem').date }).eq('id', profile.id);
       results.push({ user: uid.slice(0, 8), kind: msg.kind, sent });
