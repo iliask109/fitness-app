@@ -6,6 +6,7 @@ import { navigate } from '../lib/router';
 import { ageFromBirthDate, todayISO } from '../lib/utils';
 import { ThemePicker } from '../components/ThemeControls';
 import SetPassword from '../components/SetPassword';
+import NotificationSettings from '../components/NotificationSettings';
 
 const FIELDS = [
   ['calorie_goal', 'יעד קלוריות יומי'],
@@ -75,6 +76,7 @@ export default function Settings() {
         </div>
         <button className="btn primary">{saved ? '✓ נשמר' : 'שמירה'}</button>
       </form>
+      <NotificationSettings />
       <ThemePicker />
       {!isDemo && <SetPassword />}
       <div className="card stack tight">

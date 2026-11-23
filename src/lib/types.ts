@@ -1,4 +1,4 @@
-export type TableName = 'profiles' | 'workouts' | 'programs' | 'meals' | 'body_weights' | 'water_logs';
+export type TableName = 'profiles' | 'workouts' | 'programs' | 'meals' | 'body_weights' | 'water_logs' | 'push_subscriptions';
 
 export interface BaseRow {
   id: string;
@@ -61,6 +61,12 @@ export interface Profile extends BaseRow {
   onboarded_at?: string | null;
   /** The program "today's workout" follows. */
   active_program_id?: string | null;
+  reminder_enabled?: boolean | null;
+  reminder_time?: string | null;
+  reminder_tz?: string | null;
+  remind_training_day?: boolean | null;
+  remind_no_workout?: boolean | null;
+  last_reminded_on?: string | null;
   calorie_goal: number;
   protein_goal: number;
   carbs_goal: number;
