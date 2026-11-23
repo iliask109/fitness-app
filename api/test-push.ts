@@ -10,7 +10,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { data: { user }, error } = await db.auth.getUser(token);
     if (error || !user) return res.status(401).json({ error: 'not signed in' });
 
-    const { data: subs } = await db.from('push_subscriptions').select('*').eq('user_id', user.id);
+    const { data: subs, error: subsError } = await db.from('push_subscriptions').select('*').eq('user_id', user.id);
+    if (subsError) return res.status(500).json({ error: 'קריאת המכשירים נכשלה: ' + subsError.message });
     if (!subs?.length) return res.status(404).json({ error: 'no devices' });
     const result = await sendToSubscriptions(db, subs as SubscriptionRow[], {
       title: 'FitLogix 🔔', body: 'ההתראות עובדות! נזכיר לך כשיגיע זמן האימון.', url: '/#/settings',

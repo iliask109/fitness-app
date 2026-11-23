@@ -13,9 +13,19 @@ export function requireEnv(name: string): string {
   return v;
 }
 
+/** Role inside a legacy JWT key ("anon" or "service_role"), if it is one. */
+function jwtRole(key: string): string | undefined {
+  try { return JSON.parse(Buffer.from(key.split('.')[1], 'base64url').toString()).role; } catch { return undefined; }
+}
+
 /** Server-side Supabase client with the secret key: bypasses RLS, so only use it here. */
 export function adminClient() {
-  return createClient(SUPABASE_URL, requireEnv('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false } });
+  const key = requireEnv('SUPABASE_SERVICE_ROLE_KEY').trim();
+  // The public key would sign users in fine but read nothing, which looks like "no devices". Say so instead.
+  if (key.startsWith('sb_publishable_') || jwtRole(key) === 'anon') {
+    throw new Error('ב-Vercel, SUPABASE_SERVICE_ROLE_KEY מכיל את המפתח הציבורי. צריך את המפתח הסודי מ-Supabase (secret, מתחיל ב-sb_secret_ או service_role).');
+  }
+  return createClient(SUPABASE_URL, key, { auth: { persistSession: false } });
 }
 
 let vapidReady = false;
