@@ -91,14 +91,17 @@ function localNow(now, timeZone) {
   const date = `${parts.year}-${parts.month}-${parts.day}`;
   return { date, minutes: Number(parts.hour) * 60 + Number(parts.minute), weekday: (/* @__PURE__ */ new Date(date + "T12:00:00Z")).getUTCDay() };
 }
-function decideReminder(profile, workouts, programs, now) {
-  if (!profile.reminder_enabled) return null;
-  const tz = profile.reminder_tz || "Asia/Jerusalem";
-  const local = localNow(now, tz);
+function isDue(profile, now) {
+  if (!profile.reminder_enabled) return false;
+  const local = localNow(now, profile.reminder_tz || "Asia/Jerusalem");
   const [h, m] = (profile.reminder_time || DEFAULT_REMINDER_TIME).split(":").map(Number);
   const late = local.minutes - (h * 60 + m);
-  if (late < 0 || late >= CHECK_EVERY_MIN) return null;
-  if (profile.last_reminded_on === local.date) return null;
+  return late >= 0 && late < CHECK_EVERY_MIN && profile.last_reminded_on !== local.date;
+}
+var HISTORY_DAYS = 60;
+function decideReminder(profile, workouts, programs, now) {
+  if (!isDue(profile, now)) return null;
+  const local = localNow(now, profile.reminder_tz || "Asia/Jerusalem");
   if (workouts.some((w) => w.date === local.date)) return null;
   const program = activeProgram(programs, workouts, profile);
   if (program && profile.remind_training_day !== false) {
@@ -130,6 +133,8 @@ function decideReminder(profile, workouts, programs, now) {
 export {
   CHECK_EVERY_MIN,
   DEFAULT_REMINDER_TIME,
+  HISTORY_DAYS,
   decideReminder,
+  isDue,
   localNow
 };

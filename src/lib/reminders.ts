@@ -30,6 +30,21 @@ export function localNow(now: Date, timeZone: string) {
   return { date, minutes: Number(parts.hour) * 60 + Number(parts.minute), weekday: new Date(date + 'T12:00:00Z').getUTCDay() };
 }
 
+/**
+ * Cheap check without any workout data: reminders on, the current 15-minute slot holds the chosen time,
+ * and nothing was sent today. The server only loads data for users who pass it.
+ */
+export function isDue(profile: ReminderSettings, now: Date): boolean {
+  if (!profile.reminder_enabled) return false;
+  const local = localNow(now, profile.reminder_tz || 'Asia/Jerusalem');
+  const [h, m] = (profile.reminder_time || DEFAULT_REMINDER_TIME).split(':').map(Number);
+  const late = local.minutes - (h * 60 + m);
+  return late >= 0 && late < CHECK_EVERY_MIN && profile.last_reminded_on !== local.date;
+}
+
+/** How far back the server looks at workouts (this week, plus the last workout of the program). */
+export const HISTORY_DAYS = 60;
+
 export interface ReminderMessage { title: string; body: string; url: string; kind: 'training_day' | 'no_workout' }
 
 /**
@@ -39,13 +54,8 @@ export interface ReminderMessage { title: string; body: string; url: string; kin
 export function decideReminder(
   profile: Profile & ReminderSettings, workouts: Workout[], programs: Program[], now: Date,
 ): ReminderMessage | null {
-  if (!profile.reminder_enabled) return null;
-  const tz = profile.reminder_tz || 'Asia/Jerusalem';
-  const local = localNow(now, tz);
-  const [h, m] = (profile.reminder_time || DEFAULT_REMINDER_TIME).split(':').map(Number);
-  const late = local.minutes - (h * 60 + m);
-  if (late < 0 || late >= CHECK_EVERY_MIN) return null;
-  if (profile.last_reminded_on === local.date) return null;
+  if (!isDue(profile, now)) return null;
+  const local = localNow(now, profile.reminder_tz || 'Asia/Jerusalem');
   if (workouts.some((w) => w.date === local.date)) return null; // already trained today
 
   const program = activeProgram(programs, workouts, profile);
