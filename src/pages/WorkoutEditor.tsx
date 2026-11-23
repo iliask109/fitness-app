@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTable } from '../lib/useTable';
 import { navigate } from '../lib/router';
 import type { Program, SetEntry, Workout, WorkoutExercise } from '../lib/types';
-import { todayISO, workoutVolume, e1rm, round } from '../lib/utils';
+import { todayISO, workoutVolume, e1rm, round, formatDate } from '../lib/utils';
 import ExercisePicker from '../components/ExercisePicker';
 import RestTimer from '../components/RestTimer';
 import ExerciseInfo from '../components/ExerciseInfo';
@@ -90,7 +90,11 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
       </div>
       <input className="title-input" value={w.name} onChange={(e) => update((d) => { d.name = e.target.value; })} />
       <div className="row gap">
-        <label className="grow">תאריך<input type="date" value={w.date} onChange={(e) => update((d) => { d.date = e.target.value; })} /></label>
+        {/* The date is the day the workout was done: set when it starts, not editable. */}
+        <div className="grow workout-date">
+          <span className="muted small">תאריך</span>
+          <strong>📅 {formatDate(w.date, { weekday: 'long', day: 'numeric', month: 'long' })}{w.date === todayISO() ? ' (היום)' : ''}</strong>
+        </div>
         <label>מנוחה (שנ׳)
           <select value={restSec} onChange={(e) => setRestSec(Number(e.target.value))}>
             {[45, 60, 90, 120, 180, 240].map((s) => <option key={s} value={s}>{s}</option>)}

@@ -383,3 +383,5 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .library-row:first-of-type { border-top: none; }
 .library-row > span:first-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .library-name { font-weight: 600; }
+.workout-date { display: flex; flex-direction: column; gap: 4px; }
+.workout-date strong { padding: 9px 0; }
