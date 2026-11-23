@@ -271,3 +271,10 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .sheet { border-radius: 28px 28px 0 0; }
 .theme-btn { font-size: 18px; }
 .segmented button { white-space: nowrap; }
+
+/* password recovery */
+.link-btn { font: inherit; background: none; border: none; padding: 4px; color: var(--primary); cursor: pointer; font-weight: 600; }
+.link-btn:disabled { color: var(--muted); cursor: default; }
+.code-input { font-size: 28px; letter-spacing: .4em; text-align: center; font-variant-numeric: tabular-nums; }
+.check-row { flex-direction: row; align-items: center; gap: 8px; color: var(--text); }
+.check-row input { width: auto; }

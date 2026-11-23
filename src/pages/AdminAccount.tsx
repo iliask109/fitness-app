@@ -2,6 +2,7 @@ import { useAuth } from '../lib/auth';
 import { isDemo } from '../lib/supabase';
 import { navigate } from '../lib/router';
 import { ThemePicker } from '../components/ThemeControls';
+import SetPassword from '../components/SetPassword';
 
 /** Account page for admins: who is signed in, and sign out. No training settings. */
 export default function AdminAccount() {
@@ -17,6 +18,7 @@ export default function AdminAccount() {
         <button className="btn danger" onClick={async () => { await signOut(); navigate('/'); }}>התנתקות</button>
       </div>
       <ThemePicker />
+      {!isDemo && <SetPassword />}
       <p className="muted small">כדי להוסיף מנהל נוסף: היכנס לדף של המשתמש ברשימה ולחץ "הפיכה למנהל".</p>
     </div>
   );

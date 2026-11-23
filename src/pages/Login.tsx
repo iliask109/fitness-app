@@ -2,12 +2,14 @@ import { FormEvent, useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { isDemo } from '../lib/supabase';
 import { ageFromBirthDate, todayISO } from '../lib/utils';
+import { authErrorHe } from '../lib/authErrors';
+import ForgotPassword from '../components/ForgotPassword';
 
 const emptySignup = { first_name: '', last_name: '', age: '', birth_date: '' };
 
 export default function Login() {
   const { signIn, signUp } = useAuth();
-  const [mode, setMode] = useState<'in' | 'up'>('in');
+  const [mode, setMode] = useState<'in' | 'up' | 'forgot'>('in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [details, setDetails] = useState(emptySignup);
@@ -50,13 +52,13 @@ export default function Login() {
         if (needsConfirm) setMsg('נשלח אליך מייל לאישור החשבון. אחרי האישור אפשר להתחבר.');
       }
     } catch (err) {
-      setMsg(translate((err as Error).message));
+      setMsg(authErrorHe((err as Error).message));
     } finally {
       setBusy(false);
     }
   }
 
-  const switchMode = (m: 'in' | 'up') => { setMode(m); setMsg(null); };
+  const switchMode = (m: 'in' | 'up' | 'forgot') => { setMode(m); setMsg(null); };
 
   return (
     <div className="login">
@@ -67,48 +69,45 @@ export default function Login() {
         {isDemo && (
           <p className="notice">מצב הדגמה: לא הוגדר Supabase, והנתונים נשמרים רק בדפדפן הזה. אפשר להיכנס עם כל אימייל.</p>
         )}
-        <div className="segmented">
-          <button className={mode === 'in' ? 'on' : ''} onClick={() => switchMode('in')}>התחברות</button>
-          <button className={mode === 'up' ? 'on' : ''} onClick={() => switchMode('up')}>הרשמה</button>
-        </div>
-        <form onSubmit={submit} className="stack" noValidate={mode === 'up'}>
-          {mode === 'up' && (
-            <>
-              <div className="grid2">
-                <label>שם פרטי<input required autoComplete="given-name" value={details.first_name}
-                  onChange={(e) => setDetails({ ...details, first_name: e.target.value })} /></label>
-                <label>שם משפחה<input required autoComplete="family-name" value={details.last_name}
-                  onChange={(e) => setDetails({ ...details, last_name: e.target.value })} /></label>
-              </div>
-              <div className="grid2">
-                <label>גיל<input type="number" inputMode="numeric" min={10} max={120} required value={details.age}
-                  onChange={(e) => setDetails({ ...details, age: e.target.value })} /></label>
-                <label><span>תאריך לידה <span className="optional">(לא חובה)</span></span>
-                  <input type="date" autoComplete="bday" max={todayISO()} value={details.birth_date}
-                    onChange={(e) => setBirthDate(e.target.value)} /></label>
-              </div>
-            </>
-          )}
-          <label>אימייל<input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" /></label>
-          <label>סיסמה<input type="password" required={!isDemo} minLength={isDemo ? 0 : 6} value={password}
-            autoComplete={mode === 'up' ? 'new-password' : 'current-password'}
-            onChange={(e) => setPassword(e.target.value)} dir="ltr" />
-            {mode === 'up' && <span className="optional">לפחות 6 תווים</span>}
-          </label>
-          <button className="btn primary" disabled={busy}>{busy ? '...' : mode === 'in' ? 'כניסה' : 'יצירת חשבון'}</button>
-        </form>
-        {msg && <p className="notice">{msg}</p>}
+        {mode === 'forgot' ? (
+          <ForgotPassword initialEmail={email} onBack={() => switchMode('in')} />
+        ) : (
+          <>
+            <div className="segmented">
+              <button className={mode === 'in' ? 'on' : ''} onClick={() => switchMode('in')}>התחברות</button>
+              <button className={mode === 'up' ? 'on' : ''} onClick={() => switchMode('up')}>הרשמה</button>
+            </div>
+            <form onSubmit={submit} className="stack" noValidate={mode === 'up'}>
+              {mode === 'up' && (
+                <>
+                  <div className="grid2">
+                    <label>שם פרטי<input required autoComplete="given-name" value={details.first_name}
+                      onChange={(e) => setDetails({ ...details, first_name: e.target.value })} /></label>
+                    <label>שם משפחה<input required autoComplete="family-name" value={details.last_name}
+                      onChange={(e) => setDetails({ ...details, last_name: e.target.value })} /></label>
+                  </div>
+                  <div className="grid2">
+                    <label>גיל<input type="number" inputMode="numeric" min={10} max={120} required value={details.age}
+                      onChange={(e) => setDetails({ ...details, age: e.target.value })} /></label>
+                    <label><span>תאריך לידה <span className="optional">(לא חובה)</span></span>
+                      <input type="date" autoComplete="bday" max={todayISO()} value={details.birth_date}
+                        onChange={(e) => setBirthDate(e.target.value)} /></label>
+                  </div>
+                </>
+              )}
+              <label>אימייל<input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" /></label>
+              <label>סיסמה<input type="password" required={!isDemo} minLength={isDemo ? 0 : 6} value={password}
+                autoComplete={mode === 'up' ? 'new-password' : 'current-password'}
+                onChange={(e) => setPassword(e.target.value)} dir="ltr" />
+                {mode === 'up' && <span className="optional">לפחות 6 תווים</span>}
+              </label>
+              <button className="btn primary" disabled={busy}>{busy ? '...' : mode === 'in' ? 'כניסה' : 'יצירת חשבון'}</button>
+              {mode === 'in' && <button type="button" className="link-btn" onClick={() => switchMode('forgot')}>שכחתי סיסמה</button>}
+            </form>
+            {msg && <p className="notice">{msg}</p>}
+          </>
+        )}
       </div>
     </div>
   );
-}
-
-function translate(m: string) {
-  if (/banned/i.test(m)) return 'החשבון שלך נחסם. פנה למנהל';
-  if (/invalid login/i.test(m)) return 'אימייל או סיסמה שגויים';
-  if (/already registered/i.test(m)) return 'המשתמש כבר קיים. נסה להתחבר';
-  if (/email not confirmed/i.test(m)) return 'צריך לאשר את האימייל לפני ההתחברות';
-  if (/valid email|invalid.*email/i.test(m)) return 'כתובת האימייל לא תקינה';
-  if (/password/i.test(m)) return 'הסיסמה צריכה להכיל לפחות 6 תווים';
-  return m;
 }

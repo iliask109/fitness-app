@@ -16,6 +16,7 @@ import Onboarding from './pages/Onboarding';
 import { useProfile } from './lib/useProfile';
 import AdminAccount from './pages/AdminAccount';
 import { ThemeToggle } from './components/ThemeControls';
+import SetPassword from './components/SetPassword';
 
 const TABS = [
   { key: '', label: 'בית', icon: '🏠' },
@@ -34,7 +35,16 @@ export default function App() {
 
 /** Admins get the management app only; everyone else gets the training app. */
 function Shell() {
-  const { isAdmin, adminChecked } = useAuth();
+  const { isAdmin, adminChecked, mustSetPassword } = useAuth();
+  // Signed in with a recovery code or link: nothing else until a new password is saved.
+  if (mustSetPassword) {
+    return (
+      <div className="app">
+        <header className="topbar"><span className="brand">FitLogix</span><ThemeToggle /></header>
+        <main className="content onboarding-only"><SetPassword forced onDone={() => navigate('/')} /></main>
+      </div>
+    );
+  }
   if (!adminChecked) return <div className="center muted">טוען…</div>;
   return isAdmin ? <AdminShell /> : <UserShell />;
 }

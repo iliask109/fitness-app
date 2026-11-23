@@ -5,6 +5,7 @@ import { isDemo } from '../lib/supabase';
 import { navigate } from '../lib/router';
 import { ageFromBirthDate, todayISO } from '../lib/utils';
 import { ThemePicker } from '../components/ThemeControls';
+import SetPassword from '../components/SetPassword';
 
 const FIELDS = [
   ['calorie_goal', 'יעד קלוריות יומי'],
@@ -75,6 +76,7 @@ export default function Settings() {
         <button className="btn primary">{saved ? '✓ נשמר' : 'שמירה'}</button>
       </form>
       <ThemePicker />
+      {!isDemo && <SetPassword />}
       <div className="card stack tight">
         <div className="muted small">מחובר בתור</div>
         <div dir="ltr" style={{ textAlign: 'right' }}>{user?.email}</div>
