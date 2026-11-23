@@ -5,10 +5,13 @@ import type { Program } from '../lib/types';
 import ExercisePicker from '../components/ExercisePicker';
 import WeekdayPicker from '../components/WeekdayPicker';
 import ExerciseInfo from '../components/ExerciseInfo';
+import ConfirmInline from '../components/ConfirmInline';
 
 export default function ProgramEditor({ id }: { id: string }) {
   const programs = useTable<Program>('programs');
   const [p, setP] = useState<Program | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
   const isNew = id === 'new';
 
   useEffect(() => {
@@ -25,23 +28,27 @@ export default function ProgramEditor({ id }: { id: string }) {
   const update = (fn: (d: Program) => void) => setP((prev) => { const d = structuredClone(prev!); fn(d); return d; });
 
   async function save() {
+    setError(null);
     try {
       await programs.save(p!);
       navigate('/programs');
-    } catch (e) { alert('שמירה נכשלה: ' + (e as Error).message); }
+    } catch (e) { setError('השמירה נכשלה: ' + (e as Error).message); }
   }
   async function remove() {
-    if (!confirm('למחוק את התוכנית?')) return;
-    await programs.remove(p!.id);
-    navigate('/programs');
+    try {
+      await programs.remove(p!.id);
+      navigate('/programs');
+    } catch (e) { setError('המחיקה נכשלה: ' + (e as Error).message); setConfirming(false); }
   }
 
   return (
     <div className="stack">
       <div className="row between">
         <a href="#/programs" className="muted">→ חזרה</a>
-        {!isNew && <button className="btn danger small" onClick={remove}>מחיקה</button>}
+        {!isNew && <button className="btn danger small" onClick={() => setConfirming(true)}>מחיקה</button>}
       </div>
+      {confirming && <ConfirmInline message={`למחוק את התוכנית "${p.name}"? האימונים שכבר עשית יישמרו.`} onConfirm={remove} onCancel={() => setConfirming(false)} />}
+      {error && <p className="notice" style={{ margin: 0 }}>{error}</p>}
       <input className="title-input" value={p.name} onChange={(e) => update((d) => { d.name = e.target.value; })} />
 
       {p.days.map((day, di) => (

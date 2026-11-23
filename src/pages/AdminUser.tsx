@@ -6,6 +6,7 @@ import { navigate } from '../lib/router';
 import { BodyWeight, DEFAULT_PROFILE, Meal, Profile, Workout } from '../lib/types';
 import { addDays, currentAge, daysAgo, formatDate, todayISO, weekStart, workoutVolume } from '../lib/utils';
 import ProgressCharts from '../components/ProgressCharts';
+import ConfirmInline from '../components/ConfirmInline';
 import { EXPERIENCE, GOALS, LOCATIONS, labelOf } from '../lib/fitnessProfile';
 
 interface Data { workouts: Workout[]; meals: Meal[]; weights: BodyWeight[]; profile: Profile }
@@ -16,6 +17,8 @@ export default function AdminUser({ id }: { id: string }) {
   const [data, setData] = useState<Data | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [asking, setAsking] = useState<'ban' | 'delete' | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   async function load() {
     try {
@@ -44,8 +47,9 @@ export default function AdminUser({ id }: { id: string }) {
 
   async function act(fn: () => Promise<void>, done?: () => void) {
     setBusy(true);
-    try { await fn(); done ? done() : await load(); }
-    catch (e) { alert((e as Error).message); }
+    setActionError(null);
+    try { await fn(); setAsking(null); done ? done() : await load(); }
+    catch (e) { setActionError((e as Error).message); }
     finally { setBusy(false); }
   }
 
@@ -149,15 +153,21 @@ export default function AdminUser({ id }: { id: string }) {
           <button className="btn" disabled={busy} onClick={() => act(() => setAdmin(u.id, !u.is_admin))}>
             {u.is_admin ? 'הסרת הרשאת מנהל' : 'הפיכה למנהל'}
           </button>
-          <button className="btn" disabled={busy} onClick={() => {
-            if (u.banned || confirm(`לחסום את ${name}? הוא לא יוכל להתחבר לאפליקציה.`)) act(() => setBanned(u.id, !u.banned));
-          }}>
-            {u.banned ? '✅ ביטול חסימה' : '🚫 חסימת משתמש'}
-          </button>
-          <button className="btn danger" disabled={busy} onClick={() => {
-            if (confirm(`למחוק את ${name} לצמיתות?\nכל האימונים, הארוחות והנתונים שלו יימחקו ואי אפשר לשחזר.`))
-              act(() => deleteUser(u.id), () => navigate('/admin'));
-          }}>🗑️ מחיקת משתמש</button>
+          {asking === 'ban' ? (
+            <ConfirmInline message={`לחסום את ${name}? ${data.profile.gender === 'female' ? 'היא לא תוכל' : 'הוא לא יוכל'} להתחבר לאפליקציה.`}
+              confirmLabel="כן, לחסום" busy={busy} onCancel={() => setAsking(null)} onConfirm={() => act(() => setBanned(u.id, true))} />
+          ) : (
+            <button className="btn" disabled={busy} onClick={() => (u.banned ? act(() => setBanned(u.id, false)) : setAsking('ban'))}>
+              {u.banned ? '✅ ביטול חסימה' : '🚫 חסימת משתמש'}
+            </button>
+          )}
+          {asking === 'delete' ? (
+            <ConfirmInline message={`למחוק את ${name} לצמיתות? כל האימונים, הארוחות והנתונים יימחקו ואי אפשר לשחזר.`}
+              busy={busy} onCancel={() => setAsking(null)} onConfirm={() => act(() => deleteUser(u.id), () => navigate('/admin'))} />
+          ) : (
+            <button className="btn danger" disabled={busy} onClick={() => setAsking('delete')}>🗑️ מחיקת משתמש</button>
+          )}
+          {actionError && <p className="notice" style={{ margin: 0 }}>{actionError}</p>}
         </div>
       ) : (
         <p className="muted small">זה החשבון שלך. אי אפשר לחסום, למחוק או להסיר הרשאת מנהל מעצמך.</p>
