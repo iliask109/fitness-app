@@ -5,6 +5,7 @@ import { useProfile } from '../lib/useProfile';
 import type { Meal, MealType } from '../lib/types';
 import { addDays, formatDate, round, todayISO } from '../lib/utils';
 import { QUICK_FOODS } from '../lib/foods';
+import CoachChat from '../components/CoachChat';
 
 const MEAL_TYPES: { key: MealType; label: string }[] = [
   { key: 'breakfast', get label() { return tr('🍳 בוקר', '🍳 Breakfast'); } },
@@ -65,6 +66,8 @@ export default function Nutrition() {
         <Macro label={tr('פחמימות', 'Carbs')} value={total.carbs} goal={profile.carbs_goal} color="var(--amber)" />
         <Macro label={tr('שומן', 'Fat')} value={total.fat} goal={profile.fat_goal} color="var(--pink)" />
       </div>
+
+      <CoachChat />
 
       {MEAL_TYPES.map((mt) => {
         const list = dayMeals.filter((m) => m.meal_type === mt.key);

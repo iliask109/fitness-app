@@ -14,6 +14,7 @@ const UPDATES: { file: string; table: string; columns?: string[] }[] = [
   { file: 'update-8-goal-period.sql', table: 'profiles', columns: ['goal_months', 'goal_start'] },
   { file: 'update-9-auto-nutrition.sql', table: 'profiles', columns: ['nutrition_updated_on', 'nutrition_weight'] },
   { file: 'update-12-language.sql', table: 'profiles', columns: ['language'] },
+  { file: 'update-13-ai-coach.sql', table: 'ai_usage' },
 ];
 
 export const SQL_FILE_URL = (file: string) => `https://github.com/iliask109/fitness-app/blob/main/supabase/${file}`;
