@@ -51,7 +51,8 @@ export default function Settings() {
   return (
     <div className="stack">
       <h2>הגדרות</h2>
-      <form onSubmit={submit} className="card stack">
+      <div className="card stack">
+      <form onSubmit={submit} className="stack">
         <h3>👤 פרטים אישיים</h3>
         <div className="grid2">
           <label>שם פרטי<input value={form.first_name ?? ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></label>
@@ -81,11 +82,12 @@ export default function Settings() {
           ))}
         </div>
         <p className="muted small">יעדי הקלוריות, החלבון, הפחמימות והשומן מחושבים אוטומטית לפי המשקל שלך ומתעדכנים כל חודש. אפשר לראות אותם בדף ההתקדמות.</p>
-        <button className="btn primary">{saved ? '✓ נשמר' : 'שמירה'}</button>
+        <button className="btn primary">{saved ? '✓ נשמר' : 'שמירת פרטים'}</button>
       </form>
+      {!isDemo && <><hr className="divider" /><SetPassword embedded /></>}
+      </div>
       <NotificationSettings />
       <ThemePicker />
-      {!isDemo && <SetPassword />}
       <div className="card stack tight">
         <div className="muted small">מחובר בתור</div>
         <div dir="ltr" style={{ textAlign: 'right' }}>{user?.email}</div>

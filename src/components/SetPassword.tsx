@@ -6,7 +6,7 @@ import { authErrorHe } from '../lib/authErrors';
  * New password form. `forced` is the screen shown after a recovery code or link:
  * the app stays locked until a new password is saved.
  */
-export default function SetPassword({ forced, onDone }: { forced?: boolean; onDone?: () => void }) {
+export default function SetPassword({ forced, onDone, embedded }: { forced?: boolean; onDone?: () => void; /** Inside another card (no card frame of its own). */ embedded?: boolean }) {
   const { updatePassword, signOut, user } = useAuth();
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
@@ -33,7 +33,7 @@ export default function SetPassword({ forced, onDone }: { forced?: boolean; onDo
   }
 
   return (
-    <form className="card stack" onSubmit={submit} noValidate>
+    <form className={embedded ? 'stack' : 'card stack'} onSubmit={submit} noValidate>
       <h3>{forced ? '🔐 בחירת סיסמה חדשה' : '🔐 שינוי סיסמה'}</h3>
       {forced && <p className="muted small" style={{ margin: 0 }}>נכנסת עם קוד זמני. כדי להמשיך, בחר סיסמה חדשה לחשבון <span dir="ltr">{user?.email}</span>.</p>}
       <label>סיסמה חדשה

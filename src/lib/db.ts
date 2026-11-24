@@ -60,7 +60,7 @@ export async function deleteRow(userId: string, table: TableName, id: string): P
 }
 
 /** Postgres `numeric` comes back as a string; turn numeric-looking fields back into numbers. */
-const NUMERIC = ['protein', 'carbs', 'fat', 'weight', 'weight_goal'];
+const NUMERIC = ['protein', 'carbs', 'fat', 'weight', 'weight_goal', 'nutrition_weight'];
 function normalize(row: Record<string, unknown>) {
   for (const k of NUMERIC) if (typeof row[k] === 'string') row[k] = Number(row[k]);
   return row;
