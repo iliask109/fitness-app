@@ -19,6 +19,7 @@ export default function Settings() {
   const { profile, loading, save } = useProfile();
   const [form, setForm] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
+  const [openDetails, setOpenDetails] = useState(false);
 
   useEffect(() => {
     if (loading) return;
@@ -52,8 +53,12 @@ export default function Settings() {
     <div className="stack">
       <h2>הגדרות</h2>
       <div className="card stack">
+      <button type="button" className="collapse-head" aria-expanded={openDetails} onClick={() => setOpenDetails(!openDetails)}>
+        <h3>👤 פרטים אישיים{isDemo ? '' : ' וסיסמה'}</h3>
+        <span className="collapse-arrow" aria-hidden>{openDetails ? '▴' : '▾'}</span>
+      </button>
+      {openDetails && <>
       <form onSubmit={submit} className="stack">
-        <h3>👤 פרטים אישיים</h3>
         <div className="grid2">
           <label>שם פרטי<input value={form.first_name ?? ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></label>
           <label>שם משפחה<input value={form.last_name ?? ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></label>
@@ -71,8 +76,14 @@ export default function Settings() {
               className={form.gender === g.key ? 'on' : ''} onClick={() => setForm({ ...form, gender: g.key })}>{g.label}</button>
           ))}
         </div>
-        <a className="btn" href="#/profile-setup">🏋️ עריכת פרופיל אימון (גובה, מטרה, ציוד…)</a>
+        <button className="btn primary">{saved ? '✓ נשמר' : 'שמירת פרטים'}</button>
+      </form>
+      {!isDemo && <><hr className="divider" /><SetPassword embedded /></>}
+      </>}
+      </div>
+      <form onSubmit={submit} className="card stack">
         <h3>🎯 יעדים</h3>
+        <a className="btn" href="#/profile-setup">🏋️ עריכת פרופיל אימון (גובה, מטרה, ציוד…)</a>
         <div className="grid2">
           {FIELDS.map(([k, label]) => (
             <label key={k}>{label}
@@ -82,10 +93,8 @@ export default function Settings() {
           ))}
         </div>
         <p className="muted small">יעדי הקלוריות, החלבון, הפחמימות והשומן מחושבים אוטומטית לפי המשקל שלך ומתעדכנים כל חודש. אפשר לראות אותם בדף ההתקדמות.</p>
-        <button className="btn primary">{saved ? '✓ נשמר' : 'שמירת פרטים'}</button>
+        <button className="btn primary">{saved ? '✓ נשמר' : 'שמירה'}</button>
       </form>
-      {!isDemo && <><hr className="divider" /><SetPassword embedded /></>}
-      </div>
       <NotificationSettings />
       <ThemePicker />
       <div className="card stack tight">

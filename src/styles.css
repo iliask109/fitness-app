@@ -436,11 +436,7 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .conn-banner.offline { background: color-mix(in srgb, var(--blue) 16%, var(--card)); }
 .pending-chip { background: color-mix(in srgb, var(--amber) 22%, transparent); font-weight: 700; }
 
-/* Progress photos */
-.photo-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.photo-pair.single { grid-template-columns: minmax(0, 220px); justify-content: center; }
-.photo-pair figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
-.photo-pair img, .photo-placeholder { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 16px; background: var(--track); }
-.photo-placeholder { display: grid; place-items: center; }
-.analysis { margin: 0; padding: 10px 12px; border-radius: 16px; background: var(--track); line-height: 1.6; white-space: pre-line; }
 .divider { border: 0; border-top: 1px solid var(--border); margin: 4px 0; width: 100%; }
+.collapse-head { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: start; }
+.collapse-head h3 { margin: 0; }
+.collapse-arrow { color: var(--muted); font-size: 18px; }

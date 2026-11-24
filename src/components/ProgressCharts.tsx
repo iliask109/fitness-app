@@ -15,12 +15,10 @@ interface Props {
   profile: Profile;
   /** Optional form shown inside the body-weight card (only for the user's own page). */
   weightForm?: ReactNode;
-  /** Optional progress-photos card, shown after the body-weight card (only on the user's own page). */
-  photos?: ReactNode;
 }
 
 /** All progress charts for one user. Used on the user's own page and in the admin user view. */
-export default function ProgressCharts({ workouts, meals, weights, profile, weightForm, photos }: Props) {
+export default function ProgressCharts({ workouts, meals, weights, profile, weightForm }: Props) {
   const weightData = useMemo(() => [...weights].sort((a, b) => a.date.localeCompare(b.date))
     .map((r) => ({ ...r, label: formatDate(r.date) })), [weights]);
 
@@ -88,8 +86,6 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
           </div>
         ) : <p className="muted small">עוד אין שקילות.</p>}
       </div>
-
-      {photos}
 
       <div className="card">
         <h3>🏋️ אימונים בשבוע</h3>

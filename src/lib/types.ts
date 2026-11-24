@@ -1,4 +1,4 @@
-export type TableName = 'profiles' | 'workouts' | 'programs' | 'meals' | 'body_weights' | 'water_logs' | 'push_subscriptions' | 'progress_photos';
+export type TableName = 'profiles' | 'workouts' | 'programs' | 'meals' | 'body_weights' | 'water_logs' | 'push_subscriptions';
 
 export interface BaseRow {
   id: string;
@@ -86,11 +86,3 @@ export const DEFAULT_PROFILE: Omit<Profile, 'id'> = {
   calorie_goal: 2200, protein_goal: 140, carbs_goal: 250, fat_goal: 70, water_goal: 8, weight_goal: null,
 };
 
-export interface ProgressPhoto extends BaseRow {
-  date: string;
-  /** Storage path in the private bucket (demo mode: a data: URL). */
-  path: string;
-  weight?: number | null;
-  analysis?: string | null;
-  compared_to?: string | null;
-}

@@ -4,7 +4,6 @@ import { useProfile } from '../lib/useProfile';
 import type { BodyWeight, Meal, Workout } from '../lib/types';
 import { todayISO } from '../lib/utils';
 import ProgressCharts from '../components/ProgressCharts';
-import ProgressPhotos from '../components/ProgressPhotos';
 
 export default function Progress() {
   const { profile } = useProfile();
@@ -35,7 +34,6 @@ export default function Progress() {
             <button className="btn primary">שמירה</button>
           </form>
         }
-        photos={<ProgressPhotos weights={weights.rows} gender={profile.gender} />}
       />
     </div>
   );
