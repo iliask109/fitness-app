@@ -446,9 +446,3 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .guide-images img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; border-radius: 14px; background: var(--photo-bg); border: 1px solid var(--border); }
 .alt-btn { display: flex; align-items: center; gap: 10px; text-align: start; width: 100%; justify-content: flex-start; }
 .alt-btn img { width: 56px; height: 42px; object-fit: contain; border-radius: 8px; background: var(--photo-bg); flex-shrink: 0; }
-
-/* AI coach chat */
-.coach-log { display: flex; flex-direction: column; gap: 8px; max-height: 420px; overflow-y: auto; padding: 2px; }
-.coach-msg { padding: 10px 12px; border-radius: 16px; line-height: 1.55; white-space: pre-wrap; max-width: 88%; font-size: 14px; }
-.coach-msg.user { align-self: flex-start; background: color-mix(in srgb, var(--primary) 14%, transparent); }
-.coach-msg.assistant { align-self: flex-end; background: var(--track); }
