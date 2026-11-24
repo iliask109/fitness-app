@@ -10,6 +10,8 @@ import SetPassword from '../components/SetPassword';
 import { GENDERS } from '../lib/gender';
 import NotificationSettings from '../components/NotificationSettings';
 import ConfirmInline from '../components/ConfirmInline';
+import MessageThread from '../components/MessageThread';
+import { unread, useThread } from '../lib/messages';
 import { deleteMyAccount } from '../lib/admin';
 import { byGender } from '../lib/gender';
 
@@ -21,6 +23,9 @@ export default function Settings() {
   const [saved, setSaved] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
   const [askDelete, setAskDelete] = useState(false);
+  const [openChat, setOpenChat] = useState(() => new URLSearchParams(location.hash.split('?')[1]).has('chat'));
+  const thread = useThread(user?.id, 60000);
+  const unreadFromAdmin = unread(thread.messages, 'admin');
   const [langBusy, setLangBusy] = useState(false);
   const [langError, setLangError] = useState<string | null>(null);
 
@@ -115,6 +120,13 @@ export default function Settings() {
         <h3>{tr('🎯 יעדים', '🎯 Goals')}</h3>
         <a className="btn" href="#/profile-setup">{tr('🏋️ עריכת פרופיל אימון (גובה, מטרה, משקל יעד, ציוד…)', '🏋️ Edit training profile (height, goal, target weight, equipment…)')}</a>
         <p className="muted small">{tr('יעדי הקלוריות, החלבון, הפחמימות והשומן מחושבים אוטומטית לפי המשקל שלך ומתעדכנים כל חודש. אפשר לראות אותם בדף ההתקדמות.', 'Your calorie, protein, carb and fat goals are calculated automatically from your weight and updated every month. You can see them on the Progress page.')}</p>
+      </div>
+      <div className="card stack tight" id="contact-admin">
+        <button type="button" className="collapse-head" aria-expanded={openChat} onClick={() => setOpenChat(!openChat)}>
+          <h3>✉️ {tr('פנייה למנהל', 'Contact the admin')} {unreadFromAdmin > 0 && <span className="unread-dot">{unreadFromAdmin}</span>}</h3>
+          <span className="collapse-arrow" aria-hidden>{openChat ? '▴' : '▾'}</span>
+        </button>
+        {openChat && user && <MessageThread uid={user.id} as="user" />}
       </div>
       <NotificationSettings />
       <ThemePicker />

@@ -6,6 +6,7 @@ import { navigate } from '../lib/router';
 import { BodyWeight, DEFAULT_PROFILE, Meal, Profile, Workout } from '../lib/types';
 import { addDays, currentAge, daysAgo, formatDate, todayISO, weekStart, workoutVolume } from '../lib/utils';
 import ProgressCharts from '../components/ProgressCharts';
+import AdminMealPlan from '../components/AdminMealPlan';
 import ConfirmInline from '../components/ConfirmInline';
 import { EXPERIENCE, GOAL_PERIODS, GOALS, LOCATIONS, labelOf } from '../lib/fitnessProfile';
 
@@ -123,6 +124,9 @@ export default function AdminUser({ id }: { id: string }) {
           {data.profile.weight_goal ? <span className="chip">משקל יעד {data.profile.weight_goal}</span> : null}
         </div>
       </div>
+
+      <AdminMealPlan uid={id} calorieGoal={data.profile.calorie_goal} />
+      <a className="btn" href={`#/admin-messages/${id}`}>💬 הודעות עם המשתמש</a>
 
       <ProgressCharts workouts={data.workouts} meals={data.meals} weights={data.weights} profile={data.profile} />
 

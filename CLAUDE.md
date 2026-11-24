@@ -23,6 +23,7 @@ Hebrew RTL fitness PWA. Live: https://fitness-app-khaki-iota.vercel.app (Vercel,
 - `lib/schedule.ts`: today's workout and week plan (`cycle` or `weekly` schedules, rotation, missed workouts not skipped). `lib/reminders.ts`: who gets a push reminder and what it says (shared with `api/reminders.ts`).
 - `lib/templates.ts` (built-in programs; live ones are in the `program_templates` table, admin-managed), `lib/exercises.ts` + `lib/exerciseGuide.ts` (53 exercises, every library exercise must have a guide; a test enforces it).
 - `lib/workoutDraft.ts`: unfinished workout kept on the device for an hour.
+- `lib/mealPlan.ts`: meal library + daily menu (`meal_plans`, one row per user, id = user id), built in `UserShell` from the calorie goal and re-sized when it changes unless an admin edited it (`components/AdminMealPlan.tsx`). `lib/messages.ts`: user ↔ admin threads (`messages`, insert-only for users), `components/MessageThread.tsx` in Settings and `pages/AdminMessages.tsx`.
 - `App.tsx`: admins get `AdminShell` (users, programs, account), others `UserShell` (onboarding gate, tabs). Heavy pages are lazy-loaded.
 - `public/sw.js`: offline app shell (pages network-first, `/assets` precached from `precache-manifest.json`) + push notifications. Registered as `/sw.js?v=<build id>`.
 - `api/`: Vercel functions `reminders.ts` (pg_cron every 15 min, `CRON_SECRET`) and `test-push.ts`. Imports inside `api/` need explicit `.js` extensions (ESM).

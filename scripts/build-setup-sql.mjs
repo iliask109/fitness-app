@@ -15,6 +15,7 @@ const FILES = [
   'update-9-auto-nutrition.sql',
   'update-11-delete-account.sql',
   'update-12-language.sql',
+  'update-14-meal-plan-and-messages.sql',
 ];
 
 const parts = FILES.map((f) => `-- ===================== ${f} =====================\n\n${readFileSync(`supabase/${f}`, 'utf8').trim()}\n`);

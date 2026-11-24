@@ -10,10 +10,12 @@ import ProgramEditor from './pages/ProgramEditor';
 import Settings from './pages/Settings';
 import Onboarding from './pages/Onboarding';
 import { useProfile } from './lib/useProfile';
-import { lazy, Suspense, useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useTable } from './lib/useTable';
 import { dueNutritionUpdate } from './lib/nutrition';
-import type { BodyWeight } from './lib/types';
+import { buildPlan, MealPlanRow, resizePlan } from './lib/mealPlan';
+import { listAllMessages, MESSAGES_CHANGED, unread, useThread } from './lib/messages';
+import type { BaseRow, BodyWeight } from './lib/types';
 import { syncDeviceSubscription } from './lib/push';
 import { startSync } from './lib/tableStore';
 import WorkoutView from './pages/WorkoutView';
@@ -32,6 +34,7 @@ const AdminTemplates = lazy(() => import('./pages/AdminTemplates'));
 const AdminTemplateEditor = lazy(() => import('./pages/AdminTemplateEditor'));
 const ExerciseLibrary = lazy(() => import('./pages/ExerciseLibrary'));
 const AdminAccount = lazy(() => import('./pages/AdminAccount'));
+const AdminMessages = lazy(() => import('./pages/AdminMessages'));
 
 const TABS = [
   { key: '', get label() { return tr('בית', 'Home'); }, icon: '🏠' },
@@ -69,14 +72,25 @@ function Shell() {
 const ADMIN_TABS = [
   { key: 'admin', label: 'משתמשים', icon: '👥' },
   { key: 'admin-programs', label: 'תוכניות', icon: '📋' },
+  { key: 'admin-messages', label: 'הודעות', icon: '💬' },
   { key: 'settings', label: 'חשבון', icon: '⚙️' },
 ];
 
 function AdminShell() {
   const route = useRoute();
   const [section = '', sub] = route.path;
-  const tab = section === 'settings' || section === 'admin-programs' ? section : 'admin';
+  const tab = section === 'settings' || section === 'admin-programs' || section === 'admin-messages' ? section : 'admin';
+  // Unread messages from users, as a badge on the messages tab.
+  const [unreadCount, setUnreadCount] = useState(0);
+  useEffect(() => {
+    const load = () => listAllMessages().then((m) => setUnreadCount(m.filter((x) => x.sender === 'user' && !x.read_at).length)).catch(() => undefined);
+    load();
+    const t = setInterval(load, 30000);
+    window.addEventListener(MESSAGES_CHANGED, load);
+    return () => { clearInterval(t); window.removeEventListener(MESSAGES_CHANGED, load); };
+  }, [route.path.join('/')]);
   const page = section === 'settings' ? <AdminAccount />
+    : section === 'admin-messages' ? <AdminMessages key={sub ?? ''} uid={sub} />
     : section === 'admin-programs' ? (sub ? <AdminTemplateEditor key={sub} id={sub} /> : <AdminTemplates />)
     : section === 'admin' && sub ? <AdminUser id={sub} />
     : <AdminUsers />;
@@ -93,7 +107,7 @@ function AdminShell() {
       <nav className="tabbar">
         {ADMIN_TABS.map((t) => (
           <a key={t.key} href={'#/' + t.key} className={tab === t.key ? 'active' : ''}>
-            <span className="tab-icon">{t.icon}</span>
+            <span className="tab-icon badge-host">{t.icon}{t.key === 'admin-messages' && unreadCount > 0 && <span className="unread-dot corner">{unreadCount}</span>}</span>
             <span>{t.label}</span>
           </a>
         ))}
@@ -130,6 +144,22 @@ function UserShell() {
     const patch = dueNutritionUpdate(me.profile, weights.rows);
     if (patch) me.save(patch).catch(() => { nutritionChecked.current = false; });
   }, [me, weights.loading, weights.rows]);
+
+  // New replies from the admin show as a badge on the settings button.
+  const thread = useThread(me.profile.onboarded_at ? user?.id : undefined, 60000);
+  const unreadFromAdmin = unread(thread.messages, 'admin');
+  // A daily meal plan from the first day, sized to the calorie goal; re-sized when the goal changes
+  // (unless an admin chose the portions by hand).
+  const plans = useTable<MealPlanRow & BaseRow>('meal_plans');
+  const planSizedFor = useRef<number | null>(null);
+  useEffect(() => {
+    const goal = me.profile.calorie_goal;
+    if (me.loading || plans.loading || plans.error || !me.profile.onboarded_at || !user || planSizedFor.current === goal) return;
+    planSizedFor.current = goal;
+    const plan = plans.rows[0];
+    if (!plan) plans.save({ id: user.id, items: buildPlan(goal, user.id), calorie_goal: goal, edited_by_admin: false }).catch(() => undefined);
+    else if (!plan.edited_by_admin && plan.calorie_goal !== goal) plans.save({ ...plan, items: resizePlan(plan.items, goal), calorie_goal: goal }).catch(() => undefined);
+  }, [me.loading, me.profile.calorie_goal, me.profile.onboarded_at, plans.loading, plans.error, plans.rows, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (me.loading && !me.profile.onboarded_at) return <div className="center muted">{tr('טוען…', 'Loading…')}</div>;
   if (!me.profile.onboarded_at && !me.error) {
@@ -169,7 +199,9 @@ function UserShell() {
         <a className="brand" href="#/" aria-label={tr('מסך הבית', 'Home')}>FitLogix</a>
         {isDemo && <span className="badge">{tr('מצב הדגמה', 'Demo mode')}</span>}
         <ThemeToggle />
-        <button className="icon-btn" onClick={() => navigate('/settings')} aria-label={tr('הגדרות', 'Settings')}>⚙️</button>
+        <button className="icon-btn badge-host" onClick={() => navigate(unreadFromAdmin ? '/settings?chat=1' : '/settings')} aria-label={tr('הגדרות', 'Settings')}>
+          ⚙️{unreadFromAdmin > 0 && <span className="unread-dot corner" aria-label={tr('הודעה חדשה מהמנהל', 'New message from the admin')}>{unreadFromAdmin}</span>}
+        </button>
       </header>
       <main className="content"><ConnectionBanner /><Suspense fallback={<p className="muted">{tr('טוען…', 'Loading…')}</p>}>{page}</Suspense></main>
       <nav className="tabbar">

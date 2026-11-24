@@ -1,4 +1,4 @@
-export type TableName = 'profiles' | 'workouts' | 'programs' | 'meals' | 'body_weights' | 'water_logs' | 'push_subscriptions';
+export type TableName = 'profiles' | 'workouts' | 'programs' | 'meals' | 'body_weights' | 'water_logs' | 'push_subscriptions' | 'meal_plans';
 
 export interface BaseRow {
   id: string;
