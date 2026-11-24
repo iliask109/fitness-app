@@ -10,6 +10,15 @@ export function addDays(iso: string, n: number) {
   d.setDate(d.getDate() + n);
   return toISO(d);
 }
+/** Same day n months later, clamped to the month's last day (31 Aug + 6 months = 28 Feb). */
+export function addMonths(iso: string, n: number) {
+  const d = new Date(iso + 'T12:00:00');
+  const day = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + n);
+  d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
+  return toISO(d);
+}
 export function formatDate(iso: string, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('he-IL', opts);
 }

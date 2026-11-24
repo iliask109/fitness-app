@@ -2,6 +2,7 @@ import { ReactNode, useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { BodyWeight, Meal, Profile, Workout } from '../lib/types';
 import { addDays, formatDate, round, todayISO, weekStart, workoutVolume } from '../lib/utils';
+import { nextNutritionUpdate } from '../lib/nutrition';
 import { GOAL_PERIODS, GOALS, goalEndDate, labelOf } from '../lib/fitnessProfile';
 
 const axis = { fontSize: 11, fill: 'var(--muted)' };
@@ -62,6 +63,7 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
   return (
     <>
       <GoalCard profile={profile} lastWeight={last} own={!!weightForm} />
+      <NutritionGoals profile={profile} />
 
       <div className="card stack tight">
         <div className="row between">
@@ -226,6 +228,31 @@ function GoalCard({ profile, lastWeight, own }: { profile: Profile; lastWeight?:
           {toGoal != null && toGoal !== 0 ? <span className="muted"> · עוד <span dir="ltr">{Math.abs(toGoal)}</span> ק״ג {toGoal < 0 ? 'להוריד' : 'לעלות'}</span> : toGoal === 0 ? <span className="good"> · היעד הושג! 🎉</span> : null}
         </span>
       ) : null}
+    </div>
+  );
+}
+
+/** Daily nutrition goals: read-only, calculated from the body weight and updated every month. */
+function NutritionGoals({ profile }: { profile: Profile }) {
+  const next = nextNutritionUpdate(profile);
+  const items = [
+    { label: 'קלוריות', value: profile.calorie_goal, unit: 'קק״ל' },
+    { label: 'חלבון', value: profile.protein_goal, unit: 'ג׳' },
+    { label: 'פחמימות', value: profile.carbs_goal, unit: 'ג׳' },
+    { label: 'שומן', value: profile.fat_goal, unit: 'ג׳' },
+  ];
+  return (
+    <div className="card stack tight">
+      <h3>🍽️ יעדי תזונה יומיים</h3>
+      <div className="grid4 nutrition-goals">
+        {items.map((x) => (
+          <div key={x.label} className="stat"><span className="stat-num">{x.value}</span><span className="muted small">{x.unit} {x.label}</span></div>
+        ))}
+      </div>
+      <span className="muted small">
+        {profile.nutrition_weight ? <>מחושב לפי משקל {profile.nutrition_weight} ק״ג. </> : null}
+        מתעדכן אוטומטית כל חודש לפי המשקל האחרון{next ? <> · עדכון הבא: {formatDate(next, { day: 'numeric', month: 'long' })}</> : null}.
+      </span>
     </div>
   );
 }

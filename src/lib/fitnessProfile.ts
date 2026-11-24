@@ -1,3 +1,5 @@
+import { addMonths } from './utils';
+
 /** Choices for the training profile filled in after sign-up. Keys are stored; labels are shown. */
 
 export const EXPERIENCE = [
@@ -43,12 +45,5 @@ export const GOAL_PERIODS = [
 export function goalEndDate(p: { goal_months?: number | null; goal_start?: string | null; onboarded_at?: string | null }) {
   const start = p.goal_start ?? p.onboarded_at?.slice(0, 10);
   if (!p.goal_months || !start) return null;
-  const d = new Date(start + 'T12:00:00');
-  const day = d.getDate();
-  d.setDate(1);
-  d.setMonth(d.getMonth() + p.goal_months);
-  // Clamp to the month's last day (31 Aug + 6 months = 28/29 Feb, not 3 Mar).
-  d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
-  const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-  return z.toISOString().slice(0, 10);
+  return addMonths(start, p.goal_months);
 }

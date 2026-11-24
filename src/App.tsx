@@ -10,7 +10,10 @@ import ProgramEditor from './pages/ProgramEditor';
 import Settings from './pages/Settings';
 import Onboarding from './pages/Onboarding';
 import { useProfile } from './lib/useProfile';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { useTable } from './lib/useTable';
+import { dueNutritionUpdate } from './lib/nutrition';
+import type { BodyWeight } from './lib/types';
 import { syncDeviceSubscription } from './lib/push';
 import { startSync } from './lib/tableStore';
 import WorkoutView from './pages/WorkoutView';
@@ -108,6 +111,15 @@ function UserShell() {
   }, [me.loading, user, remindersOn]);
   // Send changes made offline (now, when the connection returns, and every minute).
   useEffect(() => { if (user) startSync(user.id); }, [user]);
+  // Nutrition goals follow the body weight: recalculated from the latest weigh-in once a month.
+  const weights = useTable<BodyWeight>('body_weights');
+  const nutritionChecked = useRef(false);
+  useEffect(() => {
+    if (me.loading || weights.loading || !me.profile.onboarded_at || nutritionChecked.current) return;
+    nutritionChecked.current = true;
+    const patch = dueNutritionUpdate(me.profile, weights.rows);
+    if (patch) me.save(patch).catch(() => { nutritionChecked.current = false; });
+  }, [me, weights.loading, weights.rows]);
 
   if (me.loading && !me.profile.onboarded_at) return <div className="center muted">טוען…</div>;
   if (!me.profile.onboarded_at && !me.error) {

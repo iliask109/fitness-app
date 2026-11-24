@@ -9,11 +9,8 @@ import SetPassword from '../components/SetPassword';
 import { GENDERS } from '../lib/gender';
 import NotificationSettings from '../components/NotificationSettings';
 
+// Calories and macros are not edited here: they are calculated from the body weight every month (lib/nutrition.ts).
 const FIELDS = [
-  ['calorie_goal', 'יעד קלוריות יומי'],
-  ['protein_goal', 'יעד חלבון (ג׳)'],
-  ['carbs_goal', 'יעד פחמימות (ג׳)'],
-  ['fat_goal', 'יעד שומן (ג׳)'],
   ['weight_goal', 'משקל יעד (ק״ג)'],
 ] as const;
 
@@ -83,6 +80,7 @@ export default function Settings() {
             </label>
           ))}
         </div>
+        <p className="muted small">יעדי הקלוריות, החלבון, הפחמימות והשומן מחושבים אוטומטית לפי המשקל שלך ומתעדכנים כל חודש. אפשר לראות אותם בדף ההתקדמות.</p>
         <button className="btn primary">{saved ? '✓ נשמר' : 'שמירה'}</button>
       </form>
       <NotificationSettings />

@@ -77,6 +77,9 @@ export interface Profile extends BaseRow {
   fat_goal: number;
   water_goal: number;
   weight_goal?: number | null;
+  /** Day the nutrition goals were last calculated (they are recalculated a month later) and the body weight used. */
+  nutrition_updated_on?: string | null;
+  nutrition_weight?: number | null;
 }
 
 export const DEFAULT_PROFILE: Omit<Profile, 'id'> = {

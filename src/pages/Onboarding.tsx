@@ -4,6 +4,7 @@ import { listRows } from '../lib/db';
 import { saveToTable } from '../lib/tableStore';
 import type { BodyWeight, Profile } from '../lib/types';
 import { todayISO } from '../lib/utils';
+import { calcNutritionGoals, latestWeight } from '../lib/nutrition';
 import {
   EQUIPMENT_BY_LOCATION, EXPERIENCE, FULL_GYM, GOAL_PERIODS, GOALS, LOCATIONS, NO_EQUIPMENT,
 } from '../lib/fitnessProfile';
@@ -27,6 +28,7 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
   const [weight, setWeight] = useState('');
   const [experience, setExperience] = useState(profile.experience ?? '');
   const [goal, setGoal] = useState(profile.fitness_goal ?? '');
+  const [target, setTarget] = useState(profile.weight_goal ? String(profile.weight_goal) : '');
   const [months, setMonths] = useState<number | null>(profile.goal_months ?? null);
   const [days, setDays] = useState<number | null>(profile.training_days ?? null);
   const [locations, setLocations] = useState<string[]>(profile.training_locations ?? []);
@@ -67,6 +69,9 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
     }
     if (!experience) return 'נא לבחור רמת ניסיון';
     if (!goal) return 'נא לבחור מטרה';
+    const t = Number(target);
+    if (goal !== 'maintain' && (!target || !Number.isFinite(t) || t < 30 || t > 300)) return 'נא למלא משקל יעד בק״ג (30 עד 300)';
+    if (goal === 'maintain' && target && (!Number.isFinite(t) || t < 30 || t > 300)) return 'משקל היעד לא תקין (30 עד 300 ק״ג)';
     if (!months) return 'נא לבחור תוך כמה זמן להגיע ליעד';
     if (!days) return 'נא לבחור כמה ימים בשבוע תתאמן';
     if (!locations.length) return 'נא לבחור איפה תתאמן';
@@ -87,15 +92,20 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
         const existing = (await listRows<BodyWeight>(user!.id, 'body_weights')).find((r) => r.date === today);
         await saveToTable<BodyWeight>(user!.id, 'body_weights', { id: existing?.id, date: today, weight: Number(weight) });
       }
-      await save({
+      const fields = {
         height_cm: Math.round(Number(height)),
         experience, fitness_goal: goal, training_days: days,
         goal_months: months,
         // A new goal or period starts counting today; an unchanged one keeps its start date.
         goal_start: goal === profile.fitness_goal && months === profile.goal_months && profile.goal_start ? profile.goal_start : todayISO(),
         training_locations: locations, equipment,
+        weight_goal: target ? Number(target) : goal === 'maintain' && weight ? Number(weight) : profile.weight_goal ?? null,
         onboarded_at: profile.onboarded_at ?? new Date().toISOString(),
-      });
+      };
+      // Nutrition goals follow the new profile right away (and then every month, see UserShell).
+      const bodyWeight = weight ? Number(weight) : latestWeight(await listRows<BodyWeight>(user!.id, 'body_weights'));
+      const goals = calcNutritionGoals({ ...profile, ...fields }, bodyWeight);
+      await save(goals ? { ...fields, ...goals, nutrition_updated_on: todayISO(), nutrition_weight: bodyWeight } : fields);
       onDone();
     } catch (e) {
       const m = (e as Error).message;
@@ -146,6 +156,9 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
             </button>
           ))}
         </div>
+        <label>{goal === 'maintain' ? 'משקל יעד (ק״ג, לא חובה)' : 'משקל יעד (ק״ג)'}
+          <input type="number" inputMode="decimal" step="0.1" min={30} max={300} placeholder={goal === 'bulk' ? '80' : '70'} value={target} onChange={(e) => setTarget(e.target.value)} />
+        </label>
         <h3>⏳ תוך כמה זמן?</h3>
         <div className="options three">
           {GOAL_PERIODS.map((g) => (
