@@ -2,7 +2,7 @@ import { FormEvent, useState } from 'react';
 import { tr } from '../lib/i18n';
 import { useTable } from '../lib/useTable';
 import { useProfile } from '../lib/useProfile';
-import type { BodyWeight, Meal, Workout } from '../lib/types';
+import type { BodyWeight, Workout } from '../lib/types';
 import { todayISO } from '../lib/utils';
 import ProgressCharts from '../components/ProgressCharts';
 
@@ -10,7 +10,6 @@ export default function Progress() {
   const { profile } = useProfile();
   const weights = useTable<BodyWeight>('body_weights');
   const workouts = useTable<Workout>('workouts');
-  const meals = useTable<Meal>('meals');
   const [w, setW] = useState('');
   const [wDate, setWDate] = useState(todayISO());
 
@@ -27,7 +26,7 @@ export default function Progress() {
     <div className="stack">
       <h2>{tr('התקדמות', 'Progress')}</h2>
       <ProgressCharts
-        workouts={workouts.rows} meals={meals.rows} weights={weights.rows} profile={profile}
+        workouts={workouts.rows} weights={weights.rows} profile={profile}
         weightForm={
           <form onSubmit={addWeight} className="row gap">
             <input type="number" step="0.1" inputMode="decimal" aria-label={tr('משקל (ק״ג)', 'Weight (kg)')} placeholder={tr('משקל (ק״ג)', 'Weight (kg)')} value={w} onChange={(e) => setW(e.target.value)} className="grow" />

@@ -1,7 +1,7 @@
 import { ReactNode, useMemo, useState } from 'react';
 import { tr, tx } from '../lib/i18n';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import type { BodyWeight, Meal, Profile, Workout } from '../lib/types';
+import type { BodyWeight, Profile, Workout } from '../lib/types';
 import { addDays, formatDate, round, todayISO, weekStart, workoutVolume } from '../lib/utils';
 import { nextNutritionUpdate } from '../lib/nutrition';
 import { GOAL_PERIODS, GOALS, goalEndDate, labelOf } from '../lib/fitnessProfile';
@@ -11,7 +11,6 @@ const tooltipStyle = { contentStyle: { background: 'var(--card)', border: '1px s
 
 interface Props {
   workouts: Workout[];
-  meals: Meal[];
   weights: BodyWeight[];
   profile: Profile;
   /** Optional form shown inside the body-weight card (only for the user's own page). */
@@ -19,7 +18,7 @@ interface Props {
 }
 
 /** All progress charts for one user. Used on the user's own page and in the admin user view. */
-export default function ProgressCharts({ workouts, meals, weights, profile, weightForm }: Props) {
+export default function ProgressCharts({ workouts, weights, profile, weightForm }: Props) {
   const weightData = useMemo(() => [...weights].sort((a, b) => a.date.localeCompare(b.date))
     .map((r) => ({ ...r, label: formatDate(r.date) })), [weights]);
 
@@ -31,11 +30,6 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
       return { label: formatDate(ws), count: list.length, volume: Math.round(list.reduce((a, x) => a + workoutVolume(x), 0)) };
     });
   }, [workouts]);
-
-  const calories = useMemo(() => Array.from({ length: 14 }, (_, i) => {
-    const d = addDays(todayISO(), i - 13);
-    return { label: formatDate(d), kcal: meals.filter((m) => m.date === d).reduce((a, m) => a + m.calories, 0) };
-  }), [meals]);
 
   // Working weight per workout = the heaviest completed set of that exercise (more reps wins a tie).
   const { prs, history } = useMemo(() => {
@@ -98,22 +92,6 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
               <YAxis allowDecimals={false} tick={axis} />
               <Tooltip {...tooltipStyle} cursor={{ fill: 'var(--track)' }} formatter={(v: number) => [`${v} ${tr('אימונים', 'workouts')}`, tr('אימונים', 'Workouts')]} />
               <Bar dataKey="count" fill="var(--blue)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <div className="card">
-        <h3>{tr('🔥 קלוריות, 14 ימים אחרונים', '🔥 Calories, last 14 days')}</h3>
-        <div dir="ltr" className="chart" role="img" aria-label={tr('קלוריות ביום: ', 'Calories per day: ') + calories.map((c) => `${c.label} ${c.kcal}`).join(', ')}>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={calories} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-              <CartesianGrid stroke="var(--border)" vertical={false} />
-              <XAxis dataKey="label" tick={axis} interval={1} />
-              <YAxis tick={axis} />
-              <Tooltip {...tooltipStyle} cursor={{ fill: 'var(--track)' }} formatter={(v: number) => [`${v} ${tr('קק״ל', 'kcal')}`, tr('קלוריות', 'Calories')]} />
-              <ReferenceLine y={profile.calorie_goal} stroke="var(--amber)" strokeDasharray="4 4" />
-              <Bar dataKey="kcal" fill="var(--green)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

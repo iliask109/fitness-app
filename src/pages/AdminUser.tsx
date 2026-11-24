@@ -128,7 +128,7 @@ export default function AdminUser({ id }: { id: string }) {
       <AdminMealPlan uid={id} calorieGoal={data.profile.calorie_goal} />
       <a className="btn" href={`#/admin-messages/${id}`}>💬 הודעות עם המשתמש</a>
 
-      <ProgressCharts workouts={data.workouts} meals={data.meals} weights={data.weights} profile={data.profile} />
+      <ProgressCharts workouts={data.workouts} weights={data.weights} profile={data.profile} />
 
       <div className="card">
         <h3>📝 אימונים אחרונים</h3>

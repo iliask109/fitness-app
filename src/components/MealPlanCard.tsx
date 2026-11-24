@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { useTable } from '../lib/useTable';
 import { tr, tx } from '../lib/i18n';
-import type { BaseRow, Meal, MealType } from '../lib/types';
+import type { BaseRow, MealType } from '../lib/types';
 import { alternatives, itemNutrition, MealPlanRow, PlanItem, planTotals } from '../lib/mealPlan';
 
 const SLOT_LABEL = (slot: MealType) => ({
@@ -10,18 +10,11 @@ const SLOT_LABEL = (slot: MealType) => ({
   dinner: tr('🍽️ ערב', '🍽️ Dinner'), snack: tr('🍎 נשנוש', '🍎 Snack'),
 }[slot]);
 
-/** Name of a plan item as it is logged when eaten: in the user's language, with the portion when it is not 1. */
-export const loggedName = (item: PlanItem) => {
-  const n = itemNutrition(item);
-  if (!n) return '';
-  return tx(n.meal.name) + (item.portion !== 1 ? ` ×${item.portion}` : '');
-};
-
 /**
  * The daily menu: built from the calorie goal when the user signs up (see UserShell). Each meal can be
- * logged as eaten with one tap, or swapped for another meal with similar calories.
+ * swapped for another meal with similar calories.
  */
-export default function MealPlanCard({ dayMeals, onEat }: { dayMeals: Meal[]; onEat: (slot: MealType, m: Omit<Meal, 'id' | 'date' | 'meal_type'>) => Promise<void> }) {
+export default function MealPlanCard() {
   const { user } = useAuth();
   const plans = useTable<MealPlanRow & BaseRow>('meal_plans');
   const plan = plans.rows[0];
@@ -56,19 +49,14 @@ export default function MealPlanCard({ dayMeals, onEat }: { dayMeals: Meal[]; on
       {items.map((item, i) => {
         const n = itemNutrition(item);
         if (!n) return null;
-        const name = loggedName(item);
-        const eaten = dayMeals.some((m) => m.meal_type === item.slot && m.name === name);
         return (
           <div key={item.slot + i} className="plan-item stack tight">
             <div className="row between">
               <span className="muted small">{SLOT_LABEL(item.slot)}</span>
-              <span className="muted small">{n.kcal} {tr('קק״ל', 'kcal')} · {tr('ח׳', 'P')} {n.protein}</span>
+              <span className="muted small">{n.kcal} {tr('קק״ל', 'kcal')} · {tr('ח׳', 'P')} {n.protein} · {tr('פ׳', 'C')} {n.carbs} · {tr('ש׳', 'F')} {n.fat}</span>
             </div>
             <strong>{tx(n.meal.name)}{item.portion !== 1 && <span className="muted small"> · <span dir="ltr">×{item.portion}</span> {tr('מנה', 'portion')}</span>}</strong>
             <div className="row gap">
-              {eaten
-                ? <span className="good small">✓ {tr('נרשם ביומן', 'Logged')}</span>
-                : <button className="btn small primary" onClick={() => onEat(item.slot, { name, calories: n.kcal, protein: n.protein, carbs: n.carbs, fat: n.fat })}>✓ {tr('אכלתי', 'I ate this')}</button>}
               <button className="btn small" onClick={() => setSwapping(swapping === i ? null : i)}>🔄 {swapping === i ? tr('ביטול', 'Cancel') : tr('החלפה', 'Swap')}</button>
             </div>
             {swapping === i && (
