@@ -32,13 +32,14 @@ export default function MealPlanCard({ dayMeals, onEat }: { dayMeals: Meal[]; on
   if (!plan) {
     return plans.error ? null : <div className="card muted small">{tr('התפריט שלך נבנה…', 'Building your menu…')}</div>;
   }
-  const totals = planTotals(plan.items);
+  const items = Array.isArray(plan.items) ? plan.items : [];
+  const totals = planTotals(items);
 
   async function swap(index: number, item: PlanItem) {
     setError(null);
     try {
-      const items = plan.items.map((it, i) => (i === index ? item : it));
-      await plans.save({ ...plan, id: plan.id ?? user!.id, items });
+      const next = items.map((it, i) => (i === index ? item : it));
+      await plans.save({ ...plan, id: plan.id ?? user!.id, items: next });
       setSwapping(null);
     } catch (e) {
       setError(tr('השמירה נכשלה: ', 'Saving failed: ') + (e as Error).message);
@@ -52,7 +53,7 @@ export default function MealPlanCard({ dayMeals, onEat }: { dayMeals: Meal[]; on
         <span className="muted small">{totals.kcal} {tr('קק״ל', 'kcal')} · {totals.protein} {tr('ג׳ חלבון', 'g protein')}</span>
       </div>
       {plan.edited_by_admin && <span className="muted small">✏️ {tr('המאמן התאים את התפריט בשבילך', 'Your coach adjusted this menu for you')}</span>}
-      {plan.items.map((item, i) => {
+      {items.map((item, i) => {
         const n = itemNutrition(item);
         if (!n) return null;
         const name = loggedName(item);
@@ -87,7 +88,7 @@ export default function MealPlanCard({ dayMeals, onEat }: { dayMeals: Meal[]; on
           </div>
         );
       })}
-      {error && <p className="notice" style={{ margin: 0 }}>{error}</p>}
+      {error && <p className="notice" role="alert" style={{ margin: 0 }}>{error}</p>}
     </div>
   );
 }

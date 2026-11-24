@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { EXERCISE_ALTERNATIVE, demoVideoUrl, equipmentFor, guideFor } from '../lib/exerciseGuide';
 import { tr, tx } from '../lib/i18n';
 import { exerciseImages } from '../lib/exerciseImages';
+import { useDialog } from '../lib/a11y';
 
 /**
  * Bottom sheet with how to do one exercise: pictures, steps and one alternative exercise.
@@ -16,15 +17,11 @@ export default function ExerciseGuideSheet({ name: initial, onClose, onReplace }
   const equipment = equipmentFor(name);
   const sheet = useRef<HTMLDivElement>(null);
   useEffect(() => { sheet.current?.scrollTo({ top: 0 }); }, [name]);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  useDialog(sheet, onClose);
 
   return createPortal(
     <div className="sheet-backdrop" onClick={onClose}>
-      <div ref={sheet} className="sheet stack tight sheet-scroll guide" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={tr(`איך עושים ${name}`, `How to do ${tx(name)}`)}>
+      <div ref={sheet} aria-modal="true" className="sheet stack tight sheet-scroll guide" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={tr(`איך עושים ${name}`, `How to do ${tx(name)}`)}>
         <div className="row between">
           <h3 style={{ margin: 0 }}>📖 {tx(name)}</h3>
           <button className="icon-btn" onClick={onClose} aria-label={tr('סגירה', 'Close')}>✕</button>

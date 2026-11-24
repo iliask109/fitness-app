@@ -84,7 +84,7 @@ export default function WorkoutView({ id }: { id: string }) {
         </div>
       )}
 
-      {error && <p className="notice" style={{ margin: 0 }}>{error}</p>}
+      {error && <p className="notice" role="alert" style={{ margin: 0 }}>{error}</p>}
       {confirming ? (
         <div className="card confirm-card stack tight" role="alertdialog" aria-label={tr('מחיקת האימון', 'Delete workout')}>
           <strong>{tr(byGender(profile.gender, 'אתה בטוח?', 'את בטוחה?', 'אתה בטוח/ה?') + ' האימון יימחק מההיסטוריה ומהגרפים, ואי אפשר לשחזר אותו.', 'Are you sure? The workout will be removed from your history and charts, and cannot be restored.')}</strong>

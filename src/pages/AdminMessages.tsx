@@ -48,7 +48,7 @@ export default function AdminMessages({ uid }: { uid?: string }) {
   return (
     <div className="stack">
       <h2>💬 הודעות ממשתמשים</h2>
-      {error && <p className="notice">{error}</p>}
+      {error && <p className="notice" role="alert">{error}</p>}
       {messages === null && !error && <p className="muted">טוען…</p>}
       {messages && threads.length === 0 && <div className="card muted">עוד לא התקבלו הודעות. משתמשים יכולים לכתוב לך מההגדרות שלהם ("פנייה למנהל").</div>}
       {threads.map((t) => (

@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import { tr } from '../lib/i18n';
+import { useDialog } from '../lib/a11y';
 import type { BodyWeight } from '../lib/types';
 import { todayISO } from '../lib/utils';
 
@@ -17,13 +18,9 @@ export default function WeightDialog({ weights, save, onClose }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    input.current?.select();
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  const box = useRef<HTMLFormElement>(null);
+  useDialog(box, onClose);
+  useEffect(() => { input.current?.focus(); input.current?.select(); }, []);
 
   const existing = weights.find((w) => w.date === date);
   const diff = last && weight ? Number(weight) - last.weight : 0;
@@ -44,7 +41,7 @@ export default function WeightDialog({ weights, save, onClose }: Props) {
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
-      <form className="sheet stack" onClick={(e) => e.stopPropagation()} onSubmit={submit} noValidate role="dialog" aria-label={tr('משקל חדש', 'Log weight')}>
+      <form ref={box} aria-modal="true" className="sheet stack" onClick={(e) => e.stopPropagation()} onSubmit={submit} noValidate role="dialog" aria-label={tr('משקל חדש', 'Log weight')}>
         <div className="row between">
           <h3>{tr('⚖️ משקל חדש', '⚖️ Log weight')}</h3>
           <button type="button" className="icon-btn" onClick={onClose} aria-label={tr('סגירה', 'Close')}>✕</button>
@@ -61,7 +58,7 @@ export default function WeightDialog({ weights, save, onClose }: Props) {
         )}
         <label>{tr('תאריך', 'Date')}<input type="date" value={date} max={todayISO()} onChange={(e) => setDate(e.target.value)} /></label>
         {existing && <p className="muted small" style={{ margin: 0 }}>{tr(`כבר נשמר משקל לתאריך הזה (${existing.weight} ק״ג). השמירה תעדכן אותו.`, `A weight is already saved for this date (${existing.weight} kg). Saving will update it.`)}</p>}
-        {error && <p className="notice">{error}</p>}
+        {error && <p className="notice" role="alert">{error}</p>}
         <button className="btn primary big" disabled={busy}>{busy ? tr('שומר…', 'Saving…') : tr('שמירה', 'Save')}</button>
       </form>
     </div>

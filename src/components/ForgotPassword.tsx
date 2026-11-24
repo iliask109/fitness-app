@@ -90,7 +90,7 @@ export default function ForgotPassword({ initialEmail, onBack }: { initialEmail:
         </form>
       )}
 
-      {error && <p className="notice" style={{ margin: 0 }}>{error}</p>}
+      {error && <p className="notice" role="alert" style={{ margin: 0 }}>{error}</p>}
       <button type="button" className="link-btn" onClick={onBack}>{tr('→ חזרה להתחברות', '← Back to sign in')}</button>
     </div>
   );

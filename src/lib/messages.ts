@@ -11,6 +11,7 @@ function readDemo(uid: string): Message[] {
 const writeDemo = (uid: string, list: Message[]) => localStorage.setItem(demoKey(uid), JSON.stringify(list));
 
 function missingTable(m: string) {
+  if (/too many messages/i.test(m)) return 'נשלחו יותר מדי הודעות. אפשר לשלוח שוב בעוד כמה דקות. / Too many messages. Try again in a few minutes.';
   return /could not find the table|does not exist|schema cache/i.test(m)
     ? 'מסד הנתונים עוד לא עודכן (update-14-meal-plan-and-messages.sql). / The database has not been updated yet (update-14).' : m;
 }

@@ -123,7 +123,7 @@ export default function AdminTemplateEditor({ id }: { id: string }) {
       ))}
       <button className="btn dashed" onClick={() => update((d) => { d.days.push({ name: `יום ${d.days.length + 1}`, exercises: [] }); })}>+ הוספת יום אימון</button>
 
-      {error && <p className="notice" style={{ margin: 0 }}>{error}</p>}
+      {error && <p className="notice" role="alert" style={{ margin: 0 }}>{error}</p>}
       <button className="btn primary big" disabled={busy} onClick={save}>{busy ? 'שומר…' : 'שמירת תוכנית'}</button>
 
       {!isNew && (confirmDelete ? (

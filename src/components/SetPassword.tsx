@@ -17,7 +17,7 @@ export default function SetPassword({ forced, onDone, embedded }: { forced?: boo
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (pw.length < 6) return setMsg({ ok: false, text: tr('הסיסמה צריכה להכיל לפחות 6 תווים', 'The password must be at least 6 characters') });
+    if (pw.length < 8) return setMsg({ ok: false, text: tr('הסיסמה צריכה להכיל לפחות 8 תווים', 'The password must be at least 8 characters') });
     if (pw !== pw2) return setMsg({ ok: false, text: tr('הסיסמאות לא תואמות', 'The passwords don\'t match') });
     setBusy(true);
     setMsg(null);

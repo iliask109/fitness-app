@@ -10,7 +10,7 @@ export function authErrorHe(m: string) {
   if (/different from the old password/i.test(m)) return tr('הסיסמה החדשה צריכה להיות שונה מהסיסמה הקודמת', 'The new password must be different from the old one');
   if (/rate limit|too many|security purposes|seconds/i.test(m)) return tr('נשלחו יותר מדי בקשות. נסה שוב בעוד כמה דקות', 'Too many requests. Try again in a few minutes');
   if (/valid email|invalid.*email/i.test(m)) return tr('כתובת האימייל לא תקינה', 'The email address is not valid');
-  if (/password/i.test(m)) return tr('הסיסמה צריכה להכיל לפחות 6 תווים', 'The password must be at least 6 characters');
+  if (/password/i.test(m)) return tr('הסיסמה צריכה להכיל לפחות 8 תווים', 'The password must be at least 8 characters');
   if (/fetch|network/i.test(m)) return tr('אין חיבור לאינטרנט. נסה שוב', 'No internet connection. Try again');
   return m;
 }

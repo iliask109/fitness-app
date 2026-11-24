@@ -14,7 +14,7 @@ export default function AdminMealPlan({ uid, calorieGoal }: { uid: string; calor
 
   useEffect(() => {
     listRows<MealPlanRow & BaseRow>(uid, 'meal_plans')
-      .then((rows) => { setPlan(rows[0] ?? null); setItems(rows[0]?.items ?? buildPlan(calorieGoal, uid)); })
+      .then((rows) => { setPlan(rows[0] ?? null); setItems(Array.isArray(rows[0]?.items) ? rows[0].items : buildPlan(calorieGoal, uid)); })
       .catch((e) => setMsg({ ok: false, text: /could not find the table|does not exist/i.test((e as Error).message) ? 'צריך להריץ את update-14-meal-plan-and-messages.sql' : (e as Error).message }));
   }, [uid, calorieGoal]);
 

@@ -30,8 +30,8 @@ export default function Progress() {
         workouts={workouts.rows} meals={meals.rows} weights={weights.rows} profile={profile}
         weightForm={
           <form onSubmit={addWeight} className="row gap">
-            <input type="number" step="0.1" inputMode="decimal" placeholder={tr('משקל (ק״ג)', 'Weight (kg)')} value={w} onChange={(e) => setW(e.target.value)} className="grow" />
-            <input type="date" value={wDate} max={todayISO()} onChange={(e) => setWDate(e.target.value)} />
+            <input type="number" step="0.1" inputMode="decimal" aria-label={tr('משקל (ק״ג)', 'Weight (kg)')} placeholder={tr('משקל (ק״ג)', 'Weight (kg)')} value={w} onChange={(e) => setW(e.target.value)} className="grow" />
+            <input type="date" aria-label={tr('תאריך השקילה', 'Weigh-in date')} value={wDate} max={todayISO()} onChange={(e) => setWDate(e.target.value)} />
             <button className="btn primary">{tr('שמירה', 'Save')}</button>
           </form>
         }

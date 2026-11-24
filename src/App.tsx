@@ -23,6 +23,8 @@ import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
 import ConnectionBanner from './components/ConnectionBanner';
 import SchemaWarning from './components/SchemaWarning';
+import ErrorBoundary from './components/ErrorBoundary';
+import A11yMenu from './components/A11yMenu';
 import { getLang, setLang, tr } from './lib/i18n';
 
 // Loaded on first visit: the charts, the admin area and the exercise guide are large and not needed at start.
@@ -35,6 +37,7 @@ const AdminTemplateEditor = lazy(() => import('./pages/AdminTemplateEditor'));
 const ExerciseLibrary = lazy(() => import('./pages/ExerciseLibrary'));
 const AdminAccount = lazy(() => import('./pages/AdminAccount'));
 const AdminMessages = lazy(() => import('./pages/AdminMessages'));
+const AccessibilityStatement = lazy(() => import('./pages/AccessibilityStatement'));
 
 const TABS = [
   { key: '', get label() { return tr('בית', 'Home'); }, icon: '🏠' },
@@ -44,9 +47,39 @@ const TABS = [
   { key: 'progress', get label() { return tr('התקדמות', 'Progress'); }, icon: '📈' },
 ];
 
+/** Name of the current screen: the hidden page heading for screen readers and the browser tab title. */
+function pageTitle(section: string) {
+  const tab = TABS.find((t) => t.key === section);
+  if (tab) return tab.label;
+  return ({
+    settings: tr('הגדרות', 'Settings'), exercises: tr('מדריך תרגילים', 'Exercise guide'),
+    'profile-setup': tr('פרופיל אימון', 'Training profile'), accessibility: tr('הצהרת נגישות', 'Accessibility statement'),
+  } as Record<string, string>)[section] ?? 'FitLogix';
+}
+
+/** Keeps the browser tab title in step with the screen (WCAG 2.4.2). */
+function useDocumentTitle(title: string) {
+  useEffect(() => { document.title = title === 'FitLogix' ? title : `${title} · FitLogix`; }, [title]);
+}
+
+/** "Skip to content" link, the first thing a keyboard user reaches (WCAG 2.4.1). */
+function SkipLink() {
+  return <a className="skip-link" href="#main-content" onClick={(e) => { e.preventDefault(); document.getElementById('main-content')?.focus(); }}>{tr('דילוג לתוכן', 'Skip to content')}</a>;
+}
+
 export default function App() {
   const { user, loading } = useAuth();
+  const route = useRoute();
   if (loading) return <div className="center muted">{tr('טוען…', 'Loading…')}</div>;
+  // The accessibility statement is public: it can be read before signing in.
+  if (!user && route.path[0] === 'accessibility') {
+    return (
+      <div className="app">
+        <header className="topbar"><span className="brand">FitLogix</span><A11yMenu /><ThemeToggle /></header>
+        <main className="content" id="main-content" tabIndex={-1}><Suspense fallback={null}><AccessibilityStatement signedIn={false} /></Suspense></main>
+      </div>
+    );
+  }
   if (!user) return <Login />;
   return <Shell key={user.id} />;
 }
@@ -58,8 +91,9 @@ function Shell() {
   if (mustSetPassword) {
     return (
       <div className="app">
-        <header className="topbar"><span className="brand">FitLogix</span><ThemeToggle /></header>
-        <main className="content onboarding-only"><SetPassword forced onDone={() => navigate('/')} /></main>
+        <header className="topbar"><span className="brand">FitLogix</span><A11yMenu /><ThemeToggle /></header>
+        <main className="content onboarding-only" id="main-content" tabIndex={-1}>
+          <h1 className="sr-only">{tr('פרופיל אימון', 'Training profile')}</h1><SetPassword forced onDone={() => navigate('/')} /></main>
       </div>
     );
   }
@@ -80,6 +114,7 @@ function AdminShell() {
   const route = useRoute();
   const [section = '', sub] = route.path;
   const tab = section === 'settings' || section === 'admin-programs' || section === 'admin-messages' ? section : 'admin';
+  useDocumentTitle(ADMIN_TABS.find((t) => t.key === tab)?.label ?? 'FitLogix');
   // Unread messages from users, as a badge on the messages tab.
   const [unreadCount, setUnreadCount] = useState(0);
   useEffect(() => {
@@ -97,16 +132,20 @@ function AdminShell() {
 
   return (
     <div className="app">
+      <SkipLink />
       <header className="topbar">
         <a className="brand" href="#/admin" aria-label="מסך הבית">FitLogix</a>
         {isDemo && <span className="badge">מצב הדגמה</span>}
         <span className="chip tag-admin">🛡️ מנהל</span>
-        <ThemeToggle />
+        <A11yMenu /><ThemeToggle />
       </header>
-      <main className="content"><ConnectionBanner /><SchemaWarning /><Suspense fallback={<p className="muted">טוען…</p>}>{page}</Suspense></main>
-      <nav className="tabbar">
+      <main className="content" id="main-content" tabIndex={-1}>
+        <h1 className="sr-only">{ADMIN_TABS.find((t) => t.key === tab)?.label}</h1>
+        <ConnectionBanner /><SchemaWarning /><Suspense fallback={<p className="muted">טוען…</p>}><ErrorBoundary resetKey={route.path.join('/')}>{page}</ErrorBoundary></Suspense>
+      </main>
+      <nav className="tabbar" aria-label="ניווט ראשי">
         {ADMIN_TABS.map((t) => (
-          <a key={t.key} href={'#/' + t.key} className={tab === t.key ? 'active' : ''}>
+          <a key={t.key} href={'#/' + t.key} className={tab === t.key ? 'active' : ''} aria-current={tab === t.key ? 'page' : undefined}>
             <span className="tab-icon badge-host">{t.icon}{t.key === 'admin-messages' && unreadCount > 0 && <span className="unread-dot corner">{unreadCount}</span>}</span>
             <span>{t.label}</span>
           </a>
@@ -121,6 +160,7 @@ function UserShell() {
   const { signOut, user } = useAuth();
   const route = useRoute();
   const me = useProfile();
+  useDocumentTitle(pageTitle(route.path[0] ?? ''));
   const remindersOn = !!me.profile.reminder_enabled;
   // Once notifications are allowed, keep this device registered on every app open (e.g. after signing back in).
   useEffect(() => {
@@ -158,7 +198,7 @@ function UserShell() {
     planSizedFor.current = goal;
     const plan = plans.rows[0];
     if (!plan) plans.save({ id: user.id, items: buildPlan(goal, user.id), calorie_goal: goal, edited_by_admin: false }).catch(() => undefined);
-    else if (!plan.edited_by_admin && plan.calorie_goal !== goal) plans.save({ ...plan, items: resizePlan(plan.items, goal), calorie_goal: goal }).catch(() => undefined);
+    else if (!plan.edited_by_admin && plan.calorie_goal !== goal && Array.isArray(plan.items)) plans.save({ ...plan, items: resizePlan(plan.items, goal), calorie_goal: goal }).catch(() => undefined);
   }, [me.loading, me.profile.calorie_goal, me.profile.onboarded_at, plans.loading, plans.error, plans.rows, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (me.loading && !me.profile.onboarded_at) return <div className="center muted">{tr('טוען…', 'Loading…')}</div>;
@@ -167,10 +207,11 @@ function UserShell() {
       <div className="app">
         <header className="topbar">
           <span className="brand">FitLogix</span>
-          <ThemeToggle />
+          <A11yMenu /><ThemeToggle />
           <button className="btn small" onClick={signOut}>{tr('התנתקות', 'Sign out')}</button>
         </header>
-        <main className="content onboarding-only">
+        <main className="content onboarding-only" id="main-content" tabIndex={-1}>
+          <h1 className="sr-only">{tr('פרופיל אימון', 'Training profile')}</h1>
           <Onboarding profile={me.profile} save={me.save} onDone={() => { me.reload(); navigate("/"); }} />
         </main>
       </div>
@@ -189,24 +230,29 @@ function UserShell() {
     case 'progress': page = <Progress />; break;
     case 'settings': page = <Settings />; break;
     case 'exercises': page = <ExerciseLibrary />; break;
+    case 'accessibility': page = <AccessibilityStatement />; break;
     case 'profile-setup': page = <Onboarding editing profile={me.profile} save={me.save} onDone={() => { me.reload(); navigate('/settings'); }} />; break;
     default: page = <Dashboard />;
   }
 
   return (
     <div className="app">
+      <SkipLink />
       <header className="topbar">
         <a className="brand" href="#/" aria-label={tr('מסך הבית', 'Home')}>FitLogix</a>
         {isDemo && <span className="badge">{tr('מצב הדגמה', 'Demo mode')}</span>}
-        <ThemeToggle />
+        <A11yMenu /><ThemeToggle />
         <button className="icon-btn badge-host" onClick={() => navigate(unreadFromAdmin ? '/settings?chat=1' : '/settings')} aria-label={tr('הגדרות', 'Settings')}>
           ⚙️{unreadFromAdmin > 0 && <span className="unread-dot corner" aria-label={tr('הודעה חדשה מהמנהל', 'New message from the admin')}>{unreadFromAdmin}</span>}
         </button>
       </header>
-      <main className="content"><ConnectionBanner /><Suspense fallback={<p className="muted">{tr('טוען…', 'Loading…')}</p>}>{page}</Suspense></main>
-      <nav className="tabbar">
+      <main className="content" id="main-content" tabIndex={-1}>
+        <h1 className="sr-only">{pageTitle(section)}</h1>
+        <ConnectionBanner /><Suspense fallback={<p className="muted">{tr('טוען…', 'Loading…')}</p>}><ErrorBoundary resetKey={route.path.join('/')}>{page}</ErrorBoundary></Suspense>
+      </main>
+      <nav className="tabbar" aria-label={tr('ניווט ראשי', 'Main navigation')}>
         {TABS.map((t) => (
-          <a key={t.key} href={'#/' + t.key} className={section === t.key ? 'active' : ''}>
+          <a key={t.key} href={'#/' + t.key} className={section === t.key ? 'active' : ''} aria-current={section === t.key ? 'page' : undefined}>
             <span className="tab-icon">{t.icon}</span>
             <span>{t.label}</span>
           </a>

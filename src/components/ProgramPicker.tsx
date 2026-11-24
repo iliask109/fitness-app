@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useRef } from 'react';
+import { useDialog } from '../lib/a11y';
 import { tr, tx } from '../lib/i18n';
 import { useTable } from '../lib/useTable';
 import { navigate } from '../lib/router';
@@ -8,15 +9,12 @@ import type { Program } from '../lib/types';
 export default function ProgramPicker({ onClose }: { onClose: () => void }) {
   const { rows, loading } = useTable<Program>('programs');
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+  const box = useRef<HTMLDivElement>(null);
+  useDialog(box, onClose);
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
-      <div className="sheet stack sheet-scroll" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={tr('תוכנית שמורה', 'Saved program')}>
+      <div ref={box} aria-modal="true" className="sheet stack sheet-scroll" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={tr('תוכנית שמורה', 'Saved program')}>
         <div className="row between">
           <h3>{tr('📋 בחירת תוכנית', '📋 Choose a program')}</h3>
           <button className="icon-btn" onClick={onClose} aria-label={tr('סגירה', 'Close')}>✕</button>

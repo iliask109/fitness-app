@@ -159,7 +159,7 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
           </div>
         </div>
       )}
-      <input className="title-input" value={tx(w.name)} onChange={(e) => update((d) => { d.name = e.target.value; })} />
+      <input className="title-input" maxLength={200} aria-label={tr('שם האימון', 'Workout name')} value={tx(w.name)} onChange={(e) => update((d) => { d.name = e.target.value; })} />
       <div className="row gap">
         {/* The date is the day the workout was done: set when it starts, not editable. */}
         <div className="grow workout-date">
@@ -263,10 +263,10 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
 
       <ExercisePicker onPick={addExercise} />
 
-      <label>{tr('הערות', 'Notes')}<textarea rows={2} value={w.notes ?? ''} onChange={(e) => update((d) => { d.notes = e.target.value; })} /></label>
+      <label>{tr('הערות', 'Notes')}<textarea rows={2} maxLength={5000} value={w.notes ?? ''} onChange={(e) => update((d) => { d.notes = e.target.value; })} /></label>
 
       <div className="muted small">{tr('נפח כולל:', 'Total volume:')} {Math.round(workoutVolume(w)).toLocaleString()} {tr('ק״ג', 'kg')}</div>
-      {saveError && <p className="notice" style={{ margin: 0 }}>{saveError}</p>}
+      {saveError && <p className="notice" role="alert" style={{ margin: 0 }}>{saveError}</p>}
       <button className="btn primary big" onClick={save} disabled={saving || w.exercises.length === 0}>
         {saving ? tr('שומר…', 'Saving…') : tr('סיום ושמירת אימון', 'Finish and save workout')}
       </button>

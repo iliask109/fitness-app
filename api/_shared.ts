@@ -38,6 +38,18 @@ function ensureVapid() {
 export interface SubscriptionRow { id: string; user_id: string; endpoint: string; p256dh: string; auth: string }
 
 /**
+ * Push addresses come from the browser, but users could save any URL there. Only the browsers' real push
+ * services are contacted, so the server is never made to call an arbitrary address.
+ */
+const PUSH_HOSTS = [/^fcm\.googleapis\.com$/, /^updates\.push\.services\.mozilla\.com$/, /^web\.push\.apple\.com$/, /\.notify\.windows\.com$/, /^android\.googleapis\.com$/];
+export function isPushEndpoint(endpoint: string) {
+  try {
+    const u = new URL(endpoint);
+    return u.protocol === 'https:' && PUSH_HOSTS.some((re) => re.test(u.hostname));
+  } catch { return false; }
+}
+
+/**
  * Sends to every device of a user; deletes subscriptions the browser has revoked (404/410).
  * Returns how many arrived and the status code of each failure.
  */
@@ -48,6 +60,7 @@ export async function sendToSubscriptions(
   let sent = 0;
   const failed: number[] = [];
   for (const s of subs) {
+    if (!isPushEndpoint(s.endpoint)) { failed.push(0); console.error('skipped push to unknown host'); continue; }
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 60 * 60 });
       sent++;

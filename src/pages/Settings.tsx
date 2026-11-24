@@ -95,8 +95,8 @@ export default function Settings() {
       {openDetails && <>
       <form onSubmit={submit} className="stack">
         <div className="grid2">
-          <label>{tr('שם פרטי', 'First name')}<input value={form.first_name ?? ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></label>
-          <label>{tr('שם משפחה', 'Last name')}<input value={form.last_name ?? ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></label>
+          <label>{tr('שם פרטי', 'First name')}<input maxLength={60} value={form.first_name ?? ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></label>
+          <label>{tr('שם משפחה', 'Last name')}<input maxLength={60} value={form.last_name ?? ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></label>
           <label>{tr('גיל', 'Age')}<input type="number" min={10} max={120} value={form.age ?? ''} onChange={(e) => setForm({ ...form, age: e.target.value })} /></label>
           <label><span>{tr('תאריך לידה', 'Birth date')} <span className="optional">{tr('(לא חובה)', '(optional)')}</span></span>
             <input type="date" max={todayISO()} value={form.birth_date ?? ''} onChange={(e) => {
@@ -130,6 +130,7 @@ export default function Settings() {
       </div>
       <NotificationSettings />
       <ThemePicker />
+      <a className="btn" href="#/accessibility">♿ {tr('הצהרת נגישות', 'Accessibility statement')}</a>
       <div className="card stack tight">
         <h3>🌐 {tr('שפה', 'Language')}</h3>
         <div className="segmented" role="radiogroup" aria-label={tr('שפה', 'Language')}>
@@ -138,7 +139,7 @@ export default function Settings() {
               onClick={() => changeLanguage(l)}>{l === 'he' ? 'עברית' : 'English'}</button>
           ))}
         </div>
-        {langError && <p className="notice" style={{ margin: 0 }}>{langError}</p>}
+        {langError && <p className="notice" role="alert" style={{ margin: 0 }}>{langError}</p>}
       </div>
       <div className="card stack tight">
         <div className="muted small">{tr('מחובר בתור', 'Signed in as')}</div>
@@ -150,7 +151,7 @@ export default function Settings() {
       <div className="card stack tight">
         <h3>{tr('🗑️ מחיקת החשבון', '🗑️ Delete account')}</h3>
         <p className="muted small" style={{ margin: 0 }}>{tr('מוחקת את החשבון ואת כל הנתונים שלו לצמיתות.', 'Permanently deletes the account and all its data.')}</p>
-        {deleteError && <p className="notice">{deleteError}</p>}
+        {deleteError && <p className="notice" role="alert">{deleteError}</p>}
         {askDelete ? (
           <ConfirmInline
             message={tr(byGender(profile.gender, 'אתה בטוח?', 'את בטוחה?', 'בטוח/ה?') + ' כל הנתונים שלך יימחקו לצמיתות: אימונים, תוכניות, תזונה, שקילות והפרופיל. אי אפשר לשחזר אותם.', 'Are you sure? All your data will be deleted permanently: workouts, programs, nutrition, weigh-ins and your profile. It cannot be restored.')}

@@ -38,7 +38,7 @@ export default function MessageThread({ uid, as, otherName }: { uid: string; as:
 
   return (
     <div className="stack tight">
-      {error && <p className="notice" style={{ margin: 0 }}>{error}</p>}
+      {error && <p className="notice" role="alert" style={{ margin: 0 }}>{error}</p>}
       {loaded && messages.length === 0 && !error && (
         <p className="muted small" style={{ margin: 0 }}>
           {as === 'user'
@@ -62,7 +62,7 @@ export default function MessageThread({ uid, as, otherName }: { uid: string; as:
           placeholder={as === 'user' ? tr('ההודעה שלך למנהל…', 'Your message to the admin…') : 'התשובה שלך…'} aria-label={tr('הודעה', 'Message')} />
         <button className="btn primary" disabled={busy || !text.trim()}>{busy ? tr('שולח…', 'Sending…') : tr('שליחה', 'Send')}</button>
       </form>
-      {sendError && <p className="notice" style={{ margin: 0 }}>{sendError}</p>}
+      {sendError && <p className="notice" role="alert" style={{ margin: 0 }}>{sendError}</p>}
     </div>
   );
 }

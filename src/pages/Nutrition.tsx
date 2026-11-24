@@ -52,7 +52,7 @@ export default function Nutrition() {
     <div className="stack">
       <div className="row between">
         <button className="btn small" onClick={() => setDate(addDays(date, -1))} aria-label={tr('יום קודם', 'Previous day')}>{tr('→', '←')}</button>
-        <strong>{date === todayISO() ? tr('היום', 'Today') : formatDate(date, { weekday: 'long', day: 'numeric', month: 'short' })}</strong>
+        <h2 className="day-title">{date === todayISO() ? tr('היום', 'Today') : formatDate(date, { weekday: 'long', day: 'numeric', month: 'short' })}</h2>
         <button className="btn small" onClick={() => setDate(addDays(date, 1))} disabled={date >= todayISO()} aria-label={tr('יום הבא', 'Next day')}>{tr('←', '→')}</button>
       </div>
 
@@ -92,7 +92,7 @@ export default function Nutrition() {
             ))}
             {adding === mt.key ? (
               <form onSubmit={submit} className="stack tight">
-                <input placeholder={tr('מה אכלת?', 'What did you eat?')} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoFocus />
+                <input maxLength={200} placeholder={tr('מה אכלת?', 'What did you eat?')} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoFocus />
                 <div className="grid4">
                   <label>{tr('קלוריות', 'Calories')}<input type="number" inputMode="numeric" value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} /></label>
                   <label>{tr('חלבון', 'Protein')}<input type="number" inputMode="decimal" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} /></label>

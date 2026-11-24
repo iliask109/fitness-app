@@ -54,7 +54,7 @@ export default function NotificationPrompt() {
           </div>
         </div>
       </div>
-      {error && <p className="notice small" style={{ margin: 0 }}>{error}</p>}
+      {error && <p className="notice small" role="alert" style={{ margin: 0 }}>{error}</p>}
       <div className="row gap">
         {support.ok && <button className="btn primary grow" disabled={busy} onClick={allow}>{busy ? tr('רגע…', 'One moment…') : tr('🔔 אישור התראות', '🔔 Allow notifications')}</button>}
         <button className="btn" onClick={later}>{tr('לא עכשיו', 'Not now')}</button>

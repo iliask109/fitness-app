@@ -73,7 +73,7 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
         {first !== undefined && last !== undefined && <WeightChange first={first} last={last} count={weightData.length} goal={profile.fitness_goal} />}
         {weightForm}
         {weightData.length > 0 ? (
-          <div dir="ltr" className="chart">
+          <div dir="ltr" className="chart" role="img" aria-label={tr('גרף משקל גוף: ', 'Body weight chart: ') + weightData.slice(-10).map((d) => `${d.label} ${d.weight}`).join(', ')}>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={weightData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid stroke="var(--border)" vertical={false} />
@@ -90,7 +90,7 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
 
       <div className="card">
         <h3>{tr('🏋️ אימונים בשבוע', '🏋️ Workouts per week')}</h3>
-        <div dir="ltr" className="chart">
+        <div dir="ltr" className="chart" role="img" aria-label={tr('אימונים בכל שבוע: ', 'Workouts per week: ') + weekly.map((w) => `${w.label} ${w.count}`).join(', ')}>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={weekly} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <CartesianGrid stroke="var(--border)" vertical={false} />
@@ -105,7 +105,7 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
 
       <div className="card">
         <h3>{tr('🔥 קלוריות, 14 ימים אחרונים', '🔥 Calories, last 14 days')}</h3>
-        <div dir="ltr" className="chart">
+        <div dir="ltr" className="chart" role="img" aria-label={tr('קלוריות ביום: ', 'Calories per day: ') + calories.map((c) => `${c.label} ${c.kcal}`).join(', ')}>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={calories} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid stroke="var(--border)" vertical={false} />
@@ -127,7 +127,7 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
               {exerciseNames.map((n) => <option key={n} value={n}>{tx(n)}</option>)}
             </select>
             <GainSummary points={history.get(selected) ?? []} />
-            <div dir="ltr" className="chart">
+            <div dir="ltr" className="chart" role="img" aria-label={tr(`משקל עבודה ב${tx(selected)}: `, `Working weight for ${tx(selected)}: `) + (history.get(selected) ?? []).slice(-10).map((h) => `${h.date} ${h.weight}×${h.reps}`).join(', ')}>
               <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={history.get(selected)} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid stroke="var(--border)" vertical={false} />

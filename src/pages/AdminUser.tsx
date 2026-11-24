@@ -171,7 +171,7 @@ export default function AdminUser({ id }: { id: string }) {
           ) : (
             <button className="btn danger" disabled={busy} onClick={() => setAsking('delete')}>🗑️ מחיקת משתמש</button>
           )}
-          {actionError && <p className="notice" style={{ margin: 0 }}>{actionError}</p>}
+          {actionError && <p className="notice" role="alert" style={{ margin: 0 }}>{actionError}</p>}
         </div>
       ) : (
         <p className="muted small">זה החשבון שלך. אי אפשר לחסום, למחוק או להסיר הרשאת מנהל מעצמך.</p>

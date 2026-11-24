@@ -204,7 +204,7 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
         )}
       </section>
 
-      {error && <p className="notice">{error}</p>}
+      {error && <p className="notice" role="alert">{error}</p>}
       <button className="btn primary big" onClick={submit} disabled={busy}>
         {busy ? tr('שומר…', 'Saving…') : editing ? tr('שמירה', 'Save') : tr('בוא נתחיל! 🚀', 'Let\'s start! 🚀')}
       </button>

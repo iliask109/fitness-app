@@ -49,8 +49,8 @@ export default function ProgramEditor({ id }: { id: string }) {
         {!isNew && <button className="btn danger small" onClick={() => setConfirming(true)}>{tr('מחיקה', 'Delete')}</button>}
       </div>
       {confirming && <ConfirmInline message={tr(`למחוק את התוכנית "${p.name}"? האימונים שכבר עשית יישמרו.`, `Delete the program "${tx(p.name)}"? Workouts you already did are kept.`)} onConfirm={remove} onCancel={() => setConfirming(false)} />}
-      {error && <p className="notice" style={{ margin: 0 }}>{error}</p>}
-      <input className="title-input" value={tx(p.name)} onChange={(e) => update((d) => { d.name = e.target.value; })} />
+      {error && <p className="notice" role="alert" style={{ margin: 0 }}>{error}</p>}
+      <input className="title-input" maxLength={200} aria-label={tr('שם התוכנית', 'Program name')} value={tx(p.name)} onChange={(e) => update((d) => { d.name = e.target.value; })} />
 
       {p.days.map((day, di) => (
         <div key={di} className="card stack tight">

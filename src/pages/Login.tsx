@@ -5,6 +5,7 @@ import { isDemo } from '../lib/supabase';
 import { ageFromBirthDate, todayISO } from '../lib/utils';
 import { authErrorHe } from '../lib/authErrors';
 import ForgotPassword from '../components/ForgotPassword';
+import A11yMenu from '../components/A11yMenu';
 import { GENDERS, Gender } from '../lib/gender';
 
 const emptySignup = { first_name: '', last_name: '', age: '', birth_date: '', gender: '' as Gender | '' };
@@ -33,7 +34,7 @@ export default function Login() {
     if (!Number.isInteger(age) || age < 10 || age > 120) return tr('נא למלא גיל תקין (10 עד 120)', 'Please enter a valid age (10 to 120)');
     if (details.birth_date && details.birth_date > todayISO()) return tr('תאריך הלידה לא יכול להיות בעתיד', 'The birth date cannot be in the future');
     if (!/^\S+@\S+\.\S+$/.test(email)) return tr('כתובת האימייל לא תקינה', 'The email address is not valid');
-    if (!isDemo && password.length < 6) return tr('הסיסמה צריכה להכיל לפחות 6 תווים', 'The password must be at least 6 characters');
+    if (!isDemo && password.length < 8) return tr('הסיסמה צריכה להכיל לפחות 8 תווים', 'The password must be at least 8 characters');
     return null;
   }
 
@@ -65,7 +66,7 @@ export default function Login() {
   const switchMode = (m: 'in' | 'up' | 'forgot') => { setMode(m); setMsg(null); };
 
   return (
-    <div className="login">
+    <main className="login" id="main-content">
       <div className="login-card card">
         <div className="login-logo">💪</div>
         <h1>FitLogix</h1>
@@ -74,6 +75,7 @@ export default function Login() {
         {isDemo && (
           <p className="notice">{tr('מצב הדגמה: לא הוגדר Supabase, והנתונים נשמרים רק בדפדפן הזה. אפשר להיכנס עם כל אימייל.', 'Demo mode: Supabase is not set up, and data is saved only in this browser. You can sign in with any email.')}</p>
         )}
+        <div className="row gap login-tools"><A11yMenu /><a className="link-btn small" href="#/accessibility">{tr('הצהרת נגישות', 'Accessibility statement')}</a></div>
         {mode === 'forgot' ? (
           <ForgotPassword initialEmail={email} onBack={() => switchMode('in')} />
         ) : (
@@ -87,9 +89,9 @@ export default function Login() {
                 <>
                   <div className="grid2">
                     <label>{tr('שם פרטי', 'First name')}<input required autoComplete="given-name" value={details.first_name}
-                      onChange={(e) => setDetails({ ...details, first_name: e.target.value })} /></label>
+                      maxLength={60} onChange={(e) => setDetails({ ...details, first_name: e.target.value })} /></label>
                     <label>{tr('שם משפחה', 'Last name')}<input required autoComplete="family-name" value={details.last_name}
-                      onChange={(e) => setDetails({ ...details, last_name: e.target.value })} /></label>
+                      maxLength={60} onChange={(e) => setDetails({ ...details, last_name: e.target.value })} /></label>
                   </div>
                   <div className="stack tight">
                     <span className="small muted" style={{ textAlign: 'start' }}>{tr('מגדר', 'Gender')}</span>
@@ -110,18 +112,18 @@ export default function Login() {
                 </>
               )}
               <label>{tr('אימייל', 'Email')}<input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} dir="ltr" /></label>
-              <label>{tr('סיסמה', 'Password')}<input type="password" required={!isDemo} minLength={isDemo ? 0 : 6} value={password}
+              <label>{tr('סיסמה', 'Password')}<input type="password" required={!isDemo} minLength={isDemo ? 0 : 8} value={password}
                 autoComplete={mode === 'up' ? 'new-password' : 'current-password'}
                 onChange={(e) => setPassword(e.target.value)} dir="ltr" />
-                {mode === 'up' && <span className="optional">{tr('לפחות 6 תווים', 'At least 6 characters')}</span>}
+                {mode === 'up' && <span className="optional">{tr('לפחות 8 תווים', 'At least 8 characters')}</span>}
               </label>
               <button className="btn primary" disabled={busy}>{busy ? '...' : mode === 'in' ? tr('כניסה', 'Sign in') : tr('יצירת חשבון', 'Create account')}</button>
               {mode === 'in' && <button type="button" className="link-btn" onClick={() => switchMode('forgot')}>{tr('שכחתי סיסמה', 'Forgot password')}</button>}
             </form>
-            {msg && <p className="notice">{msg}</p>}
+            {msg && <p className="notice" role="alert">{msg}</p>}
           </>
         )}
       </div>
-    </div>
+    </main>
   );
 }
