@@ -9,10 +9,6 @@ import SetPassword from '../components/SetPassword';
 import { GENDERS } from '../lib/gender';
 import NotificationSettings from '../components/NotificationSettings';
 
-// Calories and macros are not edited here: they are calculated from the body weight every month (lib/nutrition.ts).
-const FIELDS = [
-  ['weight_goal', 'משקל יעד (ק״ג)'],
-] as const;
 
 export default function Settings() {
   const { user, signOut, adminCheckError } = useAuth();
@@ -29,7 +25,6 @@ export default function Settings() {
       birth_date: profile.birth_date ?? '',
       gender: profile.gender ?? '',
     };
-    for (const [k] of FIELDS) f[k] = profile[k] == null ? '' : String(profile[k]);
     setForm(f);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
@@ -43,7 +38,6 @@ export default function Settings() {
       age: Number.isInteger(age) && age > 0 ? age : null, birth_date: form.birth_date || null,
       gender: form.gender === 'male' || form.gender === 'female' ? form.gender : null,
     };
-    for (const [k] of FIELDS) patch[k] = form[k] === '' ? (k === 'weight_goal' ? null : profile[k]) : Number(form[k]);
     await save(patch);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -81,20 +75,11 @@ export default function Settings() {
       {!isDemo && <><hr className="divider" /><SetPassword embedded /></>}
       </>}
       </div>
-      <form onSubmit={submit} className="card stack">
+      <div className="card stack">
         <h3>🎯 יעדים</h3>
-        <a className="btn" href="#/profile-setup">🏋️ עריכת פרופיל אימון (גובה, מטרה, ציוד…)</a>
-        <div className="grid2">
-          {FIELDS.map(([k, label]) => (
-            <label key={k}>{label}
-              <input type="number" step={k === 'weight_goal' ? '0.1' : '1'} value={form[k] ?? ''}
-                onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
-            </label>
-          ))}
-        </div>
+        <a className="btn" href="#/profile-setup">🏋️ עריכת פרופיל אימון (גובה, מטרה, משקל יעד, ציוד…)</a>
         <p className="muted small">יעדי הקלוריות, החלבון, הפחמימות והשומן מחושבים אוטומטית לפי המשקל שלך ומתעדכנים כל חודש. אפשר לראות אותם בדף ההתקדמות.</p>
-        <button className="btn primary">{saved ? '✓ נשמר' : 'שמירה'}</button>
-      </form>
+      </div>
       <NotificationSettings />
       <ThemePicker />
       <div className="card stack tight">
