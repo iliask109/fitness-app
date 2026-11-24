@@ -11,7 +11,7 @@ export default function ExercisePicker({ onPick, label = '+ הוספת תרגי�
   return (
     <div className="card picker">
       <div className="row gap">
-        <input autoFocus placeholder="חיפוש או שם תרגיל חדש" value={q} onChange={(e) => setQ(e.target.value)}
+        <input type="search" enterKeyHint="done" placeholder="🔍 חיפוש או שם תרגיל חדש" value={q} onChange={(e) => setQ(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter' && q.trim()) pick(q.trim()); }} />
         <button className="btn" onClick={() => setOpen(false)}>ביטול</button>
       </div>
