@@ -206,7 +206,7 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
             <div className="row between">
               <span className="row gap">
                 <span className={'ex-badge' + (complete ? ' on' : '')}>{complete ? '✓' : ei + 1}</span>
-                <strong>{ex.name}</strong><ExerciseInfo name={ex.name} icon />
+                <strong>{ex.name}</strong><ExerciseInfo name={ex.name} icon onReplace={(n) => update((d) => { d.exercises[ei].name = n; })} />
               </span>
               <span className="row gap">
                 {order}

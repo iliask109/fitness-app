@@ -7,7 +7,7 @@ const ExerciseGuideSheet = lazy(() => import('./ExerciseGuideSheet'));
  * Makes an exercise name open its guide. `icon` shows a small ⓘ button; otherwise the
  * given content (usually the name) becomes the button.
  */
-export default function ExerciseInfo({ name, icon, children }: { name: string; icon?: boolean; children?: ReactNode }) {
+export default function ExerciseInfo({ name, icon, children, onReplace }: { name: string; icon?: boolean; children?: ReactNode; /** Swap the exercise for its alternative (inside a workout). */ onReplace?: (name: string) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -15,7 +15,7 @@ export default function ExerciseInfo({ name, icon, children }: { name: string; i
         aria-label={`איך עושים ${name}`} title="איך עושים">
         {icon ? 'ⓘ' : children ?? name}
       </button>
-      {open && <Suspense fallback={null}><ExerciseGuideSheet name={name} onClose={() => setOpen(false)} /></Suspense>}
+      {open && <Suspense fallback={null}><ExerciseGuideSheet name={name} onClose={() => setOpen(false)} onReplace={onReplace} /></Suspense>}
     </>
   );
 }

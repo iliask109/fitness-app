@@ -74,3 +74,7 @@ GitHub Actions runs the type checks, tests and build on every push (`.github/wor
 - `supabase/`: `setup.sql` (generated, new projects), the individual schema/update files, the reset-password email template.
 - `public/sw.js`: service worker: keeps the app files for offline use (pages network-first, `/assets/*` from `precache-manifest.json`, written by a plugin in `vite.config.ts`) and shows notifications. Supabase and `/api` are never cached.
 - Offline data: `src/lib/tableStore.ts` keeps a device copy of each table and an outbox of changes made offline, sent on reconnect, on app open and every minute.
+
+## Credits
+
+Exercise illustrations (`public/exercises/`): [Free Exercise DB](https://github.com/yuhonas/free-exercise-db), public domain (Unlicense).

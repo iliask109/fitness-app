@@ -2,7 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { clearDraft, DRAFT_TTL_MS, draftProgress, hasProgress, loadDraft, saveDraft } from '../src/lib/workoutDraft';
 import { PROGRAM_TEMPLATES } from '../src/lib/templates';
 import { ALL_EXERCISES } from '../src/lib/exercises';
-import { EXERCISE_GUIDE } from '../src/lib/exerciseGuide';
+import { EXERCISE_ALTERNATIVE, EXERCISE_GUIDE } from '../src/lib/exerciseGuide';
+import { EXERCISE_IMAGE_IDS } from '../src/lib/exerciseImages';
+import { existsSync } from 'node:fs';
 import { requiredDays } from '../src/lib/schedule';
 import type { Program, Workout } from '../src/lib/types';
 
@@ -56,5 +58,20 @@ describe('ready-made programs', () => {
   });
   it('every exercise in the library has a guide', () => {
     expect(ALL_EXERCISES.filter((n) => !EXERCISE_GUIDE[n])).toEqual([]);
+  });
+  it('every exercise has an alternative from the library (not itself)', () => {
+    expect(ALL_EXERCISES.filter((n) => !EXERCISE_ALTERNATIVE[n])).toEqual([]);
+    for (const [n, alt] of Object.entries(EXERCISE_ALTERNATIVE)) {
+      expect(ALL_EXERCISES, `${n}: alternative ${alt}`).toContain(alt);
+      expect(alt).not.toBe(n);
+    }
+  });
+  it('exercise pictures exist for library exercises', () => {
+    for (const [n, id] of Object.entries(EXERCISE_IMAGE_IDS)) {
+      expect(ALL_EXERCISES).toContain(n);
+      for (const i of [0, 1]) expect(existsSync(`public/exercises/${id}/${i}.jpg`), `${n} picture ${i}`).toBe(true);
+    }
+    // Only these have no matching picture in the image library.
+    expect(ALL_EXERCISES.filter((n) => !EXERCISE_IMAGE_IDS[n]).sort()).toEqual(['בורפיז', 'שכיבות סמיכה פייק'].sort());
   });
 });

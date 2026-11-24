@@ -1,6 +1,8 @@
 /* "Soft & rounded" look: mint green, round shapes, Varela Round.
    Light by default; dark follows the device, or the user's explicit choice via data-theme on <html>. */
 :root {
+  /* Exercise illustrations are drawn on white, so they keep a white frame in both themes. */
+  --photo-bg: #fff;
   --bg: #EDF5F0; --card: #FFFFFF; --text: #1D2B26; --muted: #66786F; --border: #D9E8DF; --track: #E1EDE6;
   --green: #2E9E7A; --blue: #4A86E8; --cyan: #3BB3C3; --amber: #EE9A4D; --pink: #E8789A; --red: #D9534F; --purple: #9B7BE0;
   --primary: #2E9E7A; --primary-text: #FFFFFF; --on-color: #FFFFFF;
@@ -440,3 +442,7 @@ input, select, textarea { font-family: inherit; border-radius: 14px; }
 .collapse-head { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-align: start; }
 .collapse-head h3 { margin: 0; }
 .collapse-arrow { color: var(--muted); font-size: 18px; }
+.guide-images { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.guide-images img { width: 100%; aspect-ratio: 4 / 3; object-fit: contain; border-radius: 14px; background: var(--photo-bg); border: 1px solid var(--border); }
+.alt-btn { display: flex; align-items: center; gap: 10px; text-align: start; width: 100%; justify-content: flex-start; }
+.alt-btn img { width: 56px; height: 42px; object-fit: contain; border-radius: 8px; background: var(--photo-bg); flex-shrink: 0; }
