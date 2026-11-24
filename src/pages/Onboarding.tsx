@@ -5,7 +5,7 @@ import { saveToTable } from '../lib/tableStore';
 import type { BodyWeight, Profile } from '../lib/types';
 import { todayISO } from '../lib/utils';
 import {
-  EQUIPMENT_BY_LOCATION, EXPERIENCE, FULL_GYM, GOALS, LOCATIONS, NO_EQUIPMENT,
+  EQUIPMENT_BY_LOCATION, EXPERIENCE, FULL_GYM, GOAL_PERIODS, GOALS, LOCATIONS, NO_EQUIPMENT,
 } from '../lib/fitnessProfile';
 
 interface Props {
@@ -27,6 +27,7 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
   const [weight, setWeight] = useState('');
   const [experience, setExperience] = useState(profile.experience ?? '');
   const [goal, setGoal] = useState(profile.fitness_goal ?? '');
+  const [months, setMonths] = useState<number | null>(profile.goal_months ?? null);
   const [days, setDays] = useState<number | null>(profile.training_days ?? null);
   const [locations, setLocations] = useState<string[]>(profile.training_locations ?? []);
   const [equipment, setEquipment] = useState<string[]>(profile.equipment ?? []);
@@ -66,6 +67,7 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
     }
     if (!experience) return 'נא לבחור רמת ניסיון';
     if (!goal) return 'נא לבחור מטרה';
+    if (!months) return 'נא לבחור תוך כמה זמן להגיע ליעד';
     if (!days) return 'נא לבחור כמה ימים בשבוע תתאמן';
     if (!locations.length) return 'נא לבחור איפה תתאמן';
     if (!equipment.length) return 'נא לבחור ציוד (או "ללא ציוד")';
@@ -88,6 +90,9 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
       await save({
         height_cm: Math.round(Number(height)),
         experience, fitness_goal: goal, training_days: days,
+        goal_months: months,
+        // A new goal or period starts counting today; an unchanged one keeps its start date.
+        goal_start: goal === profile.fitness_goal && months === profile.goal_months && profile.goal_start ? profile.goal_start : todayISO(),
         training_locations: locations, equipment,
         onboarded_at: profile.onboarded_at ?? new Date().toISOString(),
       });
@@ -133,11 +138,19 @@ export default function Onboarding({ profile, save, onDone, editing }: Props) {
       </section>
 
       <section className="card stack tight">
-        <h3>🎯 מטרה</h3>
+        <h3>🎯 מה היעד שלך?</h3>
         <div className="options three">
           {GOALS.map((g) => (
             <button key={g.key} className={'option centered' + (goal === g.key ? ' on' : '')} onClick={() => setGoal(g.key)}>
               <span className="option-icon">{g.icon}</span><strong>{g.label}</strong><span className="muted small">{g.hint}</span>
+            </button>
+          ))}
+        </div>
+        <h3>⏳ תוך כמה זמן?</h3>
+        <div className="options three">
+          {GOAL_PERIODS.map((g) => (
+            <button key={g.key} className={'option centered' + (months === g.key ? ' on' : '')} onClick={() => setMonths(g.key)}>
+              <strong>{g.label}</strong>
             </button>
           ))}
         </div>

@@ -7,7 +7,7 @@ import { BodyWeight, DEFAULT_PROFILE, Meal, Profile, Workout } from '../lib/type
 import { addDays, currentAge, daysAgo, formatDate, todayISO, weekStart, workoutVolume } from '../lib/utils';
 import ProgressCharts from '../components/ProgressCharts';
 import ConfirmInline from '../components/ConfirmInline';
-import { EXPERIENCE, GOALS, LOCATIONS, labelOf } from '../lib/fitnessProfile';
+import { EXPERIENCE, GOAL_PERIODS, GOALS, LOCATIONS, labelOf } from '../lib/fitnessProfile';
 
 interface Data { workouts: Workout[]; meals: Meal[]; weights: BodyWeight[]; profile: Profile }
 
@@ -107,6 +107,7 @@ export default function AdminUser({ id }: { id: string }) {
             ) : null}
             <span className="muted">ניסיון</span><span>{labelOf(EXPERIENCE, data.profile.experience)}</span>
             <span className="muted">מטרה</span><span>{labelOf(GOALS, data.profile.fitness_goal)}</span>
+            <span className="muted">תוך</span><span>{GOAL_PERIODS.find((p) => p.key === data.profile.goal_months)?.label ?? '–'}</span>
             <span className="muted">ימי אימון</span><span>{data.profile.training_days} בשבוע</span>
             <span className="muted">איפה</span><span>{(data.profile.training_locations ?? []).map((l) => labelOf(LOCATIONS, l)).join(', ')}</span>
             <span className="muted">ציוד</span><span>{(data.profile.equipment ?? []).join(', ')}</span>
@@ -119,7 +120,6 @@ export default function AdminUser({ id }: { id: string }) {
         <div className="chips">
           <span className="chip">{data.profile.calorie_goal} קק״ל</span>
           <span className="chip">{data.profile.protein_goal} ג׳ חלבון</span>
-          <span className="chip">{data.profile.water_goal} כוסות מים</span>
           {data.profile.weight_goal ? <span className="chip">משקל יעד {data.profile.weight_goal}</span> : null}
         </div>
       </div>

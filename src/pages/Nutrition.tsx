@@ -1,8 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useTable } from '../lib/useTable';
 import { useProfile } from '../lib/useProfile';
-import { useAuth } from '../lib/auth';
-import type { Meal, MealType, WaterLog } from '../lib/types';
+import type { Meal, MealType } from '../lib/types';
 import { addDays, formatDate, round, todayISO } from '../lib/utils';
 import { QUICK_FOODS } from '../lib/foods';
 
@@ -16,10 +15,8 @@ const MEAL_TYPES: { key: MealType; label: string }[] = [
 const emptyForm = { name: '', calories: '', protein: '', carbs: '', fat: '' };
 
 export default function Nutrition() {
-  const { user } = useAuth();
   const { profile } = useProfile();
   const meals = useTable<Meal>('meals');
-  const water = useTable<WaterLog>('water_logs');
   const [date, setDate] = useState(todayISO());
   const [adding, setAdding] = useState<MealType | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -28,14 +25,9 @@ export default function Nutrition() {
   const total = dayMeals.reduce((a, m) => ({
     calories: a.calories + m.calories, protein: a.protein + m.protein, carbs: a.carbs + m.carbs, fat: a.fat + m.fat,
   }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
-  const waterRow = water.rows.find((w) => w.date === date);
-  const glasses = waterRow?.glasses ?? 0;
 
   // Recently used meals, de-duplicated by name, for one-tap re-adding.
   const recent = Array.from(new Map([...meals.rows].reverse().map((m) => [m.name, m])).values()).slice(0, 8);
-
-  const setWater = (n: number) =>
-    water.save({ id: waterRow?.id ?? `${user!.id}_${date}`, date, glasses: Math.max(0, n) });
 
   async function addMeal(type: MealType, m: Omit<Meal, 'id' | 'date' | 'meal_type'>) {
     await meals.save({ ...m, date, meal_type: type });
@@ -71,20 +63,6 @@ export default function Nutrition() {
         <Macro label="חלבון" value={total.protein} goal={profile.protein_goal} color="var(--blue)" />
         <Macro label="פחמימות" value={total.carbs} goal={profile.carbs_goal} color="var(--amber)" />
         <Macro label="שומן" value={total.fat} goal={profile.fat_goal} color="var(--pink)" />
-      </div>
-
-      <div className="card row between">
-        <div>
-          <strong>💧 מים</strong>
-          <div className="muted small">{glasses} מתוך {profile.water_goal} כוסות</div>
-        </div>
-        <div className="row gap">
-          <button className="btn small" onClick={() => setWater(glasses - 1)} disabled={glasses === 0}>−</button>
-          <div className="glasses">{Array.from({ length: Math.max(profile.water_goal, glasses) }, (_, i) => (
-            <span key={i} className={i < glasses ? 'on' : ''} />
-          ))}</div>
-          <button className="btn small primary" onClick={() => setWater(glasses + 1)}>+</button>
-        </div>
       </div>
 
       {MEAL_TYPES.map((mt) => {

@@ -14,7 +14,6 @@ const FIELDS = [
   ['protein_goal', 'יעד חלבון (ג׳)'],
   ['carbs_goal', 'יעד פחמימות (ג׳)'],
   ['fat_goal', 'יעד שומן (ג׳)'],
-  ['water_goal', 'יעד מים (כוסות)'],
   ['weight_goal', 'משקל יעד (ק״ג)'],
 ] as const;
 

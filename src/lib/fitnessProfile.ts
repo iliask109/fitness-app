@@ -10,7 +10,7 @@ export const EXPERIENCE = [
 
 export const GOALS = [
   { key: 'bulk', label: 'מסה', icon: '💪', hint: 'לבנות שריר ולעלות במשקל' },
-  { key: 'cut', label: 'חיטוב', icon: '🔥', hint: 'להוריד שומן ולשמור על שריר' },
+  { key: 'cut', label: 'ירידה במשקל', icon: '🔥', hint: 'להוריד שומן ולשמור על שריר' },
   { key: 'maintain', label: 'שימור', icon: '⚖️', hint: 'לשמור על הכושר והמשקל' },
 ] as const;
 
@@ -32,3 +32,23 @@ export const EQUIPMENT_BY_LOCATION: Record<string, string[]> = {
 
 export const labelOf = (list: readonly { key: string; label: string }[], key?: string | null) =>
   list.find((x) => x.key === key)?.label ?? '–';
+
+export const GOAL_PERIODS = [
+  { key: 3, label: '3 חודשים' },
+  { key: 6, label: 'חצי שנה' },
+  { key: 12, label: 'שנה' },
+] as const;
+
+/** Target date of the goal (YYYY-MM-DD), or null when no period was chosen. */
+export function goalEndDate(p: { goal_months?: number | null; goal_start?: string | null; onboarded_at?: string | null }) {
+  const start = p.goal_start ?? p.onboarded_at?.slice(0, 10);
+  if (!p.goal_months || !start) return null;
+  const d = new Date(start + 'T12:00:00');
+  const day = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + p.goal_months);
+  // Clamp to the month's last day (31 Aug + 6 months = 28/29 Feb, not 3 Mar).
+  d.setDate(Math.min(day, new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()));
+  const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+  return z.toISOString().slice(0, 10);
+}

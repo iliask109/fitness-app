@@ -2,6 +2,7 @@ import { ReactNode, useMemo, useState } from 'react';
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import type { BodyWeight, Meal, Profile, Workout } from '../lib/types';
 import { addDays, formatDate, round, todayISO, weekStart, workoutVolume } from '../lib/utils';
+import { GOAL_PERIODS, GOALS, goalEndDate, labelOf } from '../lib/fitnessProfile';
 
 const axis = { fontSize: 11, fill: 'var(--muted)' };
 const tooltipStyle = { contentStyle: { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, direction: 'rtl' as const } };
@@ -60,13 +61,13 @@ export default function ProgressCharts({ workouts, meals, weights, profile, weig
 
   return (
     <>
+      <GoalCard profile={profile} lastWeight={last} own={!!weightForm} />
+
       <div className="card stack tight">
         <div className="row between">
           <h3>⚖️ משקל גוף</h3>
-          {first !== undefined && last !== undefined && weightData.length > 1 && (
-            <span className={last <= first ? 'good' : 'muted'}><span dir="ltr">{last - first > 0 ? '+' : ''}{round(last - first, 1)}</span> ק״ג</span>
-          )}
         </div>
+        {first !== undefined && last !== undefined && <WeightChange first={first} last={last} count={weightData.length} goal={profile.fitness_goal} />}
         {weightForm}
         {weightData.length > 0 ? (
           <div dir="ltr" className="chart">
@@ -169,6 +170,62 @@ function GainSummary({ points }: { points: { weight: number }[] }) {
       <span className={'gain-badge ' + (diff > 0 ? 'up' : diff < 0 ? 'down' : '')}>
         {diff > 0 ? <><span dir="ltr">+{diff}</span> ק״ג מההתחלה 💪</> : diff < 0 ? <><span dir="ltr">{diff}</span> ק״ג מההתחלה</> : 'אותו משקל כמו בהתחלה'}
       </span>
+    </div>
+  );
+}
+
+/** "Started at 80 kg, now 77 kg: down 3 kg since the start", green when the change matches the goal. */
+function WeightChange({ first, last, count, goal }: { first: number; last: number; count: number; goal?: string | null }) {
+  if (count < 2) return <div className="gain muted small">משקל התחלה: {first} ק״ג. בשקילה הבאה תראה כמה השתנה מתחילת התהליך.</div>;
+  const diff = round(last - first, 1);
+  const good = goal === 'bulk' ? diff > 0 : goal === 'maintain' ? Math.abs(diff) <= 1 : diff < 0;
+  return (
+    <div className="gain">
+      <span className="small muted">התחלה <strong className="gain-num">{first}</strong> ק״ג ← עכשיו <strong className="gain-num">{last}</strong> ק״ג</span>
+      <span className={'gain-badge ' + (diff === 0 ? '' : good ? 'up' : 'down')}>
+        {diff < 0 ? <>ירידה של <span dir="ltr">{-diff}</span> ק״ג מתחילת התהליך</>
+          : diff > 0 ? <>עלייה של <span dir="ltr">{diff}</span> ק״ג מתחילת התהליך</>
+          : 'אותו משקל כמו בתחילת התהליך'}
+      </span>
+    </div>
+  );
+}
+
+/** The goal chosen in the training profile, its target date and how much time is left. */
+function GoalCard({ profile, lastWeight, own }: { profile: Profile; lastWeight?: number; own: boolean }) {
+  const end = goalEndDate(profile);
+  const start = profile.goal_start ?? profile.onboarded_at?.slice(0, 10);
+  if (!profile.fitness_goal && !end) return null;
+  const goal = GOALS.find((g) => g.key === profile.fitness_goal);
+  const period = GOAL_PERIODS.find((p) => p.key === profile.goal_months);
+  const day = 86400000, today = new Date(todayISO() + 'T12:00:00').getTime();
+  const left = end ? Math.round((new Date(end + 'T12:00:00').getTime() - today) / day) : null;
+  const total = end && start ? Math.max(1, Math.round((new Date(end + 'T12:00:00').getTime() - new Date(start + 'T12:00:00').getTime()) / day)) : null;
+  const pct = total && left != null ? Math.min(100, Math.max(0, ((total - left) / total) * 100)) : 0;
+  const toGoal = profile.weight_goal && lastWeight !== undefined ? round(profile.weight_goal - lastWeight, 1) : null;
+  return (
+    <div className="card stack tight">
+      <div className="row between">
+        <h3>🎯 {own ? 'היעד שלי' : 'היעד'}</h3>
+        {goal && <span className="chip">{goal.icon} {labelOf(GOALS, profile.fitness_goal)}</span>}
+      </div>
+      {end ? (
+        <>
+          <div className="row between small">
+            <span className="muted">{period ? `${period.label} · ` : ''}תאריך יעד: <strong>{formatDate(end, { day: 'numeric', month: 'long', year: 'numeric' })}</strong></span>
+            <span className={left! < 0 ? 'muted' : 'good'}>{left! > 0 ? `נשארו ${left} ימים` : left === 0 ? 'היום! 🎉' : 'תאריך היעד עבר'}</span>
+          </div>
+          <div className="bar"><div style={{ width: pct + '%', background: 'var(--primary)' }} /></div>
+          {start && <span className="muted small">התחלה: {formatDate(start, { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
+        </>
+      ) : own ? (
+        <a className="btn small" href="#/profile-setup">⏳ בחירת תאריך יעד (3 חודשים, חצי שנה או שנה)</a>
+      ) : <span className="muted small">לא נבחר תאריך יעד.</span>}
+      {profile.weight_goal ? (
+        <span className="small">משקל יעד: <strong>{profile.weight_goal}</strong> ק״ג
+          {toGoal != null && toGoal !== 0 ? <span className="muted"> · עוד <span dir="ltr">{Math.abs(toGoal)}</span> ק״ג {toGoal < 0 ? 'להוריד' : 'לעלות'}</span> : toGoal === 0 ? <span className="good"> · היעד הושג! 🎉</span> : null}
+        </span>
+      ) : null}
     </div>
   );
 }

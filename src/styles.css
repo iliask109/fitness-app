@@ -105,9 +105,6 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--primary); o
 
 .bar { height: 8px; border-radius: 99px; background: var(--track); overflow: hidden; margin-top: 3px; }
 .bar > div { height: 100%; border-radius: 99px; transition: width .4s; }
-.glasses { display: flex; gap: 3px; flex-wrap: wrap; max-width: 140px; }
-.glasses span { width: 10px; height: 16px; border-radius: 2px 2px 4px 4px; background: var(--track); }
-.glasses span.on { background: var(--cyan); }
 
 .exercise { display: flex; flex-direction: column; gap: 6px; }
 .set-grid { display: grid; grid-template-columns: 36px 1fr 1fr 44px; gap: 8px; align-items: center; }

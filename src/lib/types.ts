@@ -55,6 +55,9 @@ export interface Profile extends BaseRow {
   height_cm?: number | null;
   experience?: string | null;
   fitness_goal?: string | null;
+  /** Goal period in months (3, 6 or 12) and the day it started; the target date is goal_start + goal_months. */
+  goal_months?: number | null;
+  goal_start?: string | null;
   training_days?: number | null;
   training_locations?: string[] | null;
   equipment?: string[] | null;
