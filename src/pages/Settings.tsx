@@ -8,6 +8,9 @@ import { ThemePicker } from '../components/ThemeControls';
 import SetPassword from '../components/SetPassword';
 import { GENDERS } from '../lib/gender';
 import NotificationSettings from '../components/NotificationSettings';
+import ConfirmInline from '../components/ConfirmInline';
+import { deleteMyAccount } from '../lib/admin';
+import { byGender } from '../lib/gender';
 
 
 export default function Settings() {
@@ -16,6 +19,22 @@ export default function Settings() {
   const [form, setForm] = useState<Record<string, string>>({});
   const [saved, setSaved] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
+  const [askDelete, setAskDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  async function deleteAccount() {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteMyAccount(user!.id);
+      await signOut().catch(() => undefined);
+      navigate('/');
+    } catch (e) {
+      setDeleteError((e as Error).message);
+      setDeleting(false);
+    }
+  }
 
   useEffect(() => {
     if (loading) return;
@@ -88,6 +107,19 @@ export default function Settings() {
         {adminCheckError && <div className="notice" dir="ltr">admin check: {adminCheckError}</div>}
         {isDemo && <p className="notice">מצב הדגמה: הנתונים נשמרים רק בדפדפן הזה. כדי לשמור בענן, הגדר Supabase לפי ה-README.</p>}
         <button className="btn danger" onClick={async () => { await signOut(); navigate('/'); }}>התנתקות</button>
+      </div>
+      <div className="card stack tight">
+        <h3>🗑️ מחיקת החשבון</h3>
+        <p className="muted small" style={{ margin: 0 }}>מוחקת את החשבון ואת כל הנתונים שלו לצמיתות.</p>
+        {deleteError && <p className="notice">{deleteError}</p>}
+        {askDelete ? (
+          <ConfirmInline
+            message={<>{byGender(profile.gender, 'אתה בטוח?', 'את בטוחה?', 'בטוח/ה?')} כל הנתונים שלך יימחקו לצמיתות: אימונים, תוכניות, תזונה, שקילות והפרופיל. אי אפשר לשחזר אותם.</>}
+            confirmLabel="כן, למחוק את החשבון" busy={deleting}
+            onConfirm={deleteAccount} onCancel={() => setAskDelete(false)} />
+        ) : (
+          <button className="btn danger" onClick={() => setAskDelete(true)}>מחיקת החשבון</button>
+        )}
       </div>
     </div>
   );

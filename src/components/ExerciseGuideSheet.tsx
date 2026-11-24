@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { EXERCISE_ALTERNATIVE, EXERCISE_GUIDE, demoVideoUrl } from '../lib/exerciseGuide';
+import { EXERCISE_ALTERNATIVE, EXERCISE_EQUIPMENT, EXERCISE_GUIDE, demoVideoUrl } from '../lib/exerciseGuide';
 import { exerciseImages } from '../lib/exerciseImages';
 
 /**
@@ -12,6 +12,7 @@ export default function ExerciseGuideSheet({ name: initial, onClose, onReplace }
   const g = EXERCISE_GUIDE[name];
   const images = exerciseImages(name);
   const alt = EXERCISE_ALTERNATIVE[name];
+  const equipment = EXERCISE_EQUIPMENT[name];
   const sheet = useRef<HTMLDivElement>(null);
   useEffect(() => { sheet.current?.scrollTo({ top: 0 }); }, [name]);
   useEffect(() => {
@@ -40,7 +41,10 @@ export default function ExerciseGuideSheet({ name: initial, onClose, onReplace }
         )}
         {g ? (
           <>
-            <div className="guide-muscles"><span className="muted small">שרירים:</span> {g.muscles}</div>
+            <div className="guide-muscles stack tight">
+              <span><span className="muted small">💪 שרירים:</span> {g.muscles}</span>
+              {equipment && <span><span className="muted small">🧰 ציוד נדרש:</span> {equipment}</span>}
+            </div>
             <div className="guide-block">
               <h4>איך עושים</h4>
               <ol className="guide-steps">{g.steps.map((s, i) => <li key={i}>{s}</li>)}</ol>

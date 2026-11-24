@@ -108,3 +108,21 @@ function translate(m: string) {
   if (/yourself/.test(m)) return 'אי אפשר לבצע את הפעולה הזו על עצמך';
   return m;
 }
+
+/** The signed-in user deletes their own account and all its data (admins cannot). */
+export async function deleteMyAccount(uid: string) {
+  if (supabase) {
+    const { error } = await supabase.rpc('delete_my_account');
+    if (error) {
+      if (/admins cannot/.test(error.message)) throw new Error('מנהל לא יכול למחוק את החשבון של עצמו.');
+      if (/could not find the function|does not exist/i.test(error.message)) throw new Error('מסד הנתונים עוד לא עודכן (update-11-delete-account.sql). פנה למנהל האתר.');
+      throw new Error(error.message);
+    }
+  } else {
+    await deleteUser(uid);
+  }
+  // Forget everything this device kept for the user (device copies, unsent changes, workout draft).
+  try {
+    for (const k of Object.keys(localStorage)) if (k.includes(uid)) localStorage.removeItem(k);
+  } catch { /* ignore */ }
+}

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { clearDraft, DRAFT_TTL_MS, draftProgress, hasProgress, loadDraft, saveDraft } from '../src/lib/workoutDraft';
 import { PROGRAM_TEMPLATES } from '../src/lib/templates';
 import { ALL_EXERCISES } from '../src/lib/exercises';
-import { EXERCISE_ALTERNATIVE, EXERCISE_GUIDE } from '../src/lib/exerciseGuide';
+import { EXERCISE_ALTERNATIVE, EXERCISE_EQUIPMENT, EXERCISE_GUIDE } from '../src/lib/exerciseGuide';
 import { EXERCISE_IMAGE_IDS } from '../src/lib/exerciseImages';
 import { existsSync } from 'node:fs';
 import { requiredDays } from '../src/lib/schedule';
@@ -58,6 +58,9 @@ describe('ready-made programs', () => {
   });
   it('every exercise in the library has a guide', () => {
     expect(ALL_EXERCISES.filter((n) => !EXERCISE_GUIDE[n])).toEqual([]);
+  });
+  it('every exercise lists its equipment', () => {
+    expect(ALL_EXERCISES.filter((n) => !EXERCISE_EQUIPMENT[n])).toEqual([]);
   });
   it('every exercise has an alternative from the library (not itself)', () => {
     expect(ALL_EXERCISES.filter((n) => !EXERCISE_ALTERNATIVE[n])).toEqual([]);
