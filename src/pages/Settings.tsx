@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { getLang, isEn, Lang, setLang, tr } from '../lib/i18n';
 import { useAuth } from '../lib/auth';
 import { useProfile } from '../lib/useProfile';
 import { isDemo } from '../lib/supabase';
@@ -20,6 +21,22 @@ export default function Settings() {
   const [saved, setSaved] = useState(false);
   const [openDetails, setOpenDetails] = useState(false);
   const [askDelete, setAskDelete] = useState(false);
+  const [langBusy, setLangBusy] = useState(false);
+  const [langError, setLangError] = useState<string | null>(null);
+
+  /** Saved on the profile first (reminders use it, and the app follows the profile), then the app switches. */
+  async function changeLanguage(l: Lang) {
+    if (l === getLang()) return;
+    setLangBusy(true);
+    setLangError(null);
+    try {
+      await save({ language: l });
+      setLang(l);
+    } catch (e) {
+      setLangError(tr('השמירה נכשלה: ', 'Saving failed: ') + (e as Error).message);
+      setLangBusy(false);
+    }
+  }
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -64,61 +81,71 @@ export default function Settings() {
 
   return (
     <div className="stack">
-      <h2>הגדרות</h2>
+      <h2>{tr('הגדרות', 'Settings')}</h2>
       <div className="card stack">
       <button type="button" className="collapse-head" aria-expanded={openDetails} onClick={() => setOpenDetails(!openDetails)}>
-        <h3>👤 פרטים אישיים{isDemo ? '' : ' וסיסמה'}</h3>
+        <h3>👤 {tr('פרטים אישיים', 'Personal details')}{isDemo ? '' : tr(' וסיסמה', ' and password')}</h3>
         <span className="collapse-arrow" aria-hidden>{openDetails ? '▴' : '▾'}</span>
       </button>
       {openDetails && <>
       <form onSubmit={submit} className="stack">
         <div className="grid2">
-          <label>שם פרטי<input value={form.first_name ?? ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></label>
-          <label>שם משפחה<input value={form.last_name ?? ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></label>
-          <label>גיל<input type="number" min={10} max={120} value={form.age ?? ''} onChange={(e) => setForm({ ...form, age: e.target.value })} /></label>
-          <label><span>תאריך לידה <span className="optional">(לא חובה)</span></span>
+          <label>{tr('שם פרטי', 'First name')}<input value={form.first_name ?? ''} onChange={(e) => setForm({ ...form, first_name: e.target.value })} /></label>
+          <label>{tr('שם משפחה', 'Last name')}<input value={form.last_name ?? ''} onChange={(e) => setForm({ ...form, last_name: e.target.value })} /></label>
+          <label>{tr('גיל', 'Age')}<input type="number" min={10} max={120} value={form.age ?? ''} onChange={(e) => setForm({ ...form, age: e.target.value })} /></label>
+          <label><span>{tr('תאריך לידה', 'Birth date')} <span className="optional">{tr('(לא חובה)', '(optional)')}</span></span>
             <input type="date" max={todayISO()} value={form.birth_date ?? ''} onChange={(e) => {
               const v = e.target.value;
               setForm({ ...form, birth_date: v, age: v ? String(ageFromBirthDate(v)) : form.age });
             }} /></label>
         </div>
-        <span className="small muted">מגדר</span>
-        <div className="segmented" role="radiogroup" aria-label="מגדר">
+        <span className="small muted">{tr('מגדר', 'Gender')}</span>
+        <div className="segmented" role="radiogroup" aria-label={tr('מגדר', 'Gender')}>
           {GENDERS.map((g) => (
             <button key={g.key} type="button" role="radio" aria-checked={form.gender === g.key}
               className={form.gender === g.key ? 'on' : ''} onClick={() => setForm({ ...form, gender: g.key })}>{g.label}</button>
           ))}
         </div>
-        <button className="btn primary">{saved ? '✓ נשמר' : 'שמירת פרטים'}</button>
+        <button className="btn primary">{saved ? tr('✓ נשמר', '✓ Saved') : tr('שמירת פרטים', 'Save details')}</button>
       </form>
       {!isDemo && <><hr className="divider" /><SetPassword embedded /></>}
       </>}
       </div>
       <div className="card stack">
-        <h3>🎯 יעדים</h3>
-        <a className="btn" href="#/profile-setup">🏋️ עריכת פרופיל אימון (גובה, מטרה, משקל יעד, ציוד…)</a>
-        <p className="muted small">יעדי הקלוריות, החלבון, הפחמימות והשומן מחושבים אוטומטית לפי המשקל שלך ומתעדכנים כל חודש. אפשר לראות אותם בדף ההתקדמות.</p>
+        <h3>{tr('🎯 יעדים', '🎯 Goals')}</h3>
+        <a className="btn" href="#/profile-setup">{tr('🏋️ עריכת פרופיל אימון (גובה, מטרה, משקל יעד, ציוד…)', '🏋️ Edit training profile (height, goal, target weight, equipment…)')}</a>
+        <p className="muted small">{tr('יעדי הקלוריות, החלבון, הפחמימות והשומן מחושבים אוטומטית לפי המשקל שלך ומתעדכנים כל חודש. אפשר לראות אותם בדף ההתקדמות.', 'Your calorie, protein, carb and fat goals are calculated automatically from your weight and updated every month. You can see them on the Progress page.')}</p>
       </div>
       <NotificationSettings />
       <ThemePicker />
       <div className="card stack tight">
-        <div className="muted small">מחובר בתור</div>
-        <div dir="ltr" style={{ textAlign: 'right' }}>{user?.email}</div>
-        {adminCheckError && <div className="notice" dir="ltr">admin check: {adminCheckError}</div>}
-        {isDemo && <p className="notice">מצב הדגמה: הנתונים נשמרים רק בדפדפן הזה. כדי לשמור בענן, הגדר Supabase לפי ה-README.</p>}
-        <button className="btn danger" onClick={async () => { await signOut(); navigate('/'); }}>התנתקות</button>
+        <h3>🌐 {tr('שפה', 'Language')}</h3>
+        <div className="segmented" role="radiogroup" aria-label={tr('שפה', 'Language')}>
+          {(['he', 'en'] as const).map((l) => (
+            <button key={l} type="button" role="radio" aria-checked={getLang() === l} className={getLang() === l ? 'on' : ''} disabled={langBusy}
+              onClick={() => changeLanguage(l)}>{l === 'he' ? 'עברית' : 'English'}</button>
+          ))}
+        </div>
+        {langError && <p className="notice" style={{ margin: 0 }}>{langError}</p>}
       </div>
       <div className="card stack tight">
-        <h3>🗑️ מחיקת החשבון</h3>
-        <p className="muted small" style={{ margin: 0 }}>מוחקת את החשבון ואת כל הנתונים שלו לצמיתות.</p>
+        <div className="muted small">{tr('מחובר בתור', 'Signed in as')}</div>
+        <div dir="ltr" style={{ textAlign: isEn() ? 'left' : 'right' }}>{user?.email}</div>
+        {adminCheckError && <div className="notice" dir="ltr">admin check: {adminCheckError}</div>}
+        {isDemo && <p className="notice">{tr('מצב הדגמה: הנתונים נשמרים רק בדפדפן הזה. כדי לשמור בענן, הגדר Supabase לפי ה-README.', 'Demo mode: data is saved only in this browser. To save in the cloud, set up Supabase as described in the README.')}</p>}
+        <button className="btn danger" onClick={async () => { await signOut(); navigate('/'); }}>{tr('התנתקות', 'Sign out')}</button>
+      </div>
+      <div className="card stack tight">
+        <h3>{tr('🗑️ מחיקת החשבון', '🗑️ Delete account')}</h3>
+        <p className="muted small" style={{ margin: 0 }}>{tr('מוחקת את החשבון ואת כל הנתונים שלו לצמיתות.', 'Permanently deletes the account and all its data.')}</p>
         {deleteError && <p className="notice">{deleteError}</p>}
         {askDelete ? (
           <ConfirmInline
-            message={<>{byGender(profile.gender, 'אתה בטוח?', 'את בטוחה?', 'בטוח/ה?')} כל הנתונים שלך יימחקו לצמיתות: אימונים, תוכניות, תזונה, שקילות והפרופיל. אי אפשר לשחזר אותם.</>}
-            confirmLabel="כן, למחוק את החשבון" busy={deleting}
+            message={tr(byGender(profile.gender, 'אתה בטוח?', 'את בטוחה?', 'בטוח/ה?') + ' כל הנתונים שלך יימחקו לצמיתות: אימונים, תוכניות, תזונה, שקילות והפרופיל. אי אפשר לשחזר אותם.', 'Are you sure? All your data will be deleted permanently: workouts, programs, nutrition, weigh-ins and your profile. It cannot be restored.')}
+            confirmLabel={tr('כן, למחוק את החשבון', 'Yes, delete my account')} busy={deleting}
             onConfirm={deleteAccount} onCancel={() => setAskDelete(false)} />
         ) : (
-          <button className="btn danger" onClick={() => setAskDelete(true)}>מחיקת החשבון</button>
+          <button className="btn danger" onClick={() => setAskDelete(true)}>{tr('מחיקת החשבון', 'Delete account')}</button>
         )}
       </div>
     </div>

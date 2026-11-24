@@ -1,4 +1,5 @@
 import { useTable } from '../lib/useTable';
+import { tr, tx } from '../lib/i18n';
 import { TEMPLATE_CATEGORIES } from '../lib/templates';
 import { useTemplates } from '../lib/templateStore';
 import { DAY_STYLES, dayStyle } from '../lib/dayStyle';
@@ -67,23 +68,23 @@ export default function Programs() {
       <div className="row between">
         <div className="stack tight" style={{ gap: 2, minWidth: 0 }}>
           <div className="row gap">
-            <h3 style={{ margin: 0 }}>{p.name}</h3>
-            <span className="chip active-chip">⭐ התוכנית שלי</span>
+            <h3 style={{ margin: 0 }}>{tx(p.name)}</h3>
+            <span className="chip active-chip">{tr('⭐ התוכנית שלי', '⭐ My program')}</span>
           </div>
           <span className="muted small">📅 {describeSchedule(p)}</span>
         </div>
         <div className="row gap">
-          <a className="btn small" href={`#/programs/${p.id}`}>✏️ עריכה</a>
-          <button className="btn small" onClick={() => setConfirmSwitch(true)}>🔄 החלפת תוכנית</button>
+          <a className="btn small" href={`#/programs/${p.id}`}>{tr('✏️ עריכה', '✏️ Edit')}</a>
+          <button className="btn small" onClick={() => setConfirmSwitch(true)}>{tr('🔄 החלפת תוכנית', '🔄 Switch program')}</button>
         </div>
       </div>
       {confirmSwitch && (
-        <div className="card confirm-card stack tight" role="alertdialog" aria-label="החלפת תוכנית">
-          <strong>להחליף תוכנית?</strong>
-          <span className="small">התוכנית "{p.name}" תוסר, ואז תוכל לבחור תוכנית אחרת. האימונים שכבר עשית יישמרו.</span>
+        <div className="card confirm-card stack tight" role="alertdialog" aria-label={tr('החלפת תוכנית', 'Switch program')}>
+          <strong>{tr('להחליף תוכנית?', 'Switch program?')}</strong>
+          <span className="small">{tr(`התוכנית "${p.name}" תוסר, ואז תוכל לבחור תוכנית אחרת. האימונים שכבר עשית יישמרו.`, `The program "${tx(p.name)}" will be removed, and then you can choose another. Workouts you already did are kept.`)}</span>
           <div className="row gap">
-            <button className="btn danger" onClick={switchProgram}>כן, להחליף</button>
-            <button className="btn" onClick={() => setConfirmSwitch(false)}>ביטול</button>
+            <button className="btn danger" onClick={switchProgram}>{tr('כן, להחליף', 'Yes, switch')}</button>
+            <button className="btn" onClick={() => setConfirmSwitch(false)}>{tr('ביטול', 'Cancel')}</button>
           </div>
         </div>
       )}
@@ -98,7 +99,7 @@ export default function Programs() {
     <div className="chips">
       {days.map((d, i) => {
         const st = DAY_STYLES[dayStyle(d)];
-        return <span key={i} className="style-chip" style={{ '--accent': st.color } as React.CSSProperties}>{st.icon} {d.name}</span>;
+        return <span key={i} className="style-chip" style={{ '--accent': st.color } as React.CSSProperties}>{st.icon} {tx(d.name)}</span>;
       })}
     </div>
   );
@@ -106,21 +107,21 @@ export default function Programs() {
   return (
     <div className="stack">
       <div className="row between">
-        <h2>תוכניות אימון</h2>
+        <h2>{tr('תוכניות אימון', 'Training programs')}</h2>
         {locked
-          ? <button className="btn primary" disabled title="יש לך כבר תוכנית">+ תוכנית חדשה</button>
-          : <a className="btn primary" href="#/programs/new">+ תוכנית חדשה</a>}
+          ? <button className="btn primary" disabled title={tr('יש לך כבר תוכנית', 'You already have a program')}>{tr('+ תוכנית חדשה', '+ New program')}</button>
+          : <a className="btn primary" href="#/programs/new">{tr('+ תוכנית חדשה', '+ New program')}</a>}
       </div>
 
-      {loading && <p className="muted">טוען…</p>}
+      {loading && <p className="muted">{tr('טוען…', 'Loading…')}</p>}
 
       {active && programSection(active)}
 
       {!loading && !locked && (
         <>
-          <div className="card muted">עוד אין לך תוכנית. בחר אחת מהתוכניות המוכנות או בנה תוכנית משלך.</div>
-          <h3 style={{ marginTop: 8 }}>✨ תוכניות מוכנות</h3>
-          {templates.loading && <p className="muted">טוען…</p>}
+          <div className="card muted">{tr('עוד אין לך תוכנית. בחר אחת מהתוכניות המוכנות או בנה תוכנית משלך.', 'You don\'t have a program yet. Pick one of the ready-made programs or build your own.')}</div>
+          <h3 style={{ marginTop: 8 }}>{tr('✨ תוכניות מוכנות', '✨ Ready-made programs')}</h3>
+          {templates.loading && <p className="muted">{tr('טוען…', 'Loading…')}</p>}
           {categories.map((c) => {
             const list = templates.list.filter((t) => t.category === c.key);
             if (!list.length) return null;
@@ -132,37 +133,37 @@ export default function Programs() {
                 aria-expanded={open} disabled={!anyFits || c.fits}>
                 <span className="category-icon">{c.icon}</span>
                 <span className="grow stack" style={{ gap: 0 }}>
-                  <span className="row gap"><strong className="category-title">{c.label}</strong>{c.fits && <span className="chip fits-chip">מתאים לך</span>}</span>
-                  <span className="muted small">{open ? c.note : `${list.length} תוכניות · ${c.note}`}</span>
+                  <span className="row gap"><strong className="category-title">{c.label}</strong>{c.fits && <span className="chip fits-chip">{tr('מתאים לך', 'Fits you')}</span>}</span>
+                  <span className="muted small">{open ? c.note : tr(`${list.length} תוכניות · ${c.note}`, `${list.length} programs · ${c.note}`)}</span>
                 </span>
                 {anyFits && !c.fits && <span className="category-chevron" aria-hidden>{open ? '▴' : '▾'}</span>}
               </button>
               {open && list.map((t) => (
                 <div key={t.id ?? t.name} className="card template-card">
                   <div className="row between">
-                    <strong>{t.name}</strong>
-                    <button className="btn primary small" onClick={() => addTemplate(t)}>+ בחירה</button>
+                    <strong>{tx(t.name)}</strong>
+                    <button className="btn primary small" onClick={() => addTemplate(t)}>{tr('+ בחירה', '+ Choose')}</button>
                   </div>
-                  <span className="muted small">{t.description}</span>
-                  <span className="small">🧰 {t.equipment}</span>
+                  <span className="muted small">{tx(t.description)}</span>
+                  <span className="small">🧰 {tx(t.equipment)}</span>
                   {styleChips(t.days)}
                 </div>
               ))}
             </section>
             );
           })}
-          <p className="muted small" style={{ margin: 0 }}>אחרי הבחירה תוכל לבחור את ימי האימון שלך.</p>
+          <p className="muted small" style={{ margin: 0 }}>{tr('אחרי הבחירה תוכל לבחור את ימי האימון שלך.', 'After choosing, you\'ll be able to pick your training days.')}</p>
         </>
       )}
 
       {!loading && locked && (
         <div className="locked-area stack tight">
-          <div className="locked-note small">🔒 אפשר להתאמן לפי תוכנית אחת בכל פעם. כדי לבחור תוכנית אחרת, לחץ "🔄 החלפת תוכנית".</div>
+          <div className="locked-note small">{tr('🔒 אפשר להתאמן לפי תוכנית אחת בכל פעם. כדי לבחור תוכנית אחרת, לחץ "🔄 החלפת תוכנית".', '🔒 You can follow one program at a time. To choose another, tap "🔄 Switch program".')}</div>
           <div className="locked-list" aria-disabled="true" {...{ inert: '' }}>
             {[...others.map((p) => ({ key: p.id, name: p.name, days: p.days })),
-              ...templates.list.map((t) => ({ key: t.id ?? t.name, name: `${TEMPLATE_CATEGORIES.find((c) => c.key === t.category)?.icon} ${t.name}`, days: t.days }))].map((x) => (
+              ...templates.list.map((t) => ({ key: t.id ?? t.name, name: `${TEMPLATE_CATEGORIES.find((c) => c.key === t.category)?.icon} ${tx(t.name)}`, days: t.days }))].map((x) => (
               <div key={x.key} className="locked-row">
-                <strong>{x.name}</strong>
+                <strong>{tx(x.name)}</strong>
                 {styleChips(x.days)}
               </div>
             ))}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { tr, tx } from '../lib/i18n';
 import { useAuth } from '../lib/auth';
 import { clearDraft, DRAFT_TTL_MS, draftProgress, loadDraft } from '../lib/workoutDraft';
 import { useProfile } from '../lib/useProfile';
@@ -18,28 +19,28 @@ export default function ResumeWorkoutCard({ now }: { now: Date }) {
   const startedAgo = Math.max(1, Math.round((now.getTime() - draft.startedAt) / 60000));
 
   return (
-    <div className="card resume-card stack tight" role="region" aria-label="אימון שלא הסתיים">
+    <div className="card resume-card stack tight" role="region" aria-label={tr('אימון שלא הסתיים', 'Unfinished workout')}>
       <div className="row gap">
         <span className="resume-icon">⏸️</span>
         <div className="grow">
-          <strong>אימון שלא הסתיים: {draft.workout.name}</strong>
-          <div className="muted small">{p.done}/{p.total} תרגילים · {p.sets} סטים · התחלת לפני {startedAgo} דק׳</div>
+          <strong>{tr('אימון שלא הסתיים:', 'Unfinished workout:')} {tx(draft.workout.name)}</strong>
+          <div className="muted small">{p.done}/{p.total} {tr('תרגילים', 'exercises')} · {p.sets} {tr('סטים', 'sets')} · {tr(`התחלת לפני ${startedAgo} דק׳`, `started ${startedAgo} min ago`)}</div>
         </div>
       </div>
       <div className="bar"><div style={{ width: `${p.total ? (p.done / p.total) * 100 : 0}%`, background: 'var(--amber)' }} /></div>
-      <span className="muted small">אפשר להמשיך עוד {minutesLeft} דק׳</span>
+      <span className="muted small">{tr(`אפשר להמשיך עוד ${minutesLeft} דק׳`, `You can continue for ${minutesLeft} more min`)}</span>
       {confirming ? (
-        <div className="stack tight confirm-inline" role="alertdialog" aria-label="מחיקת האימון">
-          <strong>{byGender(profile.gender, 'אתה בטוח?', 'את בטוחה?', 'אתה בטוח/ה?')} האימון והסטים שסימנת יימחקו.</strong>
+        <div className="stack tight confirm-inline" role="alertdialog" aria-label={tr('מחיקת האימון', 'Delete workout')}>
+          <strong>{tr(byGender(profile.gender, 'אתה בטוח?', 'את בטוחה?', 'אתה בטוח/ה?') + ' האימון והסטים שסימנת יימחקו.', 'Are you sure? The workout and the sets you ticked will be deleted.')}</strong>
           <div className="row gap">
-            <button className="btn danger grow" onClick={() => { clearDraft(user!.id); setConfirming(false); setGone((x) => x + 1); }}>כן, למחוק</button>
-            <button className="btn grow" onClick={() => setConfirming(false)}>ביטול</button>
+            <button className="btn danger grow" onClick={() => { clearDraft(user!.id); setConfirming(false); setGone((x) => x + 1); }}>{tr('כן, למחוק', 'Yes, delete')}</button>
+            <button className="btn grow" onClick={() => setConfirming(false)}>{tr('ביטול', 'Cancel')}</button>
           </div>
         </div>
       ) : (
         <div className="row gap">
-          <a className="btn primary grow" href="#/workouts/new?resume=1">▶ המשך אימון</a>
-          <button className="btn" onClick={() => setConfirming(true)}>מחיקה</button>
+          <a className="btn primary grow" href="#/workouts/new?resume=1">{tr('▶ המשך אימון', '▶ Continue workout')}</a>
+          <button className="btn" onClick={() => setConfirming(true)}>{tr('מחיקה', 'Delete')}</button>
         </div>
       )}
     </div>

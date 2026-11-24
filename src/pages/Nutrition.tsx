@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import { tr, tx } from '../lib/i18n';
 import { useTable } from '../lib/useTable';
 import { useProfile } from '../lib/useProfile';
 import type { Meal, MealType } from '../lib/types';
@@ -6,10 +7,10 @@ import { addDays, formatDate, round, todayISO } from '../lib/utils';
 import { QUICK_FOODS } from '../lib/foods';
 
 const MEAL_TYPES: { key: MealType; label: string }[] = [
-  { key: 'breakfast', label: '🍳 בוקר' },
-  { key: 'lunch', label: '🍲 צהריים' },
-  { key: 'dinner', label: '🍽️ ערב' },
-  { key: 'snack', label: '🍎 נשנושים' },
+  { key: 'breakfast', get label() { return tr('🍳 בוקר', '🍳 Breakfast'); } },
+  { key: 'lunch', get label() { return tr('🍲 צהריים', '🍲 Lunch'); } },
+  { key: 'dinner', get label() { return tr('🍽️ ערב', '🍽️ Dinner'); } },
+  { key: 'snack', get label() { return tr('🍎 נשנושים', '🍎 Snacks'); } },
 ];
 
 const emptyForm = { name: '', calories: '', protein: '', carbs: '', fat: '' };
@@ -49,20 +50,20 @@ export default function Nutrition() {
   return (
     <div className="stack">
       <div className="row between">
-        <button className="btn small" onClick={() => setDate(addDays(date, -1))}>→</button>
-        <strong>{date === todayISO() ? 'היום' : formatDate(date, { weekday: 'long', day: 'numeric', month: 'short' })}</strong>
-        <button className="btn small" onClick={() => setDate(addDays(date, 1))} disabled={date >= todayISO()}>←</button>
+        <button className="btn small" onClick={() => setDate(addDays(date, -1))} aria-label={tr('יום קודם', 'Previous day')}>{tr('→', '←')}</button>
+        <strong>{date === todayISO() ? tr('היום', 'Today') : formatDate(date, { weekday: 'long', day: 'numeric', month: 'short' })}</strong>
+        <button className="btn small" onClick={() => setDate(addDays(date, 1))} disabled={date >= todayISO()} aria-label={tr('יום הבא', 'Next day')}>{tr('←', '→')}</button>
       </div>
 
       <div className="card stack tight">
         <div className="row between">
-          <span><strong className="big-num">{total.calories}</strong> / {profile.calorie_goal} קק״ל</span>
-          <span className={remaining < 0 ? 'over' : 'muted'}>{remaining >= 0 ? `נשארו ${remaining}` : `חריגה של ${-remaining}`}</span>
+          <span><strong className="big-num">{total.calories}</strong> / {profile.calorie_goal} {tr('קק״ל', 'kcal')}</span>
+          <span className={remaining < 0 ? 'over' : 'muted'}>{remaining >= 0 ? tr(`נשארו ${remaining}`, `${remaining} left`) : tr(`חריגה של ${-remaining}`, `${-remaining} over`)}</span>
         </div>
         <Bar value={total.calories} goal={profile.calorie_goal} color="var(--green)" />
-        <Macro label="חלבון" value={total.protein} goal={profile.protein_goal} color="var(--blue)" />
-        <Macro label="פחמימות" value={total.carbs} goal={profile.carbs_goal} color="var(--amber)" />
-        <Macro label="שומן" value={total.fat} goal={profile.fat_goal} color="var(--pink)" />
+        <Macro label={tr('חלבון', 'Protein')} value={total.protein} goal={profile.protein_goal} color="var(--blue)" />
+        <Macro label={tr('פחמימות', 'Carbs')} value={total.carbs} goal={profile.carbs_goal} color="var(--amber)" />
+        <Macro label={tr('שומן', 'Fat')} value={total.fat} goal={profile.fat_goal} color="var(--pink)" />
       </div>
 
       {MEAL_TYPES.map((mt) => {
@@ -72,51 +73,51 @@ export default function Nutrition() {
           <div key={mt.key} className="card stack tight">
             <div className="row between">
               <strong>{mt.label}</strong>
-              <span className="muted small">{kcal} קק״ל</span>
+              <span className="muted small">{kcal} {tr('קק״ל', 'kcal')}</span>
             </div>
             {list.map((m) => (
               <div key={m.id} className="list-item">
                 <div>
-                  <div>{m.name}</div>
-                  <div className="muted small">ח׳ {round(m.protein)} · פ׳ {round(m.carbs)} · ש׳ {round(m.fat)}</div>
+                  <div>{tx(m.name)}</div>
+                  <div className="muted small">{tr('ח׳', 'P')} {round(m.protein)} · {tr('פ׳', 'C')} {round(m.carbs)} · {tr('ש׳', 'F')} {round(m.fat)}</div>
                 </div>
                 <div className="row gap">
                   <span>{m.calories}</span>
-                  <button className="icon-btn" aria-label="מחיקה" onClick={() => meals.remove(m.id)}>✕</button>
+                  <button className="icon-btn" aria-label={tr('מחיקה', 'Delete')} onClick={() => meals.remove(m.id)}>✕</button>
                 </div>
               </div>
             ))}
             {adding === mt.key ? (
               <form onSubmit={submit} className="stack tight">
-                <input placeholder="מה אכלת?" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoFocus />
+                <input placeholder={tr('מה אכלת?', 'What did you eat?')} required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoFocus />
                 <div className="grid4">
-                  <label>קלוריות<input type="number" inputMode="numeric" value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} /></label>
-                  <label>חלבון<input type="number" inputMode="decimal" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} /></label>
-                  <label>פחמ׳<input type="number" inputMode="decimal" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} /></label>
-                  <label>שומן<input type="number" inputMode="decimal" value={form.fat} onChange={(e) => setForm({ ...form, fat: e.target.value })} /></label>
+                  <label>{tr('קלוריות', 'Calories')}<input type="number" inputMode="numeric" value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} /></label>
+                  <label>{tr('חלבון', 'Protein')}<input type="number" inputMode="decimal" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} /></label>
+                  <label>{tr('פחמ׳', 'Carbs')}<input type="number" inputMode="decimal" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} /></label>
+                  <label>{tr('שומן', 'Fat')}<input type="number" inputMode="decimal" value={form.fat} onChange={(e) => setForm({ ...form, fat: e.target.value })} /></label>
                 </div>
                 <div className="row gap">
-                  <button className="btn primary grow">הוספה</button>
-                  <button type="button" className="btn" onClick={() => setAdding(null)}>ביטול</button>
+                  <button className="btn primary grow">{tr('הוספה', 'Add')}</button>
+                  <button type="button" className="btn" onClick={() => setAdding(null)}>{tr('ביטול', 'Cancel')}</button>
                 </div>
-                <div className="muted small">הוספה מהירה:</div>
+                <div className="muted small">{tr('הוספה מהירה:', 'Quick add:')}</div>
                 <div className="chips">
                   {recent.map((m) => (
                     <button type="button" key={'r' + m.id} className="chip btn-chip recent"
                       onClick={() => { addMeal(mt.key, { name: m.name, calories: m.calories, protein: m.protein, carbs: m.carbs, fat: m.fat }); setAdding(null); }}>
-                      ↺ {m.name}
+                      ↺ {tx(m.name)}
                     </button>
                   ))}
                   {QUICK_FOODS.map(([name, calories, protein, carbs, fat]) => (
                     <button type="button" key={name} className="chip btn-chip"
-                      onClick={() => setForm({ name, calories: String(calories), protein: String(protein), carbs: String(carbs), fat: String(fat) })}>
-                      {name}
+                      onClick={() => setForm({ name: tx(name), calories: String(calories), protein: String(protein), carbs: String(carbs), fat: String(fat) })}>
+                      {tx(name)}
                     </button>
                   ))}
                 </div>
               </form>
             ) : (
-              <button className="btn dashed small" onClick={() => { setAdding(mt.key); setForm(emptyForm); }}>+ הוספה</button>
+              <button className="btn dashed small" onClick={() => { setAdding(mt.key); setForm(emptyForm); }}>{tr('+ הוספה', '+ Add')}</button>
             )}
           </div>
         );
@@ -132,7 +133,7 @@ function Bar({ value, goal, color }: { value: number; goal: number; color: strin
 function Macro({ label, value, goal, color }: { label: string; value: number; goal: number; color: string }) {
   return (
     <div>
-      <div className="row between small"><span>{label}</span><span className="muted">{round(value)} / {goal} ג׳</span></div>
+      <div className="row between small"><span>{label}</span><span className="muted">{round(value)} / {goal} {tr('ג׳', 'g')}</span></div>
       <Bar value={value} goal={goal} color={color} />
     </div>
   );

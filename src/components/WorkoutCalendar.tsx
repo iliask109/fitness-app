@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { locale, tr } from '../lib/i18n';
+import { weekdayLetters } from '../lib/schedule';
 import { todayISO } from '../lib/utils';
 
-const LETTERS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 const pad = (n: number) => String(n).padStart(2, '0');
 
 /**
@@ -30,22 +31,22 @@ export default function WorkoutCalendar({ marked, selected, onSelect }: {
   return (
     <div className="card stack tight calendar">
       <div className="row between">
-        <button className="btn small" onClick={() => shift(-1)} aria-label="חודש קודם">→</button>
+        <button className="btn small" onClick={() => shift(-1)} aria-label={tr('חודש קודם', 'Previous month')}>{tr('→', '←')}</button>
         <div className="stack" style={{ gap: 0, alignItems: 'center' }}>
-          <strong>{first.toLocaleDateString('he-IL', { month: 'long', year: 'numeric' })}</strong>
-          <span className="muted small">{inMonth ? `${inMonth} ימי אימון` : 'אין אימונים בחודש הזה'}</span>
+          <strong>{first.toLocaleDateString(locale(), { month: 'long', year: 'numeric' })}</strong>
+          <span className="muted small">{inMonth ? tr(`${inMonth} ימי אימון`, `${inMonth} training days`) : tr('אין אימונים בחודש הזה', 'No workouts this month')}</span>
         </div>
-        <button className="btn small" onClick={() => shift(1)} disabled={isCurrentMonth} aria-label="חודש הבא">←</button>
+        <button className="btn small" onClick={() => shift(1)} disabled={isCurrentMonth} aria-label={tr('חודש הבא', 'Next month')}>{tr('←', '→')}</button>
       </div>
-      <div className="cal-grid" role="grid" aria-label="לוח שנה">
-        {LETTERS.map((l) => <span key={l} className="cal-head">{l}</span>)}
+      <div className="cal-grid" role="grid" aria-label={tr('לוח שנה', 'Calendar')}>
+        {weekdayLetters().map((l) => <span key={l} className="cal-head">{l}</span>)}
         {cells.map((d, i) => {
           if (!d) return <span key={'e' + i} />;
           const count = marked.get(d) ?? 0;
           const cls = 'cal-day' + (count ? ' has' : '') + (d === selected ? ' selected' : '') + (d === today ? ' today' : '') + (d > today ? ' future' : '');
           return (
             <button key={d} type="button" className={cls} disabled={d > today} aria-pressed={d === selected}
-              aria-label={`${Number(d.slice(8))}${count ? `, ${count} אימונים` : ''}`}
+              aria-label={`${Number(d.slice(8))}${count ? tr(`, ${count} אימונים`, `, ${count} workouts`) : ''}`}
               onClick={() => onSelect(d === selected ? null : d)}>
               {Number(d.slice(8))}
             </button>

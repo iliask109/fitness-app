@@ -1,25 +1,26 @@
 import { addMonths } from './utils';
+import { tr } from './i18n';
 
 /** Choices for the training profile filled in after sign-up. Keys are stored; labels are shown. */
 
 export const EXPERIENCE = [
-  { key: 'none', label: 'מתחיל לגמרי', hint: 'עוד לא התאמנתי' },
-  { key: 'lt1', label: 'פחות משנה', hint: 'התחלתי לאחרונה' },
-  { key: '1-3', label: '1 עד 3 שנים', hint: 'יש לי בסיס' },
-  { key: '3-5', label: '3 עד 5 שנים', hint: 'מתאמן ותיק' },
-  { key: '5+', label: 'יותר מ-5 שנים', hint: 'מתאמן מנוסה' },
+  { key: 'none', get label() { return tr('מתחיל לגמרי', 'Complete beginner'); }, get hint() { return tr('עוד לא התאמנתי', "I haven't trained yet"); } },
+  { key: 'lt1', get label() { return tr('פחות משנה', 'Less than a year'); }, get hint() { return tr('התחלתי לאחרונה', 'I started recently'); } },
+  { key: '1-3', get label() { return tr('1 עד 3 שנים', '1 to 3 years'); }, get hint() { return tr('יש לי בסיס', 'I have a base'); } },
+  { key: '3-5', get label() { return tr('3 עד 5 שנים', '3 to 5 years'); }, get hint() { return tr('מתאמן ותיק', 'Seasoned trainee'); } },
+  { key: '5+', get label() { return tr('יותר מ-5 שנים', 'More than 5 years'); }, get hint() { return tr('מתאמן מנוסה', 'Experienced trainee'); } },
 ] as const;
 
 export const GOALS = [
-  { key: 'bulk', label: 'מסה', icon: '💪', hint: 'לבנות שריר ולעלות במשקל' },
-  { key: 'cut', label: 'ירידה במשקל', icon: '🔥', hint: 'להוריד שומן ולשמור על שריר' },
-  { key: 'maintain', label: 'שימור', icon: '⚖️', hint: 'לשמור על הכושר והמשקל' },
+  { key: 'bulk', get label() { return tr('מסה', 'Build muscle'); }, icon: '💪', get hint() { return tr('לבנות שריר ולעלות במשקל', 'Build muscle and gain weight'); } },
+  { key: 'cut', get label() { return tr('ירידה במשקל', 'Lose weight'); }, icon: '🔥', get hint() { return tr('להוריד שומן ולשמור על שריר', 'Lose fat and keep muscle'); } },
+  { key: 'maintain', get label() { return tr('שימור', 'Maintain'); }, icon: '⚖️', get hint() { return tr('לשמור על הכושר והמשקל', 'Keep your fitness and weight'); } },
 ] as const;
 
 export const LOCATIONS = [
-  { key: 'gym', label: 'מכון כושר', icon: '🏋️' },
-  { key: 'home', label: 'בבית', icon: '🏠' },
-  { key: 'outdoor', label: 'מתקנים בחוץ', icon: '🌳' },
+  { key: 'gym', get label() { return tr('מכון כושר', 'Gym'); }, icon: '🏋️' },
+  { key: 'home', get label() { return tr('בבית', 'At home'); }, icon: '🏠' },
+  { key: 'outdoor', get label() { return tr('מתקנים בחוץ', 'Outdoor gym'); }, icon: '🌳' },
 ] as const;
 
 export const FULL_GYM = 'מכון מאובזר';
@@ -36,9 +37,9 @@ export const labelOf = (list: readonly { key: string; label: string }[], key?: s
   list.find((x) => x.key === key)?.label ?? '–';
 
 export const GOAL_PERIODS = [
-  { key: 3, label: '3 חודשים' },
-  { key: 6, label: 'חצי שנה' },
-  { key: 12, label: 'שנה' },
+  { key: 3, get label() { return tr('3 חודשים', '3 months'); } },
+  { key: 6, get label() { return tr('חצי שנה', '6 months'); } },
+  { key: 12, get label() { return tr('שנה', '1 year'); } },
 ] as const;
 
 /** Target date of the goal (YYYY-MM-DD), or null when no period was chosen. */

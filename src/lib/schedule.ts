@@ -1,7 +1,11 @@
 import type { Profile, Program, ProgramSchedule, ScheduleSlot, Workout } from './types';
+import { isEn, locale, tr, tx } from './i18n';
 import { addDays } from './utils';
 
-const WEEKDAY_LETTERS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
+const WEEKDAY_LETTERS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
+const WEEKDAY_LETTERS_EN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+/** Short weekday names, Sunday first. */
+export const weekdayLetters = () => (isEn() ? WEEKDAY_LETTERS_EN : WEEKDAY_LETTERS_HE);
 const DAY_MS = 86400000;
 const daysBetween = (from: string, to: string) =>
   Math.round((new Date(to + 'T12:00:00').getTime() - new Date(from + 'T12:00:00').getTime()) / DAY_MS);
@@ -27,8 +31,8 @@ export function requiredDays(p: Program): number | null {
 
 export function describeSchedule(p: Program): string {
   const s = scheduleOf(p);
-  if (s.kind === 'weekly') return `${s.weekdays.length} אימונים בשבוע: ${s.weekdays.map((d) => WEEKDAY_LETTERS[d]).join(', ')}`;
-  return s.pattern.map((x) => (x === 'rest' ? 'מנוחה' : p.days[x]?.name ?? '?')).join(' ← ');
+  if (s.kind === 'weekly') return tr(`${s.weekdays.length} אימונים בשבוע: `, `${s.weekdays.length} workouts a week: `) + s.weekdays.map((d) => weekdayLetters()[d]).join(', ');
+  return s.pattern.map((x) => (x === 'rest' ? tr('מנוחה', 'Rest') : tx(p.days[x]?.name ?? '?'))).join(tr(' ← ', ' → '));
 }
 
 /** Most recent workout done from this program (by link, or by matching a day's name for older workouts). */
@@ -120,7 +124,9 @@ export function activeProgram(programs: Program[], workouts: Workout[], profile:
 /** "מחר", "ביום שלישי", or a date, for an upcoming day. */
 export function whenLabel(date: string, today: string) {
   const d = daysBetween(today, date);
-  if (d === 1) return 'מחר';
-  if (d < 7) return 'ביום ' + new Date(date + 'T12:00:00').toLocaleDateString('he-IL', { weekday: 'long' }).replace('יום ', '');
-  return new Date(date + 'T12:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'short' });
+  if (d === 1) return tr('מחר', 'tomorrow');
+  if (d < 7) return isEn()
+    ? 'on ' + new Date(date + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long' })
+    : 'ביום ' + new Date(date + 'T12:00:00').toLocaleDateString('he-IL', { weekday: 'long' }).replace('יום ', '');
+  return new Date(date + 'T12:00:00').toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
 }

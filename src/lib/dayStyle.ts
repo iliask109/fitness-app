@@ -1,16 +1,17 @@
 import { EXERCISE_GROUPS } from './exercises';
 import type { ProgramDay } from './types';
+import { tr } from './i18n';
 
 export type DayStyleKey = 'upper' | 'lower' | 'push' | 'pull' | 'full' | 'core' | 'other';
 
 export const DAY_STYLES: Record<DayStyleKey, { label: string; icon: string; color: string }> = {
-  upper: { label: 'פלג גוף עליון', icon: '💪', color: 'var(--blue)' },
-  lower: { label: 'פלג גוף תחתון', icon: '🦵', color: 'var(--green)' },
-  push: { label: 'דחיפה', icon: '🏋️', color: 'var(--amber)' },
-  pull: { label: 'משיכה', icon: '🧗', color: 'var(--purple)' },
-  full: { label: 'כל הגוף', icon: '⚡', color: 'var(--pink)' },
-  core: { label: 'בטן וליבה', icon: '🔥', color: 'var(--cyan)' },
-  other: { label: 'אימון', icon: '📋', color: 'var(--muted)' },
+  upper: { get label() { return tr('פלג גוף עליון', 'Upper body'); }, icon: '💪', color: 'var(--blue)' },
+  lower: { get label() { return tr('פלג גוף תחתון', 'Lower body'); }, icon: '🦵', color: 'var(--green)' },
+  push: { get label() { return tr('דחיפה', 'Push'); }, icon: '🏋️', color: 'var(--amber)' },
+  pull: { get label() { return tr('משיכה', 'Pull'); }, icon: '🧗', color: 'var(--purple)' },
+  full: { get label() { return tr('כל הגוף', 'Full body'); }, icon: '⚡', color: 'var(--pink)' },
+  core: { get label() { return tr('בטן וליבה', 'Abs and core'); }, icon: '🔥', color: 'var(--cyan)' },
+  other: { get label() { return tr('אימון', 'Workout'); }, icon: '📋', color: 'var(--muted)' },
 };
 
 const NAME_RULES: [RegExp, DayStyleKey][] = [

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { tr, tx } from '../lib/i18n';
 import { useTable } from '../lib/useTable';
 import ProgramPicker from '../components/ProgramPicker';
 import WorkoutCalendar from '../components/WorkoutCalendar';
@@ -16,7 +17,7 @@ const styleOf = (w: Workout): DayStyleKey =>
 /** The name a workout is filed under: its program day when it was started from a program, otherwise its own name. */
 function groupName(w: Workout, programs: Program[]) {
   const day = programs.find((p) => p.id === w.program_id)?.days[w.program_day ?? -1];
-  return (day?.name ?? w.name).trim() || 'אימון';
+  return (day?.name ?? w.name).trim() || tr('אימון', 'Workout');
 }
 
 export default function Workouts() {
@@ -54,12 +55,12 @@ export default function Workouts() {
   return (
     <div className="stack">
       <div className="row between">
-        <h2>האימונים שלי</h2>
-        <a className="btn small" href="#/exercises">📖 מדריך תרגילים</a>
+        <h2>{tr('האימונים שלי', 'My workouts')}</h2>
+        <a className="btn small" href="#/exercises">{tr('📖 מדריך תרגילים', '📖 Exercise guide')}</a>
       </div>
       <div className="grid2">
-        <a className="btn primary big" href="#/workouts/new">+ אימון חדש</a>
-        <button className="btn blue big" onClick={() => setPicking(true)}>📋 תוכנית שמורה</button>
+        <a className="btn primary big" href="#/workouts/new">{tr('+ אימון חדש', '+ New workout')}</a>
+        <button className="btn blue big" onClick={() => setPicking(true)}>{tr('📋 תוכנית שמורה', '📋 Saved program')}</button>
       </div>
       {picking && <ProgramPicker onClose={() => setPicking(false)} />}
 
@@ -67,32 +68,32 @@ export default function Workouts() {
         <div className="stack tight">
           <div className="row gap">
             <button className={'btn small' + (showCalendar ? ' primary' : '')} onClick={() => setShowCalendar((s) => !s)} aria-expanded={showCalendar}>
-              📅 {date ? formatDate(date, { day: 'numeric', month: 'long' }) : 'חיפוש לפי תאריך'}
+              📅 {date ? formatDate(date, { day: 'numeric', month: 'long' }) : tr('חיפוש לפי תאריך', 'Search by date')}
             </button>
-            {date && <button className="btn small" onClick={() => setDate(null)} aria-label="ניקוי התאריך">✕ כל התאריכים</button>}
+            {date && <button className="btn small" onClick={() => setDate(null)} aria-label={tr('ניקוי התאריך', 'Clear date')}>{tr('✕ כל התאריכים', '✕ All dates')}</button>}
           </div>
           {showCalendar && <WorkoutCalendar marked={perDay} selected={date} onSelect={(d) => { setDate(d); if (d) setShowCalendar(false); }} />}
-          <div className="chips" role="group" aria-label="סינון לפי שם האימון">
-            <button className={'chip btn-chip' + (!name ? ' selected' : '')} onClick={() => setName(null)}>הכול ({sorted.filter((w) => !date || w.date === date).length})</button>
+          <div className="chips" role="group" aria-label={tr('סינון לפי שם האימון', 'Filter by workout name')}>
+            <button className={'chip btn-chip' + (!name ? ' selected' : '')} onClick={() => setName(null)}>{tr('הכול', 'All')} ({sorted.filter((w) => !date || w.date === date).length})</button>
             {nameChips.map((c) => (
               <button key={c.name} className={'chip btn-chip' + (name === c.name ? ' selected' : '')}
-                onClick={() => setName(name === c.name ? null : c.name)} title={c.fromProgram ? 'מהתוכנית שלך' : 'שם שנתת לאימון'}>
-                {DAY_STYLES[c.style].icon} {c.name} ({c.count})
+                onClick={() => setName(name === c.name ? null : c.name)} title={c.fromProgram ? tr('מהתוכנית שלך', 'From your program') : tr('שם שנתת לאימון', 'A name you gave the workout')}>
+                {DAY_STYLES[c.style].icon} {tx(c.name)} ({c.count})
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {loading && <p className="muted">טוען…</p>}
-      {!loading && rows.length === 0 && <div className="card muted">עוד לא נרשמו אימונים.</div>}
+      {loading && <p className="muted">{tr('טוען…', 'Loading…')}</p>}
+      {!loading && rows.length === 0 && <div className="card muted">{tr('עוד לא נרשמו אימונים.', 'No workouts logged yet.')}</div>}
       {!loading && rows.length > 0 && shown.length === 0 && (
         <div className="card muted stack tight">
-          <span>{name ? `אין אימוני "${name}"` : 'אין אימונים'}{date ? ` ב-${formatDate(date, { day: 'numeric', month: 'long' })}` : ''}.</span>
-          <button className="btn small" onClick={() => { setDate(null); setName(null); }}>ניקוי הסינון</button>
+          <span>{name ? tr(`אין אימוני "${name}"`, `No "${tx(name)}" workouts`) : tr('אין אימונים', 'No workouts')}{date ? tr(` ב-${formatDate(date, { day: 'numeric', month: 'long' })}`, ` on ${formatDate(date, { day: 'numeric', month: 'long' })}`) : ''}.</span>
+          <button className="btn small" onClick={() => { setDate(null); setName(null); }}>{tr('ניקוי הסינון', 'Clear filter')}</button>
         </div>
       )}
-      {filtering && shown.length > 0 && <span className="muted small">{shown.length} אימונים</span>}
+      {filtering && shown.length > 0 && <span className="muted small">{shown.length} {tr('אימונים', 'workouts')}</span>}
 
       {shown.map((w) => {
         const sets = w.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0);
@@ -100,16 +101,16 @@ export default function Workouts() {
         return (
           <a key={w.id} href={`#/workouts/${w.id}`} className="card list-card">
             <div className="row between">
-              <strong>{w.name}</strong>
+              <strong>{tx(w.name)}</strong>
               <span className="muted small">{formatDate(w.date, { weekday: 'short', day: 'numeric', month: 'short' })}</span>
             </div>
-            <div className="muted small">{w.exercises.map((e) => e.name).join(' · ')}</div>
+            <div className="muted small">{w.exercises.map((e) => tx(e.name)).join(' · ')}</div>
             <div className="chips">
               <span className="style-chip" style={{ '--accent': st.color } as React.CSSProperties}>{st.icon} {st.label}</span>
-              <span className="chip">{sets} סטים</span>
-              <span className="chip">{Math.round(workoutVolume(w)).toLocaleString()} ק״ג</span>
-              {w.duration_min ? <span className="chip">{w.duration_min} דק׳</span> : null}
-              {pending.has(w.id) && <span className="chip pending-chip">⏳ ממתין לסנכרון</span>}
+              <span className="chip">{sets} {tr('סטים', 'sets')}</span>
+              <span className="chip">{Math.round(workoutVolume(w)).toLocaleString()} {tr('ק״ג', 'kg')}</span>
+              {w.duration_min ? <span className="chip">{w.duration_min} {tr('דק׳', 'min')}</span> : null}
+              {pending.has(w.id) && <span className="chip pending-chip">{tr('⏳ ממתין לסנכרון', '⏳ Waiting to sync')}</span>}
             </div>
           </a>
         );

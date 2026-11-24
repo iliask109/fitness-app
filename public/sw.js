@@ -81,8 +81,8 @@ self.addEventListener('push', (event) => {
     body: data.body || '',
     icon: '/icon-192.png',
     badge: '/icon-192.png',
-    dir: 'rtl',
-    lang: 'he',
+    dir: data.dir || 'rtl',
+    lang: data.lang || 'he',
     tag: 'fitlogix-reminder',
     data: { url: data.url || '/' },
   }));

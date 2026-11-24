@@ -1,6 +1,7 @@
 import type { Profile, Program, Workout } from './types';
 import { activeProgram, planToday } from './schedule';
 import { addDays, weekStart } from './utils';
+import { CONTENT_EN } from './contentEn';
 
 /** Reminder settings kept on the profile. */
 export interface ReminderSettings {
@@ -45,7 +46,7 @@ export function isDue(profile: ReminderSettings, now: Date): boolean {
 /** How far back the server looks at workouts (this week, plus the last workout of the program). */
 export const HISTORY_DAYS = 60;
 
-export interface ReminderMessage { title: string; body: string; url: string; kind: 'training_day' | 'no_workout' }
+export interface ReminderMessage { title: string; body: string; url: string; kind: 'training_day' | 'no_workout'; lang: 'he' | 'en'; dir: 'rtl' | 'ltr' }
 
 /**
  * What to send this user right now, or null. Called every CHECK_EVERY_MIN minutes by the server;
@@ -58,6 +59,9 @@ export function decideReminder(
   const local = localNow(now, profile.reminder_tz || 'Asia/Jerusalem');
   if (workouts.some((w) => w.date === local.date)) return null; // already trained today
 
+  // The server has no app language state: the profile says which language to write in.
+  const en = (profile as { language?: string | null }).language === 'en';
+  const lang = en ? 'en' as const : 'he' as const, dir = en ? 'ltr' as const : 'rtl' as const;
   const program = activeProgram(programs, workouts, profile);
   if (program && profile.remind_training_day !== false) {
     const plan = planToday(program, workouts, local.date);
@@ -65,8 +69,9 @@ export function decideReminder(
       const day = program.days[plan.dayIndex];
       return {
         kind: 'training_day',
-        title: `💪 היום יש לך אימון: ${day.name}`,
-        body: `${day.exercises.length} תרגילים מחכים לך. לחץ כדי להתחיל.`,
+        title: en ? `💪 Workout today: ${CONTENT_EN[day.name] ?? day.name}` : `💪 היום יש לך אימון: ${day.name}`,
+        body: en ? `${day.exercises.length} exercises are waiting for you. Tap to start.` : `${day.exercises.length} תרגילים מחכים לך. לחץ כדי להתחיל.`,
+        lang, dir,
         url: `/#/workouts/new?program=${program.id}&day=${plan.dayIndex}`,
       };
     }
@@ -78,8 +83,9 @@ export function decideReminder(
     if (!workouts.some((w) => w.date >= start && w.date <= end)) {
       return {
         kind: 'no_workout',
-        title: 'עוד לא התאמנת השבוע 🏃',
-        body: 'גם אימון קצר של 20 דקות עדיף על כלום. בוא נתחיל!',
+        title: en ? "You haven't trained this week yet 🏃" : 'עוד לא התאמנת השבוע 🏃',
+        body: en ? 'Even a short 20-minute workout beats nothing. Let’s go!' : 'גם אימון קצר של 20 דקות עדיף על כלום. בוא נתחיל!',
+        lang, dir,
         url: '/#/',
       };
     }

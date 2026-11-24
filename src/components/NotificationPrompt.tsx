@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { tr } from '../lib/i18n';
 import { useAuth } from '../lib/auth';
 import { useProfile } from '../lib/useProfile';
 import { enablePushOnDevice, promptSnoozed, pushSupport, snoozePrompt } from '../lib/push';
@@ -34,29 +35,29 @@ export default function NotificationPrompt() {
       setHidden(true);
     } catch (e) {
       const m = (e as Error).message;
-      if (m === 'blocked') setError('ההתראות נחסמו. אפשר לאשר אותן בהגדרות הדפדפן, באתר FitLogix ← התראות.');
-      else if (m === 'dismissed') setError('לא אישרת. אפשר לנסות שוב מתי שתרצה.');
-      else setError('ההפעלה נכשלה: ' + m);
+      if (m === 'blocked') setError(tr('ההתראות נחסמו. אפשר לאשר אותן בהגדרות הדפדפן, באתר FitLogix ← התראות.', 'Notifications are blocked. You can allow them in the browser settings, for the FitLogix site → Notifications.'));
+      else if (m === 'dismissed') setError(tr('לא אישרת. אפשר לנסות שוב מתי שתרצה.', 'You didn\'t allow them. You can try again whenever you like.'));
+      else setError(tr('ההפעלה נכשלה: ', 'Turning on failed: ') + m);
     } finally { setBusy(false); }
   }
 
   return (
-    <div className="card notif-prompt stack tight" role="region" aria-label="התראות">
+    <div className="card notif-prompt stack tight" role="region" aria-label={tr('התראות', 'Notifications')}>
       <div className="row gap">
         <span className="notif-prompt-icon">🔔</span>
         <div className="grow">
-          <strong>רוצה תזכורות לאימונים?</strong>
+          <strong>{tr('רוצה תזכורות לאימונים?', 'Want workout reminders?')}</strong>
           <div className="muted small">
             {support.ok
-              ? `נזכיר לך ביום אימון, בשעה ${profile.reminder_time || DEFAULT_REMINDER_TIME} (אפשר לשנות בהגדרות).`
-              : 'באייפון צריך קודם להתקין: כפתור השיתוף ⬆️ ← "הוסף למסך הבית", ואז לפתוח את FitLogix מהמסך הבית.'}
+              ? tr(`נזכיר לך ביום אימון, בשעה ${profile.reminder_time || DEFAULT_REMINDER_TIME} (אפשר לשנות בהגדרות).`, `We'll remind you on training days at ${profile.reminder_time || DEFAULT_REMINDER_TIME} (you can change this in Settings).`)
+              : tr('באייפון צריך קודם להתקין: כפתור השיתוף ⬆️ ← "הוסף למסך הבית", ואז לפתוח את FitLogix מהמסך הבית.', 'On iPhone, first install the app: Share button ⬆️ → "Add to Home Screen", then open FitLogix from the home screen.')}
           </div>
         </div>
       </div>
       {error && <p className="notice small" style={{ margin: 0 }}>{error}</p>}
       <div className="row gap">
-        {support.ok && <button className="btn primary grow" disabled={busy} onClick={allow}>{busy ? 'רגע…' : '🔔 אישור התראות'}</button>}
-        <button className="btn" onClick={later}>לא עכשיו</button>
+        {support.ok && <button className="btn primary grow" disabled={busy} onClick={allow}>{busy ? tr('רגע…', 'One moment…') : tr('🔔 אישור התראות', '🔔 Allow notifications')}</button>}
+        <button className="btn" onClick={later}>{tr('לא עכשיו', 'Not now')}</button>
       </div>
     </div>
   );

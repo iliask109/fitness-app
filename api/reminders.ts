@@ -17,7 +17,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const now = new Date();
 
     const { data: profiles, error } = await db.from('profiles')
-      .select('id,user_id,reminder_enabled,reminder_time,reminder_tz,remind_training_day,remind_no_workout,last_reminded_on,active_program_id')
+      // All columns, so a newer column (e.g. language) is used when present and nothing breaks before its SQL update runs.
+      .select('*')
       .eq('reminder_enabled', true);
     if (error) throw error;
     type Row = { id: string; user_id: string; reminder_tz?: string | null } & Record<string, unknown>;

@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react';
+import { tr } from '../lib/i18n';
 import { useTable } from '../lib/useTable';
 import { useProfile } from '../lib/useProfile';
 import type { BodyWeight, Meal, Workout } from '../lib/types';
@@ -24,14 +25,14 @@ export default function Progress() {
 
   return (
     <div className="stack">
-      <h2>התקדמות</h2>
+      <h2>{tr('התקדמות', 'Progress')}</h2>
       <ProgressCharts
         workouts={workouts.rows} meals={meals.rows} weights={weights.rows} profile={profile}
         weightForm={
           <form onSubmit={addWeight} className="row gap">
-            <input type="number" step="0.1" inputMode="decimal" placeholder="משקל (ק״ג)" value={w} onChange={(e) => setW(e.target.value)} className="grow" />
+            <input type="number" step="0.1" inputMode="decimal" placeholder={tr('משקל (ק״ג)', 'Weight (kg)')} value={w} onChange={(e) => setW(e.target.value)} className="grow" />
             <input type="date" value={wDate} max={todayISO()} onChange={(e) => setWDate(e.target.value)} />
-            <button className="btn primary">שמירה</button>
+            <button className="btn primary">{tr('שמירה', 'Save')}</button>
           </form>
         }
       />

@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { tr } from '../lib/i18n';
 import { useAuth } from '../lib/auth';
 import { failedTables, flushOutbox, pendingCount, refreshTables, subscribeErrors, subscribeOutbox } from '../lib/tableStore';
 
@@ -17,15 +18,15 @@ export default function ConnectionBanner() {
     return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); };
   }, []);
 
-  const waiting = pending ? ` ${pending === 1 ? 'שינוי אחד ממתין' : `${pending} שינויים ממתינים`} לסנכרון.` : '';
+  const waiting = pending ? tr(` ${pending === 1 ? 'שינוי אחד ממתין' : `${pending} שינויים ממתינים`} לסנכרון.`, ` ${pending === 1 ? '1 change is' : `${pending} changes are`} waiting to sync.`) : '';
   if (!online) {
-    return <div className="conn-banner offline" role="status">📡 אין חיבור לאינטרנט. אפשר להמשיך להתאמן, הכול נשמר בטלפון.{waiting}</div>;
+    return <div className="conn-banner offline" role="status">📡 {tr('אין חיבור לאינטרנט. אפשר להמשיך להתאמן, הכול נשמר בטלפון.', 'No internet connection. You can keep training; everything is saved on your phone.')}{waiting}</div>;
   }
   if (failed) {
     return (
       <div className="conn-banner" role="alert">
-        <span>⚠️ לא הצלחנו לטעון את הנתונים מהשרת. מוצג מה שנשמר בטלפון.{waiting}</span>
-        <button className="btn small" onClick={() => { if (user) flushOutbox(user.id); refreshTables(true); }}>נסה שוב</button>
+        <span>⚠️ {tr('לא הצלחנו לטעון את הנתונים מהשרת. מוצג מה שנשמר בטלפון.', 'Couldn’t load data from the server. Showing what is saved on your phone.')}{waiting}</span>
+        <button className="btn small" onClick={() => { if (user) flushOutbox(user.id); refreshTables(true); }}>{tr('נסה שוב', 'Try again')}</button>
       </div>
     );
   }
@@ -33,7 +34,7 @@ export default function ConnectionBanner() {
     return (
       <div className="conn-banner" role="status">
         <span>⏳{waiting}</span>
-        <button className="btn small" onClick={() => flushOutbox(user.id)}>סנכרון עכשיו</button>
+        <button className="btn small" onClick={() => flushOutbox(user.id)}>{tr('סנכרון עכשיו', 'Sync now')}</button>
       </div>
     );
   }

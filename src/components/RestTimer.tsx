@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { tr } from '../lib/i18n';
 
 /** How long "next set!" stays on screen before the bar closes by itself. */
 const DONE_SHOWN_MS = 1500;
@@ -36,12 +37,12 @@ export default function RestTimer({ startKey, seconds, onClose }: { startKey: nu
     <div className={'rest-timer' + (left <= 0 ? ' done' : '')} role="timer" aria-live="polite">
       {left > 0 ? (
         <>
-          <span>מנוחה</span>
+          <span>{tr('מנוחה', 'Rest')}</span>
           <strong dir="ltr">{mm}:{String(ss).padStart(2, '0')}</strong>
           <button className="btn small" onClick={addTime}>+15</button>
-          <button className="btn small" onClick={onClose} aria-label="סגירת הטיימר">✕</button>
+          <button className="btn small" onClick={onClose} aria-label={tr('סגירת הטיימר', 'Close timer')}>✕</button>
         </>
-      ) : <strong>סט הבא! 💪</strong>}
+      ) : <strong>{tr('סט הבא! 💪', 'Next set! 💪')}</strong>}
     </div>
   );
 }

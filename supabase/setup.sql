@@ -472,3 +472,11 @@ end $$;
 
 revoke execute on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- ===================== update-12-language.sql =====================
+
+-- FitLogix update 12: app language per user (Hebrew or English), also used for push reminders.
+-- Run once in Supabase: SQL Editor -> New query -> paste -> Run. Safe to run again.
+
+alter table public.profiles
+  add column if not exists language text check (language in ('he', 'en'));

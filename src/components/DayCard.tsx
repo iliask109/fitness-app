@@ -1,4 +1,5 @@
 import type { ProgramDay } from '../lib/types';
+import { tr, tx } from '../lib/i18n';
 import { DAY_STYLES, dayStyle, estimateMinutes } from '../lib/dayStyle';
 import ExerciseInfo from './ExerciseInfo';
 
@@ -14,16 +15,16 @@ export default function DayCard({ day, startHref }: { day: ProgramDay; startHref
         <span className="day-card-icon">{style.icon}</span>
         <span className="day-card-badge">{style.label}</span>
       </div>
-      <strong className="day-card-title">{day.name}</strong>
-      <span className="muted small">{day.exercises.length} תרגילים{day.exercises.length > 0 && ` · כ-${estimateMinutes(day)} דק׳`}</span>
+      <strong className="day-card-title">{tx(day.name)}</strong>
+      <span className="muted small">{day.exercises.length} {tr('תרגילים', 'exercises')}{day.exercises.length > 0 && tr(` · כ-${estimateMinutes(day)} דק׳`, ` · ~${estimateMinutes(day)} min`)}</span>
       <ul className="day-card-list">
         {shown.map((e, i) => (
           <li key={i}><span><ExerciseInfo name={e.name} /></span><span className="muted" dir="ltr">{e.sets}×{e.reps}</span></li>
         ))}
-        {more > 0 && <li className="muted">ועוד {more}…</li>}
-        {day.exercises.length === 0 && <li className="muted">אין תרגילים עדיין</li>}
+        {more > 0 && <li className="muted">{tr(`ועוד ${more}…`, `and ${more} more…`)}</li>}
+        {day.exercises.length === 0 && <li className="muted">{tr('אין תרגילים עדיין', 'No exercises yet')}</li>}
       </ul>
-      {startHref && day.exercises.length > 0 && <a className="day-card-start" href={startHref}>▶ התחלה</a>}
+      {startHref && day.exercises.length > 0 && <a className="day-card-start" href={startHref}>{tr('▶ התחלה', '▶ Start')}</a>}
     </div>
   );
 }

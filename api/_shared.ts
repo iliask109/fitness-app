@@ -42,7 +42,7 @@ export interface SubscriptionRow { id: string; user_id: string; endpoint: string
  * Returns how many arrived and the status code of each failure.
  */
 export async function sendToSubscriptions(
-  db: ReturnType<typeof adminClient>, subs: SubscriptionRow[], payload: { title: string; body: string; url: string },
+  db: ReturnType<typeof adminClient>, subs: SubscriptionRow[], payload: { title: string; body: string; url: string; lang?: string; dir?: string },
 ): Promise<{ sent: number; failed: number[] }> {
   ensureVapid();
   let sent = 0;

@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { tr } from '../lib/i18n';
 import type { BodyWeight } from '../lib/types';
 import { todayISO } from '../lib/utils';
 
@@ -30,38 +31,38 @@ export default function WeightDialog({ weights, save, onClose }: Props) {
   async function submit(e: FormEvent) {
     e.preventDefault();
     const w = Number(weight);
-    if (!Number.isFinite(w) || w < 30 || w > 300) { setError('נא למלא משקל תקין (30 עד 300 ק״ג)'); return; }
+    if (!Number.isFinite(w) || w < 30 || w > 300) { setError(tr('נא למלא משקל תקין (30 עד 300 ק״ג)', 'Please enter a valid weight (30 to 300 kg)')); return; }
     setBusy(true);
     try {
       await save({ id: existing?.id, date, weight: Math.round(w * 10) / 10 });
       onClose();
     } catch (err) {
-      setError('השמירה נכשלה: ' + (err as Error).message);
+      setError(tr('השמירה נכשלה: ', 'Saving failed: ') + (err as Error).message);
       setBusy(false);
     }
   }
 
   return (
     <div className="sheet-backdrop" onClick={onClose}>
-      <form className="sheet stack" onClick={(e) => e.stopPropagation()} onSubmit={submit} noValidate role="dialog" aria-label="משקל חדש">
+      <form className="sheet stack" onClick={(e) => e.stopPropagation()} onSubmit={submit} noValidate role="dialog" aria-label={tr('משקל חדש', 'Log weight')}>
         <div className="row between">
-          <h3>⚖️ משקל חדש</h3>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="סגירה">✕</button>
+          <h3>{tr('⚖️ משקל חדש', '⚖️ Log weight')}</h3>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={tr('סגירה', 'Close')}>✕</button>
         </div>
         <div className="weight-input">
           <input ref={input} type="number" inputMode="decimal" step="0.1" min={30} max={300} value={weight}
-            onChange={(e) => { setWeight(e.target.value); setError(null); }} aria-label="משקל בק״ג" />
-          <span className="muted">ק״ג</span>
+            onChange={(e) => { setWeight(e.target.value); setError(null); }} aria-label={tr('משקל בק״ג', 'Weight in kg')} />
+          <span className="muted">{tr('ק״ג', 'kg')}</span>
         </div>
         {last && weight && diff !== 0 && Number.isFinite(diff) && (
           <div className={'small ' + (diff < 0 ? 'good' : 'muted')} style={{ textAlign: 'center' }}>
-            <span dir="ltr">{diff > 0 ? '+' : ''}{diff.toFixed(1)}</span> ק״ג מהשקילה הקודמת
+            <span dir="ltr">{diff > 0 ? '+' : ''}{diff.toFixed(1)}</span> {tr('ק״ג מהשקילה הקודמת', 'kg since the last weigh-in')}
           </div>
         )}
-        <label>תאריך<input type="date" value={date} max={todayISO()} onChange={(e) => setDate(e.target.value)} /></label>
-        {existing && <p className="muted small" style={{ margin: 0 }}>כבר נשמר משקל לתאריך הזה ({existing.weight} ק״ג). השמירה תעדכן אותו.</p>}
+        <label>{tr('תאריך', 'Date')}<input type="date" value={date} max={todayISO()} onChange={(e) => setDate(e.target.value)} /></label>
+        {existing && <p className="muted small" style={{ margin: 0 }}>{tr(`כבר נשמר משקל לתאריך הזה (${existing.weight} ק״ג). השמירה תעדכן אותו.`, `A weight is already saved for this date (${existing.weight} kg). Saving will update it.`)}</p>}
         {error && <p className="notice">{error}</p>}
-        <button className="btn primary big" disabled={busy}>{busy ? 'שומר…' : 'שמירה'}</button>
+        <button className="btn primary big" disabled={busy}>{busy ? tr('שומר…', 'Saving…') : tr('שמירה', 'Save')}</button>
       </form>
     </div>
   );

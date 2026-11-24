@@ -28,7 +28,8 @@ Hebrew RTL fitness PWA. Live: https://fitness-app-khaki-iota.vercel.app (Vercel,
 - `api/`: Vercel functions `reminders.ts` (pg_cron every 15 min, `CRON_SECRET`) and `test-push.ts`. Imports inside `api/` need explicit `.js` extensions (ESM).
 
 ## Conventions
-- UI text in Hebrew; numbers like `60×8` inside Hebrew text need `dir="ltr"` or they display reversed.
+- Two languages (user picks in Settings, saved on `profiles.language` and the device): write every UI text as `tr('עברית', 'English')` (`lib/i18n.ts`). Stored Hebrew content (exercise, program, food names) is shown with `tx(name)`; add new built-in names to `lib/contentEn.ts` and new exercise guides to `lib/exerciseGuideEn.ts` (tests enforce both). Gendered Hebrew: `tr(byGender(...), 'English')`. The admin area is Hebrew only. Server texts (reminders) read `profile.language`.
+- Numbers like `60×8` inside Hebrew text need `dir="ltr"` or they display reversed.
 - Colors only through CSS tokens in `styles.css` (light + dark via `data-theme`); "soft & rounded" look, Varela Round font.
 - No `alert()`/`confirm()`: use in-page confirmations (`components/ConfirmInline.tsx`); gendered wording via `lib/gender.ts`.
 - Workout history is read-only (`pages/WorkoutView.tsx`); only new workouts are edited (`pages/WorkoutEditor.tsx`).

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { tr, tx } from '../lib/i18n';
 import { useTable } from '../lib/useTable';
 import { navigate } from '../lib/router';
 import type { Program, SetEntry, Workout, WorkoutExercise } from '../lib/types';
@@ -83,13 +84,13 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
       };
     });
     setW({
-      id: crypto.randomUUID(), date: todayISO(), name: day ? `${day.name}` : 'אימון', exercises, notes: '',
+      id: crypto.randomUUID(), date: todayISO(), name: day ? `${day.name}` : tr('אימון', 'Workout'), exercises, notes: '',
       program_id: day ? prog!.id : null, program_day: day ? Number(query.get('day') ?? 0) : null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workouts.loading, programs.loading]);
 
-  if (!w) return <p className="muted">טוען…</p>;
+  if (!w) return <p className="muted">{tr('טוען…', 'Loading…')}</p>;
   // Which exercise is open; the rest stay collapsed. Starts on the first unfinished one.
   if (openIdx === undefined) { setOpenIdx(firstUnfinished(w.exercises)); return null; }
   const allDone = w.exercises.length > 0 && w.exercises.every(isComplete);
@@ -139,33 +140,33 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
     } catch (e) {
       // The workout stays on the device as a draft, so nothing is lost; say so.
       setSaveError(navigator.onLine === false
-        ? 'אין חיבור לאינטרנט. האימון שמור בטלפון, אפשר לנסות לשמור שוב כשהחיבור יחזור.'
-        : 'השמירה נכשלה: ' + (e as Error).message + '. האימון שמור בטלפון, נסה שוב.');
+        ? tr('אין חיבור לאינטרנט. האימון שמור בטלפון, אפשר לנסות לשמור שוב כשהחיבור יחזור.', 'No internet connection. The workout is saved on your phone; you can try saving again when the connection is back.')
+        : tr('השמירה נכשלה: ', 'Saving failed: ') + (e as Error).message + tr('. האימון שמור בטלפון, נסה שוב.', '. The workout is saved on your phone; try again.'));
       setSaving(false);
     }
   }
 
   return (
     <div className="stack">
-      <a href="#/workouts" className="muted">→ חזרה</a>
+      <a href="#/workouts" className="muted">{tr('→ חזרה', '← Back')}</a>
       {pendingDraft && (
-        <div className="card resume-card stack tight" role="region" aria-label="אימון שלא הסתיים">
-          <strong>⏸️ יש לך אימון שלא הסתיים: {pendingDraft.workout.name}</strong>
-          <span className="muted small">התחלת לפני {Math.max(1, Math.round((Date.now() - pendingDraft.startedAt) / 60000))} דק׳. להמשיך אותו או להתחיל אימון חדש?</span>
+        <div className="card resume-card stack tight" role="region" aria-label={tr('אימון שלא הסתיים', 'Unfinished workout')}>
+          <strong>⏸️ {tr('יש לך אימון שלא הסתיים:', 'You have an unfinished workout:')} {tx(pendingDraft.workout.name)}</strong>
+          <span className="muted small">{tr(`התחלת לפני ${Math.max(1, Math.round((Date.now() - pendingDraft.startedAt) / 60000))} דק׳. להמשיך אותו או להתחיל אימון חדש?`, `You started ${Math.max(1, Math.round((Date.now() - pendingDraft.startedAt) / 60000))} min ago. Continue it or start a new workout?`)}</span>
           <div className="row gap">
-            <button className="btn primary grow" onClick={() => resume(pendingDraft)}>▶ המשך אותו</button>
-            <button className="btn" onClick={() => { if (user) clearDraft(user.id); setPendingDraft(null); }}>התחלת אימון חדש</button>
+            <button className="btn primary grow" onClick={() => resume(pendingDraft)}>{tr('▶ המשך אותו', '▶ Continue it')}</button>
+            <button className="btn" onClick={() => { if (user) clearDraft(user.id); setPendingDraft(null); }}>{tr('התחלת אימון חדש', 'Start a new workout')}</button>
           </div>
         </div>
       )}
-      <input className="title-input" value={w.name} onChange={(e) => update((d) => { d.name = e.target.value; })} />
+      <input className="title-input" value={tx(w.name)} onChange={(e) => update((d) => { d.name = e.target.value; })} />
       <div className="row gap">
         {/* The date is the day the workout was done: set when it starts, not editable. */}
         <div className="grow workout-date">
-          <span className="muted small">תאריך</span>
-          <strong>📅 {formatDate(w.date, { weekday: 'long', day: 'numeric', month: 'long' })}{w.date === todayISO() ? ' (היום)' : ''}</strong>
+          <span className="muted small">{tr('תאריך', 'Date')}</span>
+          <strong>📅 {formatDate(w.date, { weekday: 'long', day: 'numeric', month: 'long' })}{w.date === todayISO() ? tr(' (היום)', ' (today)') : ''}</strong>
         </div>
-        <label>מנוחה (שנ׳)
+        <label>{tr('מנוחה (שנ׳)', 'Rest (sec)')}
           <select value={restSec} onChange={(e) => setRestSec(Number(e.target.value))}>
             {[45, 60, 90, 120, 180, 240].map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
@@ -179,21 +180,21 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
         const top = done.length ? done.reduce((a, x) => (x.weight > a.weight || (x.weight === a.weight && x.reps > a.reps) ? x : a)) : null;
         const order = (
           <span className="order-btns" onClick={(e) => e.stopPropagation()}>
-            <button className="icon-btn" aria-label="הזזה למעלה" disabled={ei === 0} onClick={() => move(ei, -1)}>▲</button>
-            <button className="icon-btn" aria-label="הזזה למטה" disabled={ei === w.exercises.length - 1} onClick={() => move(ei, 1)}>▼</button>
+            <button className="icon-btn" aria-label={tr('הזזה למעלה', 'Move up')} disabled={ei === 0} onClick={() => move(ei, -1)}>▲</button>
+            <button className="icon-btn" aria-label={tr('הזזה למטה', 'Move down')} disabled={ei === w.exercises.length - 1} onClick={() => move(ei, 1)}>▼</button>
           </span>
         );
 
         if (openIdx !== ei) {
           return (
             <div key={ei} className={'card exercise collapsed' + (complete ? ' complete' : '')} role="button" tabIndex={0}
-              aria-expanded={false} aria-label={`פתיחת ${ex.name}`}
+              aria-expanded={false} aria-label={tr(`פתיחת ${ex.name}`, `Open ${tx(ex.name)}`)}
               onClick={() => setOpenIdx(ei)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpenIdx(ei); } }}>
               <span className={'ex-badge' + (complete ? ' on' : '')}>{complete ? '✓' : ei + 1}</span>
               <span className="grow ex-summary">
-                <strong>{ex.name}{ex.notes?.trim() ? ' 📝' : ''}</strong>
+                <strong>{tx(ex.name)}{ex.notes?.trim() ? ' 📝' : ''}</strong>
                 <span className="muted small">
-                  {done.length}/{ex.sets.length} סטים{top && <> · {top.weight ? <span dir="ltr">{top.weight}×{top.reps}</span> : `${top.reps} חזרות`}</>}
+                  {done.length}/{ex.sets.length} {tr('סטים', 'sets')}{top && <> · {top.weight ? <span dir="ltr">{top.weight}×{top.reps}</span> : tr(`${top.reps} חזרות`, `${top.reps} reps`)}</>}
                 </span>
               </span>
               {order}
@@ -206,15 +207,15 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
             <div className="row between">
               <span className="row gap">
                 <span className={'ex-badge' + (complete ? ' on' : '')}>{complete ? '✓' : ei + 1}</span>
-                <strong>{ex.name}</strong><ExerciseInfo name={ex.name} icon onReplace={(n) => update((d) => { d.exercises[ei].name = n; })} />
+                <strong>{tx(ex.name)}</strong><ExerciseInfo name={ex.name} icon onReplace={(n) => update((d) => { d.exercises[ei].name = n; })} />
               </span>
               <span className="row gap">
                 {order}
-                <button className="icon-btn" aria-label="הסרת תרגיל" onClick={() => removeExercise(ei)}>🗑️</button>
+                <button className="icon-btn" aria-label={tr('הסרת תרגיל', 'Remove exercise')} onClick={() => removeExercise(ei)}>🗑️</button>
               </span>
             </div>
-            {prev && <div className="muted small">פעם קודמת: <span dir="ltr">{prev.map((x) => `${x.weight}×${x.reps}`).join(', ')}</span></div>}
-            <div className="set-grid head"><span>סט</span><span>ק״ג</span><span>חזרות</span><span>✓</span></div>
+            {prev && <div className="muted small">{tr('פעם קודמת:', 'Last time:')} <span dir="ltr">{prev.map((x) => `${x.weight}×${x.reps}`).join(', ')}</span></div>}
+            <div className="set-grid head"><span>{tr('סט', 'Set')}</span><span>{tr('ק״ג', 'kg')}</span><span>{tr('חזרות', 'Reps')}</span><span>✓</span></div>
             {ex.sets.map((x, si) => (
               <div key={si} className={'set-grid' + (x.done ? ' done' : '')}>
                 <span className="set-num">{si + 1}</span>
@@ -222,7 +223,7 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
                   onChange={(e) => update((d) => { d.exercises[ei].sets[si].weight = Number(e.target.value); })} />
                 <input type="number" inputMode="numeric" min="0" value={x.reps}
                   onChange={(e) => update((d) => { d.exercises[ei].sets[si].reps = Number(e.target.value); })} />
-                <button className={'check' + (x.done ? ' on' : '')} onClick={() => toggleDone(ei, si)} aria-label="סט הושלם">✓</button>
+                <button className={'check' + (x.done ? ' on' : '')} onClick={() => toggleDone(ei, si)} aria-label={tr('סט הושלם', 'Set done')}>✓</button>
               </div>
             ))}
             <div className="row between">
@@ -230,44 +231,44 @@ export default function WorkoutEditor({ id, query }: { id: string; query: URLSea
                 <button className="btn small" onClick={() => update((d) => {
                   const last = d.exercises[ei].sets.at(-1);
                   d.exercises[ei].sets.push({ reps: last?.reps ?? 10, weight: last?.weight ?? 0, done: false });
-                })}>+ סט</button>
-                {ex.sets.length > 1 && <button className="btn small" onClick={() => update((d) => { d.exercises[ei].sets.pop(); })}>− סט</button>}
+                })}>{tr('+ סט', '+ Set')}</button>
+                {ex.sets.length > 1 && <button className="btn small" onClick={() => update((d) => { d.exercises[ei].sets.pop(); })}>{tr('− סט', '− Set')}</button>}
               </div>
-              {top && top.weight > 0 && <span className="muted small">סט כבד: {top.weight} ק״ג × {top.reps}</span>}
+              {top && top.weight > 0 && <span className="muted small">{tr('סט כבד:', 'Heaviest set:')} {top.weight} {tr('ק״ג', 'kg')} × {top.reps}</span>}
             </div>
             {(() => {
               const before = lastNote(ex.name);
               const editing = noteOpen === ei || !!ex.notes;
               return (
                 <div className="ex-note stack tight">
-                  {before && <div className="muted small prev-note">📝 בפעם הקודמת: {before}</div>}
+                  {before && <div className="muted small prev-note">📝 {tr('בפעם הקודמת:', 'Last time:')} {before}</div>}
                   {editing ? (
-                    <label className="small">הערה לתרגיל
+                    <label className="small">{tr('הערה לתרגיל', 'Exercise note')}
                       <textarea id={`ex-note-${ei}`} rows={2} value={ex.notes ?? ''} autoFocus={noteOpen === ei && !ex.notes}
-                        placeholder="למשל: גובה מושב 4, להרגיש בישבן, כאב קל בברך"
+                        placeholder={tr('למשל: גובה מושב 4, להרגיש בישבן, כאב קל בברך', 'e.g. seat height 4, feel it in the glutes, slight knee pain')}
                         onChange={(e) => update((d) => { d.exercises[ei].notes = e.target.value; })} />
                     </label>
                   ) : (
-                    <button className="btn small dashed" onClick={() => setNoteOpen(ei)}>📝 הוספת הערה</button>
+                    <button className="btn small dashed" onClick={() => setNoteOpen(ei)}>{tr('📝 הוספת הערה', '📝 Add a note')}</button>
                   )}
                 </div>
               );
             })()}
-            {complete && <button className="btn small" onClick={() => setOpenIdx(firstUnfinished(w.exercises))}>סגירה ✓</button>}
+            {complete && <button className="btn small" onClick={() => setOpenIdx(firstUnfinished(w.exercises))}>{tr('סגירה ✓', 'Close ✓')}</button>}
           </div>
         );
       })}
 
-      {allDone && <div className="card all-done">🎉 סיימת את כל התרגילים! אפשר לשמור את האימון.</div>}
+      {allDone && <div className="card all-done">{tr('🎉 סיימת את כל התרגילים! אפשר לשמור את האימון.', '🎉 You finished all the exercises! You can save the workout.')}</div>}
 
       <ExercisePicker onPick={addExercise} />
 
-      <label>הערות<textarea rows={2} value={w.notes ?? ''} onChange={(e) => update((d) => { d.notes = e.target.value; })} /></label>
+      <label>{tr('הערות', 'Notes')}<textarea rows={2} value={w.notes ?? ''} onChange={(e) => update((d) => { d.notes = e.target.value; })} /></label>
 
-      <div className="muted small">נפח כולל: {Math.round(workoutVolume(w)).toLocaleString()} ק״ג</div>
+      <div className="muted small">{tr('נפח כולל:', 'Total volume:')} {Math.round(workoutVolume(w)).toLocaleString()} {tr('ק״ג', 'kg')}</div>
       {saveError && <p className="notice" style={{ margin: 0 }}>{saveError}</p>}
       <button className="btn primary big" onClick={save} disabled={saving || w.exercises.length === 0}>
-        {saving ? 'שומר…' : 'סיום ושמירת אימון'}
+        {saving ? tr('שומר…', 'Saving…') : tr('סיום ושמירת אימון', 'Finish and save workout')}
       </button>
 
       {timerKey > 0 && <div className="timer-spacer" />}

@@ -1,3 +1,6 @@
+import { isEn, tx } from './i18n';
+import { EXERCISE_EQUIPMENT_EN, EXERCISE_GUIDE_EN } from './exerciseGuideEn';
+
 /** How to do each exercise in the library: muscles worked, steps, tips and common mistakes. */
 export interface ExerciseGuide {
   muscles: string;
@@ -600,7 +603,7 @@ export const EXERCISE_GUIDE: Record<string, ExerciseGuide> = {
 
 /** A YouTube search for a demo video of the exercise (opens outside the app). */
 export const demoVideoUrl = (name: string) =>
-  `https://www.youtube.com/results?search_query=${encodeURIComponent(`${name} תרגיל איך לבצע`)}`;
+  `https://www.youtube.com/results?search_query=${encodeURIComponent(isEn() ? `${tx(name)} exercise how to` : `${name} תרגיל איך לבצע`)}`;
 
 /** One alternative per exercise: works the same muscles, often with different equipment. */
 export const EXERCISE_ALTERNATIVE: Record<string, string> = {
@@ -715,3 +718,8 @@ export const EXERCISE_EQUIPMENT: Record<string, string> = {
   'מטפסי הרים': 'ללא ציוד',
   'בורפיז': 'ללא ציוד',
 };
+
+/** The guide in the current language (Hebrew or English). */
+export const guideFor = (name: string): ExerciseGuide | undefined => (isEn() ? EXERCISE_GUIDE_EN[name] : EXERCISE_GUIDE[name]);
+/** The equipment line in the current language. */
+export const equipmentFor = (name: string): string | undefined => (isEn() ? EXERCISE_EQUIPMENT_EN[name] : EXERCISE_EQUIPMENT[name]);

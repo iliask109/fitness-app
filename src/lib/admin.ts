@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { tr } from './i18n';
 
 export interface AdminUser {
   id: string;
@@ -104,8 +105,8 @@ export function isDemoBanned(id: string) {
 }
 
 function translate(m: string) {
-  if (/not authorized/.test(m)) return 'אין לך הרשאת מנהל';
-  if (/yourself/.test(m)) return 'אי אפשר לבצע את הפעולה הזו על עצמך';
+  if (/not authorized/.test(m)) return tr('אין לך הרשאת מנהל', 'You do not have admin permission');
+  if (/yourself/.test(m)) return tr('אי אפשר לבצע את הפעולה הזו על עצמך', 'You cannot do this to yourself');
   return m;
 }
 
@@ -114,8 +115,8 @@ export async function deleteMyAccount(uid: string) {
   if (supabase) {
     const { error } = await supabase.rpc('delete_my_account');
     if (error) {
-      if (/admins cannot/.test(error.message)) throw new Error('מנהל לא יכול למחוק את החשבון של עצמו.');
-      if (/could not find the function|does not exist/i.test(error.message)) throw new Error('מסד הנתונים עוד לא עודכן (update-11-delete-account.sql). פנה למנהל האתר.');
+      if (/admins cannot/.test(error.message)) throw new Error(tr('מנהל לא יכול למחוק את החשבון של עצמו.', 'An admin cannot delete their own account.'));
+      if (/could not find the function|does not exist/i.test(error.message)) throw new Error(tr('מסד הנתונים עוד לא עודכן (update-11-delete-account.sql). פנה למנהל האתר.', 'The database has not been updated yet (update-11-delete-account.sql). Contact the site admin.'));
       throw new Error(error.message);
     }
   } else {

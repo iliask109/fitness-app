@@ -1,4 +1,5 @@
 import { lazy, ReactNode, Suspense, useState } from 'react';
+import { tr, tx } from '../lib/i18n';
 
 /** The guide texts are only downloaded the first time someone opens a guide. */
 const ExerciseGuideSheet = lazy(() => import('./ExerciseGuideSheet'));
@@ -12,8 +13,8 @@ export default function ExerciseInfo({ name, icon, children, onReplace }: { name
   return (
     <>
       <button type="button" className={icon ? 'info-btn' : 'guide-link'} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true); }}
-        aria-label={`איך עושים ${name}`} title="איך עושים">
-        {icon ? 'ⓘ' : children ?? name}
+        aria-label={tr(`איך עושים ${name}`, `How to do ${tx(name)}`)} title={tr('איך עושים', 'How to')}>
+        {icon ? 'ⓘ' : children ?? tx(name)}
       </button>
       {open && <Suspense fallback={null}><ExerciseGuideSheet name={name} onClose={() => setOpen(false)} onReplace={onReplace} /></Suspense>}
     </>

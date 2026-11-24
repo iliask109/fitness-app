@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import { tr } from '../lib/i18n';
 import type { Program } from '../lib/types';
-import { requiredDays, scheduleOf } from '../lib/schedule';
+import { requiredDays, scheduleOf, weekdayLetters } from '../lib/schedule';
 
-const LETTERS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
-const NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+const NAMES_HE = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+const NAMES_EN = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /**
  * Choose the weekdays a program is trained on. Programs with a required count (4 for
  * Push/Pull/Legs and Upper/Lower, 3 for beginners) save once exactly that many are picked.
  */
-export default function WeekdayPicker({ program, onSave, highlight, doneText = '✓ נשמר' }: {
+export default function WeekdayPicker({ program, onSave, highlight, doneText = tr('✓ נשמר', '✓ Saved') }: {
   program: Program;
   onSave: (weekdays: number[], required: number | null) => Promise<unknown>;
   highlight?: boolean;
@@ -30,7 +31,7 @@ export default function WeekdayPicker({ program, onSave, highlight, doneText = '
     if (picked.includes(d)) next = picked.filter((x) => x !== d);
     else {
       if (required && picked.length >= required) {
-        setNote(`התוכנית הזו היא ${required} ימים בשבוע. בטל קודם יום אחר.`);
+        setNote(tr(`התוכנית הזו היא ${required} ימים בשבוע. בטל קודם יום אחר.`, `This program is ${required} days a week. Unselect another day first.`));
         return;
       }
       next = [...picked, d].sort();
@@ -48,19 +49,19 @@ export default function WeekdayPicker({ program, onSave, highlight, doneText = '
   return (
     <div className={'weekday-picker stack tight' + (highlight ? ' highlight' : '')}>
       <div className="row between">
-        <span className="small"><strong>📅 ימי האימון שלי</strong>{required ? <span className="muted"> · {required} ימים בשבוע</span> : null}</span>
+        <span className="small"><strong>📅 {tr('ימי האימון שלי', 'My training days')}</strong>{required ? <span className="muted"> · {tr(`${required} ימים בשבוע`, `${required} days a week`)}</span> : null}</span>
         <span className={'small ' + (missing > 0 ? 'muted' : 'good')}>
-          {missing > 0 ? (required ? `בחר עוד ${missing}` : 'בחר ימים') : saved ? doneText : `${picked.length} ימים`}
+          {missing > 0 ? (required ? tr(`בחר עוד ${missing}`, `Choose ${missing} more`) : tr('בחר ימים', 'Choose days')) : saved ? doneText : tr(`${picked.length} ימים`, `${picked.length} days`)}
         </span>
       </div>
-      <div className="weekday-row" role="group" aria-label="ימי אימון">
-        {LETTERS.map((l, d) => (
+      <div className="weekday-row" role="group" aria-label={tr('ימי אימון', 'Training days')}>
+        {weekdayLetters().map((l, d) => (
           <button key={d} type="button" className={picked.includes(d) ? 'on' : ''} aria-pressed={picked.includes(d)}
-            aria-label={`יום ${NAMES[d]}`} onClick={() => toggle(d)}>{l}</button>
+            aria-label={tr(`יום ${NAMES_HE[d]}`, NAMES_EN[d])} onClick={() => toggle(d)}>{l}</button>
         ))}
       </div>
       {note && <span className="small notice" style={{ margin: 0 }}>{note}</span>}
-      {s.kind === 'cycle' && missing > 0 && <span className="muted small">כרגע לפי הסדר, בלי ימים קבועים. בחר ימים כדי לקבע אותם.</span>}
+      {s.kind === 'cycle' && missing > 0 && <span className="muted small">{tr('כרגע לפי הסדר, בלי ימים קבועים. בחר ימים כדי לקבע אותם.', 'For now it goes in order, without fixed days. Choose days to fix them.')}</span>}
     </div>
   );
 }

@@ -4,11 +4,19 @@ import App from './App';
 import { AuthProvider } from './lib/auth';
 import './styles.css';
 import { registerServiceWorker } from './lib/push';
+import { applyLangToDocument, useLang } from './lib/i18n';
 
 registerServiceWorker();
+applyLangToDocument();
+
+/** Changing the language re-mounts the app, so every screen picks up the new texts and direction. */
+function LangRoot() {
+  const lang = useLang();
+  return <App key={lang} />;
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AuthProvider><App /></AuthProvider>
+    <AuthProvider><LangRoot /></AuthProvider>
   </React.StrictMode>,
 );

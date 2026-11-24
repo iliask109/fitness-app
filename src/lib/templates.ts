@@ -1,12 +1,13 @@
 import type { ProgramDay, ProgramSchedule } from './types';
+import { tr } from './i18n';
 
 export type TemplateCategory = 'gym' | 'home' | 'outdoor';
 
 /** Categories match the training locations chosen on the details page (profile.training_locations). */
 export const TEMPLATE_CATEGORIES: { key: TemplateCategory; label: string; icon: string; note: string }[] = [
-  { key: 'gym', label: 'מכון כושר', icon: '🏋️', note: 'מכשירים, מוטות ומשקולות' },
-  { key: 'home', label: 'אימון בבית', icon: '🏠', note: 'בלי ציוד, או עם משקולות יד' },
-  { key: 'outdoor', label: 'מתקנים בחוץ', icon: '🌳', note: 'מוט מתח, מקבילים וספסל בגינת כושר' },
+  { key: 'gym', get label() { return tr('מכון כושר', 'Gym'); }, icon: '🏋️', get note() { return tr('מכשירים, מוטות ומשקולות', 'Machines, barbells and dumbbells'); } },
+  { key: 'home', get label() { return tr('אימון בבית', 'At home'); }, icon: '🏠', get note() { return tr('בלי ציוד, או עם משקולות יד', 'No equipment, or with dumbbells'); } },
+  { key: 'outdoor', get label() { return tr('מתקנים בחוץ', 'Outdoor gym'); }, icon: '🌳', get note() { return tr('מוט מתח, מקבילים וספסל בגינת כושר', 'Pull-up bar, parallel bars and a bench in the park'); } },
 ];
 
 export interface ProgramTemplate {

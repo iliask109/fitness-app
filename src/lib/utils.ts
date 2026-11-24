@@ -1,4 +1,5 @@
 import type { Workout } from './types';
+import { locale, tr } from './i18n';
 
 export const todayISO = () => toISO(new Date());
 export function toISO(d: Date) {
@@ -20,7 +21,7 @@ export function addMonths(iso: string, n: number) {
   return toISO(d);
 }
 export function formatDate(iso: string, opts: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short' }) {
-  return new Date(iso + 'T12:00:00').toLocaleDateString('he-IL', opts);
+  return new Date(iso + 'T12:00:00').toLocaleDateString(locale(), opts);
 }
 
 export function workoutVolume(w: Workout) {
@@ -49,11 +50,11 @@ export function weekStart(iso: string) {
 
 /** "היום", "אתמול", "לפני 5 ימים" for a date or timestamp. */
 export function daysAgo(value: string | null | undefined) {
-  if (!value) return 'אף פעם';
+  if (!value) return tr('אף פעם', 'never');
   const days = Math.round((new Date(todayISO() + 'T12:00:00').getTime() - new Date(value.slice(0, 10) + 'T12:00:00').getTime()) / 86400000);
-  if (days <= 0) return 'היום';
-  if (days === 1) return 'אתמול';
-  if (days < 30) return `לפני ${days} ימים`;
-  if (days < 365) return `לפני ${Math.round(days / 30)} חודשים`;
-  return `לפני ${Math.round(days / 365)} שנים`;
+  if (days <= 0) return tr('היום', 'today');
+  if (days === 1) return tr('אתמול', 'yesterday');
+  if (days < 30) return tr(`לפני ${days} ימים`, `${days} days ago`);
+  if (days < 365) return tr(`לפני ${Math.round(days / 30)} חודשים`, `${Math.round(days / 30)} months ago`);
+  return tr(`לפני ${Math.round(days / 365)} שנים`, `${Math.round(days / 365)} years ago`);
 }

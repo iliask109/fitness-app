@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useState } from 'react';
+import { tr } from '../lib/i18n';
 import { useAuth } from '../lib/auth';
 import { authErrorHe } from '../lib/authErrors';
 
@@ -23,7 +24,7 @@ export default function ForgotPassword({ initialEmail, onBack }: { initialEmail:
 
   async function send(e?: FormEvent) {
     e?.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email)) { setError('כתובת האימייל לא תקינה'); return; }
+    if (!/^\S+@\S+\.\S+$/.test(email)) { setError(tr('כתובת האימייל לא תקינה', 'The email address is not valid')); return; }
     setBusy(true);
     setError(null);
     try {
@@ -42,7 +43,7 @@ export default function ForgotPassword({ initialEmail, onBack }: { initialEmail:
   async function verify(e: FormEvent) {
     e.preventDefault();
     const clean = code.replace(/\D/g, '');
-    if (clean.length < 6) { setError('נא להזין את כל הקוד מהמייל'); return; }
+    if (clean.length < 6) { setError(tr('נא להזין את כל הקוד מהמייל', 'Please enter the full code from the email')); return; }
     setBusy(true);
     setError(null);
     try {
@@ -57,41 +58,40 @@ export default function ForgotPassword({ initialEmail, onBack }: { initialEmail:
   return (
     <div className="stack">
       <div className="stack tight" style={{ textAlign: 'start' }}>
-        <h2 style={{ fontSize: 20 }}>שחזור סיסמה</h2>
+        <h2 style={{ fontSize: 20 }}>{tr('שחזור סיסמה', 'Reset password')}</h2>
         {step === 'email' ? (
-          <p className="muted small" style={{ margin: 0 }}>נשלח לך מייל עם קוד זמני. הקוד בתוקף לשעה, ואחרי שתזין אותו תבחר סיסמה חדשה.</p>
+          <p className="muted small" style={{ margin: 0 }}>{tr('נשלח לך מייל עם קוד זמני. הקוד בתוקף לשעה, ואחרי שתזין אותו תבחר סיסמה חדשה.', 'We\'ll email you a temporary code. It is valid for an hour; after entering it you\'ll choose a new password.')}</p>
         ) : (
           <p className="muted small" style={{ margin: 0 }}>
-            אם יש חשבון עם הכתובת <span dir="ltr">{email}</span>, נשלח אליו מייל עם קוד זמני. הקוד בתוקף לשעה.
-            לא מוצא? כדאי לבדוק גם בתיקיית הספאם.
+            {tr('אם יש חשבון עם הכתובת', 'If there is an account for')} <span dir="ltr">{email}</span>{tr(', נשלח אליו מייל עם קוד זמני. הקוד בתוקף לשעה. לא מוצא? כדאי לבדוק גם בתיקיית הספאם.', ", we've emailed it a temporary code, valid for an hour. Can't find it? Check your spam folder too.")}
           </p>
         )}
       </div>
 
       {step === 'email' ? (
         <form onSubmit={send} className="stack" noValidate>
-          <label>אימייל<input id="reset-email" type="email" autoComplete="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus /></label>
-          <button className="btn primary" disabled={busy}>{busy ? 'שולח…' : 'שליחת קוד למייל'}</button>
+          <label>{tr('אימייל', 'Email')}<input id="reset-email" type="email" autoComplete="email" dir="ltr" value={email} onChange={(e) => setEmail(e.target.value)} autoFocus /></label>
+          <button className="btn primary" disabled={busy}>{busy ? tr('שולח…', 'Sending…') : tr('שליחת קוד למייל', 'Email me a code')}</button>
         </form>
       ) : (
         <form onSubmit={verify} className="stack" noValidate>
-          {demoCode && <p className="notice" style={{ margin: 0 }}>מצב הדגמה (אין שליחת מיילים): הקוד הוא <strong dir="ltr">{demoCode}</strong></p>}
-          <label>קוד מהמייל
+          {demoCode && <p className="notice" style={{ margin: 0 }}>{tr('מצב הדגמה (אין שליחת מיילים): הקוד הוא', 'Demo mode (no emails are sent): the code is')} <strong dir="ltr">{demoCode}</strong></p>}
+          <label>{tr('קוד מהמייל', 'Code from the email')}
             <input id="reset-code" className="code-input" inputMode="numeric" autoComplete="one-time-code" dir="ltr"
               placeholder="••••••••" value={code} onChange={(e) => { setCode(e.target.value.replace(/\D/g, '').slice(0, 10)); setError(null); }} autoFocus />
           </label>
-          <button className="btn primary" disabled={busy}>{busy ? 'בודק…' : 'אימות והמשך'}</button>
+          <button className="btn primary" disabled={busy}>{busy ? tr('בודק…', 'Checking…') : tr('אימות והמשך', 'Verify and continue')}</button>
           <div className="row between small">
             <button type="button" className="link-btn" onClick={() => send()} disabled={wait > 0 || busy}>
-              {wait > 0 ? `שליחה מחדש בעוד ${wait} שנ׳` : 'שליחת קוד חדש'}
+              {wait > 0 ? tr(`שליחה מחדש בעוד ${wait} שנ׳`, `Resend in ${wait}s`) : tr('שליחת קוד חדש', 'Send a new code')}
             </button>
-            <button type="button" className="link-btn" onClick={() => { setStep('email'); setError(null); }}>כתובת אחרת</button>
+            <button type="button" className="link-btn" onClick={() => { setStep('email'); setError(null); }}>{tr('כתובת אחרת', 'Different address')}</button>
           </div>
         </form>
       )}
 
       {error && <p className="notice" style={{ margin: 0 }}>{error}</p>}
-      <button type="button" className="link-btn" onClick={onBack}>→ חזרה להתחברות</button>
+      <button type="button" className="link-btn" onClick={onBack}>{tr('→ חזרה להתחברות', '← Back to sign in')}</button>
     </div>
   );
 }

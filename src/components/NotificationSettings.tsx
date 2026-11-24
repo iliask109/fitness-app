@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { isEn, tr } from '../lib/i18n';
 import { useAuth } from '../lib/auth';
 import { useProfile } from '../lib/useProfile';
 import { deviceSubscribed, disablePushOnDevice, enablePushOnDevice, pushSupport, sendTestNotification } from '../lib/push';
@@ -49,12 +50,12 @@ export default function NotificationSettings() {
         reminder_tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
       setOnDevice(true);
-      setMsg({ ok: true, text: '✓ ההתראות הופעלו במכשיר הזה' });
+      setMsg({ ok: true, text: tr('✓ ההתראות הופעלו במכשיר הזה', '✓ Notifications turned on for this device') });
     } catch (e) {
       const m = (e as Error).message;
       setMsg({ ok: false, text: m === 'blocked'
-        ? 'ההתראות חסומות בדפדפן. כדי לאפשר: לחץ על סמל המנעול ליד כתובת האתר ← הרשאות ← התראות ← אפשר.'
-        : m === 'dismissed' ? 'לא אישרת התראות. אפשר לנסות שוב.' : 'ההפעלה נכשלה: ' + m });
+        ? tr('ההתראות חסומות בדפדפן. כדי לאפשר: לחץ על סמל המנעול ליד כתובת האתר ← הרשאות ← התראות ← אפשר.', 'Notifications are blocked in the browser. To allow them: tap the lock icon next to the site address → Permissions → Notifications → Allow.')
+        : m === 'dismissed' ? tr('לא אישרת התראות. אפשר לנסות שוב.', 'You didn\'t allow notifications. You can try again.') : tr('ההפעלה נכשלה: ', 'Turning on failed: ') + m });
     } finally { setBusy(false); }
   }
 
@@ -71,12 +72,12 @@ export default function NotificationSettings() {
     try {
       if (onDevice === false) await enablePushOnDevice(user!.id).then(() => setOnDevice(true));
       const r = await sendTestNotification();
-      if (r.kind === 'sent') setMsg({ ok: true, text: `✓ נשלחה התראת בדיקה${r.devices > 1 ? ` ל-${r.devices} מכשירים` : ''}. היא אמורה להופיע תוך כמה שניות.` });
-      else if (r.kind === 'no-devices') setMsg({ ok: false, text: 'המכשיר לא נרשם להתראות. כבה והדלק את המתג ונסה שוב.' });
-      else setMsg({ ok: false, text: `שירות ההתראות דחה את השליחה (קוד ${r.codes.join(', ') || '?'}).`
-        + (r.codes.some((c) => c === 401 || c === 403) ? ' כנראה שהמשתנה VAPID_PRIVATE_KEY ב-Vercel לא הועתק נכון.' : ' כבה והדלק את המתג ונסה שוב.') });
+      if (r.kind === 'sent') setMsg({ ok: true, text: tr(`✓ נשלחה התראת בדיקה${r.devices > 1 ? ` ל-${r.devices} מכשירים` : ''}. היא אמורה להופיע תוך כמה שניות.`, `✓ Test notification sent${r.devices > 1 ? ` to ${r.devices} devices` : ''}. It should appear within a few seconds.`) });
+      else if (r.kind === 'no-devices') setMsg({ ok: false, text: tr('המכשיר לא נרשם להתראות. כבה והדלק את המתג ונסה שוב.', 'This device isn\'t registered for notifications. Turn the switch off and on, then try again.') });
+      else setMsg({ ok: false, text: tr(`שירות ההתראות דחה את השליחה (קוד ${r.codes.join(', ') || '?'}).`, `The notification service rejected it (code ${r.codes.join(', ') || '?'}).`)
+        + (r.codes.some((c) => c === 401 || c === 403) ? tr(' כנראה שהמשתנה VAPID_PRIVATE_KEY ב-Vercel לא הועתק נכון.', ' The VAPID_PRIVATE_KEY variable in Vercel was probably not copied correctly.') : tr(' כבה והדלק את המתג ונסה שוב.', ' Turn the switch off and on, then try again.')) });
     } catch (e) {
-      setMsg({ ok: false, text: 'השליחה נכשלה: ' + (e as Error).message });
+      setMsg({ ok: false, text: tr('השליחה נכשלה: ', 'Sending failed: ') + (e as Error).message });
     } finally { setBusy(false); }
   }
 
@@ -84,9 +85,9 @@ export default function NotificationSettings() {
   return (
     <div className="card stack tight">
       <div className="row between">
-        <h3 style={{ margin: 0 }}>🔔 התראות לאימונים</h3>
+        <h3 style={{ margin: 0 }}>{tr('🔔 התראות לאימונים', '🔔 Workout notifications')}</h3>
         {support.ok && (
-          <label className="switch" aria-label="התראות לאימונים">
+          <label className="switch" aria-label={tr('התראות לאימונים', 'Workout notifications')}>
             <input type="checkbox" checked={enabled && !notHere} disabled={busy} onChange={(e) => (e.target.checked ? turnOn() : turnOff())} />
             <span />
           </label>
@@ -96,24 +97,29 @@ export default function NotificationSettings() {
       {!support.ok && (
         <p className="notice" style={{ margin: 0 }}>
           {support.reason === 'ios-install'
-            ? 'באייפון, התראות עובדות רק כשהאפליקציה מותקנת: לחץ על כפתור השיתוף ⬆️ ← "הוסף למסך הבית", ואז פתח את FitLogix מהמסך הבית.'
+            ? tr('באייפון, התראות עובדות רק כשהאפליקציה מותקנת: לחץ על כפתור השיתוף ⬆️ ← "הוסף למסך הבית", ואז פתח את FitLogix מהמסך הבית.', 'On iPhone, notifications only work when the app is installed: tap the Share button ⬆️ → "Add to Home Screen", then open FitLogix from the home screen.')
             : support.reason === 'blocked'
-              ? <>ההתראות חסומות בדפדפן עבור האתר הזה, ולכן הוא לא יכול לבקש אישור שוב. כדי לאפשר:<br />
+              ? isEn()
+                ? <>Notifications are blocked in the browser for this site, so it can't ask again. To allow them:<br />
+                  <strong>Chrome on Android:</strong> tap the icon left of the site address (lock or sliders) → Permissions → Notifications → Allow.<br />
+                  <strong>If the app is installed on the home screen:</strong> long-press the icon → App info (ⓘ) → Notifications → On.<br />
+                  Then come back here.</>
+                : <>ההתראות חסומות בדפדפן עבור האתר הזה, ולכן הוא לא יכול לבקש אישור שוב. כדי לאפשר:<br />
                   <strong>בכרום באנדרואיד:</strong> לחץ על הסמל שמשמאל לכתובת האתר (מנעול או פסים) ← הרשאות ← התראות ← אפשר.<br />
                   <strong>אם האפליקציה מותקנת במסך הבית:</strong> לחיצה ארוכה על האייקון ← פרטי אפליקציה (ⓘ) ← התראות ← הפעלה.<br />
                   אחר כך חזור לכאן.</>
-              : 'הדפדפן הזה לא תומך בהתראות. נסה ב-Chrome, או התקן את האפליקציה למסך הבית.'}
+              : tr('הדפדפן הזה לא תומך בהתראות. נסה ב-Chrome, או התקן את האפליקציה למסך הבית.', 'This browser doesn\'t support notifications. Try Chrome, or install the app to your home screen.')}
         </p>
       )}
 
-      {enabled && onDevice === true && <p className="good small" style={{ margin: 0 }}>📱 המכשיר הזה מקבל התראות ✓</p>}
+      {enabled && onDevice === true && <p className="good small" style={{ margin: 0 }}>{tr('📱 המכשיר הזה מקבל התראות ✓', '📱 This device gets notifications ✓')}</p>}
       {notHere && support.ok && (
-        <p className="notice" style={{ margin: 0 }}>📱 ההתראות פעילות בחשבון, אבל המכשיר הזה עוד לא רשום (למשל אחרי התנתקות). הדלק את המתג כדי לקבל התראות גם כאן.</p>
+        <p className="notice" style={{ margin: 0 }}>{tr('📱 ההתראות פעילות בחשבון, אבל המכשיר הזה עוד לא רשום (למשל אחרי התנתקות). הדלק את המתג כדי לקבל התראות גם כאן.', '📱 Notifications are on for your account, but this device isn\'t registered yet (e.g. after signing out). Turn on the switch to get notifications here too.')}</p>
       )}
 
       {enabled && (
         <>
-          <label>⏰ שעת האימון שלי
+          <label>⏰ {tr('שעת האימון שלי', 'My training time')}
             <select id="reminder-time" value={profile.reminder_time || DEFAULT_REMINDER_TIME}
               onChange={(e) => save({ reminder_time: e.target.value, reminder_tz: Intl.DateTimeFormat().resolvedOptions().timeZone })}>
               {TIMES.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -121,14 +127,14 @@ export default function NotificationSettings() {
           </label>
           <label className="row gap check-row">
             <input type="checkbox" checked={profile.remind_training_day !== false} onChange={(e) => save({ remind_training_day: e.target.checked })} />
-            תזכורת ביום אימון ("היום יש לך Pull")
+            {tr('תזכורת ביום אימון ("היום יש לך Pull")', 'Reminder on training days ("Workout today: Pull")')}
           </label>
           <label className="row gap check-row">
             <input type="checkbox" checked={profile.remind_no_workout !== false} onChange={(e) => save({ remind_no_workout: e.target.checked })} />
-            התראה אם עוד לא התאמנתי השבוע (מיום שלישי)
+            {tr('התראה אם עוד לא התאמנתי השבוע (מיום שלישי)', "A nudge if I haven't trained this week (from Tuesday)")}
           </label>
-          <p className="muted small" style={{ margin: 0 }}>לכל היותר התראה אחת ביום, בשעה שבחרת. אם כבר התאמנת באותו יום, לא תקבל התראה.</p>
-          <button className="btn" disabled={busy} onClick={test}>שליחת התראת בדיקה</button>
+          <p className="muted small" style={{ margin: 0 }}>{tr('לכל היותר התראה אחת ביום, בשעה שבחרת. אם כבר התאמנת באותו יום, לא תקבל התראה.', 'At most one notification a day, at the time you chose. If you\'ve already trained that day, you won\'t get one.')}</p>
+          <button className="btn" disabled={busy} onClick={test}>{tr('שליחת התראת בדיקה', 'Send a test notification')}</button>
         </>
       )}
       {msg && <p className={msg.ok ? 'good small' : 'notice'} style={{ margin: 0 }}>{msg.text}</p>}

@@ -21,6 +21,7 @@ import { ThemeToggle } from './components/ThemeControls';
 import SetPassword from './components/SetPassword';
 import ConnectionBanner from './components/ConnectionBanner';
 import SchemaWarning from './components/SchemaWarning';
+import { getLang, setLang, tr } from './lib/i18n';
 
 // Loaded on first visit: the charts, the admin area and the exercise guide are large and not needed at start.
 const Nutrition = lazy(() => import('./pages/Nutrition'));
@@ -33,16 +34,16 @@ const ExerciseLibrary = lazy(() => import('./pages/ExerciseLibrary'));
 const AdminAccount = lazy(() => import('./pages/AdminAccount'));
 
 const TABS = [
-  { key: '', label: 'בית', icon: '🏠' },
-  { key: 'workouts', label: 'אימונים', icon: '🏋️' },
-  { key: 'programs', label: 'תוכניות', icon: '📋' },
-  { key: 'nutrition', label: 'תזונה', icon: '🥗' },
-  { key: 'progress', label: 'התקדמות', icon: '📈' },
+  { key: '', get label() { return tr('בית', 'Home'); }, icon: '🏠' },
+  { key: 'workouts', get label() { return tr('אימונים', 'Workouts'); }, icon: '🏋️' },
+  { key: 'programs', get label() { return tr('תוכניות', 'Programs'); }, icon: '📋' },
+  { key: 'nutrition', get label() { return tr('תזונה', 'Nutrition'); }, icon: '🥗' },
+  { key: 'progress', get label() { return tr('התקדמות', 'Progress'); }, icon: '📈' },
 ];
 
 export default function App() {
   const { user, loading } = useAuth();
-  if (loading) return <div className="center muted">טוען…</div>;
+  if (loading) return <div className="center muted">{tr('טוען…', 'Loading…')}</div>;
   if (!user) return <Login />;
   return <Shell key={user.id} />;
 }
@@ -59,7 +60,9 @@ function Shell() {
       </div>
     );
   }
-  if (!adminChecked) return <div className="center muted">טוען…</div>;
+  if (!adminChecked) return <div className="center muted">{tr('טוען…', 'Loading…')}</div>;
+  // The admin area is in Hebrew only.
+  if (isAdmin && getLang() !== 'he') { setLang('he'); return null; }
   return isAdmin ? <AdminShell /> : <UserShell />;
 }
 
@@ -111,6 +114,13 @@ function UserShell() {
   }, [me.loading, user, remindersOn]);
   // Send changes made offline (now, when the connection returns, and every minute).
   useEffect(() => { if (user) startSync(user.id); }, [user]);
+  // The language follows the profile (chosen in Settings); a choice made on this device before is saved to it.
+  useEffect(() => {
+    if (me.loading || !me.profile.onboarded_at) return;
+    const saved = me.profile.language;
+    if (saved && saved !== getLang()) setLang(saved);
+    else if (!saved && getLang() === 'en') me.save({ language: 'en' }).catch(() => undefined);
+  }, [me.loading, me.profile.language, me.profile.onboarded_at]); // eslint-disable-line react-hooks/exhaustive-deps
   // Nutrition goals follow the body weight: recalculated from the latest weigh-in once a month.
   const weights = useTable<BodyWeight>('body_weights');
   const nutritionChecked = useRef(false);
@@ -121,14 +131,14 @@ function UserShell() {
     if (patch) me.save(patch).catch(() => { nutritionChecked.current = false; });
   }, [me, weights.loading, weights.rows]);
 
-  if (me.loading && !me.profile.onboarded_at) return <div className="center muted">טוען…</div>;
+  if (me.loading && !me.profile.onboarded_at) return <div className="center muted">{tr('טוען…', 'Loading…')}</div>;
   if (!me.profile.onboarded_at && !me.error) {
     return (
       <div className="app">
         <header className="topbar">
           <span className="brand">FitLogix</span>
           <ThemeToggle />
-          <button className="btn small" onClick={signOut}>התנתקות</button>
+          <button className="btn small" onClick={signOut}>{tr('התנתקות', 'Sign out')}</button>
         </header>
         <main className="content onboarding-only">
           <Onboarding profile={me.profile} save={me.save} onDone={() => { me.reload(); navigate("/"); }} />
@@ -156,12 +166,12 @@ function UserShell() {
   return (
     <div className="app">
       <header className="topbar">
-        <a className="brand" href="#/" aria-label="מסך הבית">FitLogix</a>
-        {isDemo && <span className="badge">מצב הדגמה</span>}
+        <a className="brand" href="#/" aria-label={tr('מסך הבית', 'Home')}>FitLogix</a>
+        {isDemo && <span className="badge">{tr('מצב הדגמה', 'Demo mode')}</span>}
         <ThemeToggle />
-        <button className="icon-btn" onClick={() => navigate('/settings')} aria-label="הגדרות">⚙️</button>
+        <button className="icon-btn" onClick={() => navigate('/settings')} aria-label={tr('הגדרות', 'Settings')}>⚙️</button>
       </header>
-      <main className="content"><ConnectionBanner /><Suspense fallback={<p className="muted">טוען…</p>}>{page}</Suspense></main>
+      <main className="content"><ConnectionBanner /><Suspense fallback={<p className="muted">{tr('טוען…', 'Loading…')}</p>}>{page}</Suspense></main>
       <nav className="tabbar">
         {TABS.map((t) => (
           <a key={t.key} href={'#/' + t.key} className={section === t.key ? 'active' : ''}>

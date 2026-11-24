@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { getLang, isEn, tr } from './i18n';
 import { deleteRow, saveRow } from './db';
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
@@ -78,7 +79,7 @@ export type TestResult = { kind: 'sent'; devices: number } | { kind: 'no-devices
 export async function sendTestNotification(): Promise<TestResult> {
   if (!supabase) {
     const reg = await registration();
-    await reg.showNotification('FitLogix 🔔', { body: 'ההתראות עובדות! (מצב הדגמה)', icon: '/icon-192.png', dir: 'rtl', lang: 'he' });
+    await reg.showNotification('FitLogix 🔔', { body: tr('ההתראות עובדות! (מצב הדגמה)', 'Notifications work! (demo mode)'), icon: '/icon-192.png', dir: isEn() ? 'ltr' : 'rtl', lang: getLang() });
     return { kind: 'sent', devices: 1 };
   }
   const { data } = await supabase.auth.getSession();
